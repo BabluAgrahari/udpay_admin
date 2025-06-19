@@ -1,0 +1,23 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Check if the request is for a directory or file that exists
+  #  RewriteCond %{REQUEST_FILENAME} -d [OR]
+   # RewriteCond %{REQUEST_FILENAME} -f
+    # RewriteRule ^ - [L]
+
+    # Allow access to your new project folder, replacing 'new_project' with your folder name
+    RewriteCond %{REQUEST_URI} !^/PHP_Kit/
+    RewriteCond %{REQUEST_URI} !^/PG/
+
+    # Route everything else to Laravel's public folder
+   # RewriteRule ^(.*)$ public/$1 [L]
+  
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+
+#<IfModule mod_rewrite.c>
+ #   RewriteEngine On
+ 
+#</IfModule>
