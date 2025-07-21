@@ -2,12 +2,12 @@
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
     <div class="card">
-        <div class="row card-header">
+        <div class="row card-header pb-3">
             <div class="col-md-10">
                 <h5>Products</h5>
             </div>
             <div class="col-md-2 text-right">
-                <a href="{{ url('crm/products/create') }}" class="btn btn-primary btn-sm">
+                <a href="{{ url('crm/products/create') }}" class="btn btn-outline-primary btn-sm">
                     <i class='bx bx-plus'></i>&nbsp;Add New
                 </a>
             </div>
@@ -17,10 +17,10 @@
             <form action="{{ url('crm/products') }}" method="GET" class="mb-3">
                 <div class="row">
                     <div class="col-md-3">
-                        <input type="text" name="search" class="form-control" placeholder="Search..." value="{{ request('search') }}">
+                        <input type="text" name="search" class="form-control form-control-sm" placeholder="Search..." value="{{ request('search') }}">
                     </div>
                     <div class="col-md-3">
-                        <select name="category_id" class="form-select">
+                        <select name="category_id" class="form-select form-select-sm">
                             <option value="">Select Category</option>
                             @foreach($categories as $category)
                                 <option value="{{ $category->_id }}" {{ request('category_id') == $category->_id ? 'selected' : '' }}>
@@ -30,21 +30,21 @@
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <select name="status" class="form-select">
+                        <select name="status" class="form-select form-select-sm">
                             <option value="">Select Status</option>
                             <option value="1" {{ request('status') === '1' ? 'selected' : '' }}>Active</option>
                             <option value="0" {{ request('status') === '0' ? 'selected' : '' }}>Inactive</option>
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <button type="submit" class="btn btn-primary">Filter</button>
-                        <a href="{{ url('crm/products') }}" class="btn btn-secondary">Reset</a>
+                        <button type="submit" class="btn btn-outline-primary btn-sm">Filter</button>
+                        <a href="{{ url('crm/products') }}" class="btn btn-outline-secondary btn-sm">Reset</a>
                     </div>
                 </div>
             </form>
 
             <div class="table-responsive">
-                <table class="table table-bordered table-striped">
+                <table id="productsTable" class="table table-hover table-sm w-100 text-nowrap">
                     <thead>
                         <tr>
                             <th>Image</th>
@@ -58,51 +58,12 @@
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        @forelse($products as $product)
-                        <tr>
-                            <td>
-                                @if($product->images && count($product->images) > 0)
-                                    <img src="{{ asset($product->images[0]) }}" alt="{{ $product->product_name }}" style="max-width: 50px;">
-                                @else
-                                    <img src="{{ asset('images/no-image.png') }}" alt="No Image" style="max-width: 50px;">
-                                @endif
-                            </td>
-                            <td>{{ $product->product_name }}</td>
-                            <td>{{ $product->sku }}</td>
-                            <td>{{ $product->category->name ?? 'N/A' }}</td>
-                            <td>{{ number_format($product->mrp, 2) }}</td>
-                            <td>{{ number_format($product->sale_price, 2) }}</td>
-                            <td>{{ $product->stock }}</td>
-                            <td>
-                                <div class="form-check form-switch">
-                                    <input type="checkbox" class="form-check-input status-switch" 
-                                        id="status{{ $product->_id }}" 
-                                        data-id="{{ $product->_id }}"
-                                        {{ $product->status ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="status{{ $product->_id }}"></label>
-                                </div>
-                            </td>
-                            <td>
-                                <a href="{{ url('crm/products/'.$product->_id.'/edit') }}" class="btn btn-sm btn-icon btn-outline-primary">
-                                    <i class='bx bx-edit'></i>
-                                </a>
-                                <button type="button" class="btn btn-sm btn-icon btn-outline-danger delete-btn" data-id="{{ $product->_id }}">
-                                    <i class='bx bx-trash'></i>
-                                </button>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="9" class="text-center">No products found</td>
-                        </tr>
-                        @endforelse
-                    </tbody>
+                    <tbody></tbody>
                 </table>
             </div>
 
             <div class="mt-3">
-                {{ $products->links() }}
+                {{-- DataTable handles pagination --}}
             </div>
         </div>
     </div>
@@ -112,11 +73,59 @@
 @push('script')
 <script>
 $(document).ready(function() {
+    var baseUrl = '{{ url('') }}';
+    var table = $('#productsTable').DataTable({
+        processing: true,
+        serverSide: true,
+        searching: false,
+        pagingType: 'simple_numbers',
+        ajax: {
+            url: '{{ url('crm/products/datatable-list') }}',
+            data: function (d) {
+                d.search = $('input[name="search"]').val();
+                d.category_id = $('select[name="category_id"]').val();
+                d.status = $('select[name="status"]').val();
+            }
+        },
+        columns: [
+            { data: 'image', name: 'image', orderable: false, searchable: false, render: function(data) {
+                return data ? `<img src="${data}" style="max-width:50px;">` : '<span class="text-muted">No image</span>';
+            }},
+            { data: 'product_name', name: 'product_name' },
+            { data: 'sku', name: 'sku' },
+            { data: 'category', name: 'category' },
+            { data: 'mrp', name: 'mrp' },
+            { data: 'sale_price', name: 'sale_price' },
+            { data: 'stock', name: 'stock' },
+            { data: 'status', name: 'status', render: function(data, type, row) {
+                return `<div class="form-check form-switch"><input type="checkbox" class="form-check-input status-switch" data-id="${row._id}" ${data ? 'checked' : ''}></div>`;
+            }},
+            { data: '_id', name: 'actions', orderable: false, searchable: false, render: function(data, type, row) {
+                return `<a href="${baseUrl}/crm/products/${data}/edit" class="btn btn-sm btn-icon btn-outline-primary"><i class='bx bx-edit'></i></a> 
+                <button type="button" class="btn btn-sm btn-icon btn-outline-danger delete-btn" data-id="${data}"><i class='bx bx-trash'></i></button>`;
+            }}
+        ],
+        order: [[1, 'asc']],
+        lengthMenu: [10, 25, 50, 100, 500],
+        pageLength: 10,
+        scrollX: false,
+    });
+
+    // Filter form
+    $('form[action="{{ url('crm/products') }}"]').on('submit', function(e) {
+        e.preventDefault();
+        table.ajax.reload();
+    });
+    $('form[action="{{ url('crm/products') }}"] .btn-secondary').on('click', function(e) {
+        e.preventDefault();
+        $('form[action="{{ url('crm/products') }}"]')[0].reset();
+        table.ajax.reload();
+    });
+
     // Status switch handler
-    $('.status-switch').change(function() {
+    $('#productsTable').on('change', '.status-switch', function() {
         const id = $(this).data('id');
         const status = $(this).prop('checked');
-        
         $.ajax({
             url: '{{ url("crm/products/update-status") }}',
             method: 'POST',
@@ -135,9 +144,8 @@ $(document).ready(function() {
     });
 
     // Delete handler
-    $('.delete-btn').click(function() {
+    $('#productsTable').on('click', '.delete-btn', function() {
         const id = $(this).data('id');
-        
         if (confirm('Are you sure you want to delete this product?')) {
             $.ajax({
                 url: `/crm/products/${id}`,
@@ -148,9 +156,7 @@ $(document).ready(function() {
                 success: function(response) {
                     alertMsg(response.status, response.msg, 3000);
                     if (response.status) {
-                        setTimeout(() => {
-                            location.reload();
-                        }, 1000);
+                        table.ajax.reload();
                     }
                 },
                 error: function(xhr) {

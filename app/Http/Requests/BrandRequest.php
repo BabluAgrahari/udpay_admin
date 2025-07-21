@@ -21,7 +21,10 @@ class BrandRequest extends FormRequest
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'status' => 'required|boolean',
-            'icon' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+            'icon' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'meta_title' => 'nullable|string|max:255',
+            'meta_keyword' => 'nullable|string|max:500',
+            'meta_description' => 'nullable|string|max:1000'
         ];
 
         return $rules;

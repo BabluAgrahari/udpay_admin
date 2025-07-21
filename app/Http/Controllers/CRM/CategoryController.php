@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Crm;
+namespace App\Http\Controllers\CRM;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CategoryRequest;
@@ -15,29 +15,8 @@ class CategoryController extends Controller
     public function index(Request $request)
     {
         try {
-            $query = Category::query();
-
-            // Apply filters
-            if ($request->has('search')) {
-                $search = $request->search;
-                $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                        ->orWhere('description', 'like', "%{$search}%");
-                });
-            }
-
-            if ($request->has('status')) {
-                $query->where('status', $request->status);
-            }
-
-            if ($request->has('parent_id')) {
-                $query->where('parent_id', $request->parent_id);
-            }
-
-            $categories = $query->with('parent')->paginate(10);
             $parentCategories = Category::whereNull('parent_id')->get();
-
-            return view('crm.category.index', compact('categories', 'parentCategories'));
+            return view('CRM.Category.index', compact('parentCategories'));
         } catch (Exception $e) {
             return $this->failMsg($e->getMessage());
         }
@@ -47,7 +26,7 @@ class CategoryController extends Controller
     {
         try {
             $parentCategories = Category::whereNull('parent_id')->get();
-            return view('crm.category.create', compact('parentCategories'));
+            return view('CRM.Category.create', compact('parentCategories'));
         } catch (Exception $e) {
             return $this->failMsg($e->getMessage());
         }
@@ -69,6 +48,10 @@ class CategoryController extends Controller
             $save->status = (int)$request->status;
             $save->parent_id = $request->parent_id;
             $save->labels = $labels;
+            $save->meta_title = $request->meta_title;
+            $save->meta_keyword = $request->meta_keyword;
+            $save->meta_description = $request->meta_description;
+            $save->user_id = Auth::user()->_id;
 
             if ($request->hasFile('icon')) {
                 $save->icon = singleFile($request->icon, 'category');
@@ -90,7 +73,7 @@ class CategoryController extends Controller
                 ->where('_id', '!=', $category->_id)
                 ->get();
 
-            return view('crm.category.edit', compact('category', 'parentCategories'));
+            return view('CRM.Category.edit', compact('category', 'parentCategories'));
         } catch (Exception $e) {
             return $this->failMsg($e->getMessage());
         }
@@ -119,6 +102,9 @@ class CategoryController extends Controller
             $category->status = (int)$request->status;
             $category->parent_id = $request->parent_id;
             $category->labels = $labels;
+            $category->meta_title = $request->meta_title;
+            $category->meta_keyword = $request->meta_keyword;
+            $category->meta_description = $request->meta_description;
 
             if ($request->hasFile('icon')) {
                 $category->icon = singleFile($request->icon, 'category');
@@ -202,5 +188,62 @@ class CategoryController extends Controller
         } catch (Exception $e) {
             return $this->failMsg($e->getMessage());
         }
+    }
+
+    public function datatable(Request $request)
+    {
+        $query = Category::query();
+
+        // Filtering
+        if ($request->search && $request->search['value']) {
+            $search = $request->search['value'];
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+        if ($request->status !== null && $request->status !== '') {
+            $query->where('status', (int)$request->status);
+        }
+        if ($request->parent_id) {
+            $query->where('parent_id', $request->parent_id);
+        }
+
+        $total = $query->count();
+
+        // Ordering
+        $columns = $request->columns;
+        if ($request->order && count($request->order)) {
+            foreach ($request->order as $order) {
+                $colIdx = $order['column'];
+                $colName = $columns[$colIdx]['data'];
+                $dir = $order['dir'];
+                $query->orderBy($colName, $dir);
+            }
+        }
+
+        // Pagination
+        $start = $request->start ?? 0;
+        $length = $request->length ?? 10;
+        $categories = $query->with('parent')->skip($start)->take($length)->get();
+
+        $data = $categories->map(function ($cat) {
+            return [
+                '_id' => $cat->_id,
+                'icon' => $cat->icon,
+                'name' => $cat->name,
+                'short' => $cat->short,
+                'parent_name' => $cat->parent ? $cat->parent->name : 'None',
+                'status' => $cat->status,
+                'labels' => $cat->labels,
+            ];
+        });
+
+        return response()->json([
+            'draw' => intval($request->draw),
+            'recordsTotal' => $total,
+            'recordsFiltered' => $total,
+            'data' => $data,
+        ]);
     }
 }

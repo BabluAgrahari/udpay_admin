@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\BrandRequest;
 use App\Models\Brand;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Exception;
 
@@ -29,7 +30,7 @@ class BrandController extends Controller
 
             $brands = $query->paginate(10);
 
-            return view('CRM.brand.index', compact('brands'));
+            return view('CRM.Brand.index', compact('brands'));
         } catch (Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
@@ -37,7 +38,7 @@ class BrandController extends Controller
 
     public function create()
     {
-        return view('CRM.brand.create');
+        return view('CRM.Brand.create');
     }
 
     public function store(BrandRequest $request)
@@ -50,7 +51,10 @@ class BrandController extends Controller
             $save->slug_url = generateSlug($request->name, 'brands', 'slug_url');
             $save->description = $request->description;
             $save->status = (int)$request->status;
-            
+            $save->meta_title = $request->meta_title;
+            $save->meta_keyword = $request->meta_keyword;
+            $save->meta_description = $request->meta_description;
+            $save->user_id = Auth::user()->_id;
             if ($request->hasFile('icon')) {
                 $save->icon = singleFile($request->file('icon'), 'brands');
             }
@@ -64,11 +68,21 @@ class BrandController extends Controller
         }
     }
 
+    public function show($id)
+    {
+        try {
+            $brand = Brand::findOrFail($id);
+            return $this->successMsg('Brand retrieved successfully', $brand);
+        } catch (Exception $e) {
+            return $this->failMsg($e->getMessage());
+        }
+    }
+
     public function edit($id)
     {
         try {
             $brand = Brand::findOrFail($id);
-            return view('CRM.brand.edit', compact('brand'));
+            return view('CRM.Brand.edit', compact('brand'));
         } catch (Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
@@ -79,9 +93,12 @@ class BrandController extends Controller
         try {
             $brand = Brand::findOrFail($id);
             $brand->name = $request->name;
-            $save->slug_url = generateSlug($request->name, 'brands', 'slug_url');
+            $brand->slug_url = generateSlug($request->name, 'brands', 'slug_url');
             $brand->description = $request->description;
             $brand->status = (int)$request->status;
+            $brand->meta_title = $request->meta_title;
+            $brand->meta_keyword = $request->meta_keyword;
+            $brand->meta_description = $request->meta_description;
 
             if ($request->hasFile('icon')) {
                 $brand->icon = singleFile($request->file('icon'), 'brands');
@@ -128,5 +145,58 @@ class BrandController extends Controller
         } catch (Exception $e) {
             return $this->failMsg($e->getMessage());
         }
+    }
+
+    public function datatable(Request $request)
+    {
+        $query = Brand::query();
+
+        // Filtering
+        if ($request->search && $request->search['value']) {
+            $search = $request->search['value'];
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+        if ($request->status !== null && $request->status !== '') {
+            $query->where('status', (int)$request->status);
+        }
+
+        $total = $query->count();
+
+        // Ordering
+        $columns = $request->columns;
+        if ($request->order && count($request->order)) {
+            foreach ($request->order as $order) {
+                $colIdx = $order['column'];
+                $colName = $columns[$colIdx]['data'];
+                $dir = $order['dir'];
+                $query->orderBy($colName, $dir);
+            }
+        }
+
+        // Pagination
+        $start = $request->start ?? 0;
+        $length = $request->length ?? 10;
+        $brands = $query->skip($start)->take($length)->get();
+
+        $data = $brands->map(function ($brand) {
+            return [
+                '_id' => $brand->_id,
+                'icon' => $brand->icon ? asset($brand->icon) : null,
+                'name' => $brand->name,
+                'slug_url' => $brand->slug_url,
+                'description' => $brand->description,
+                'status' => $brand->status,
+            ];
+        });
+
+        return response()->json([
+            'draw' => intval($request->draw),
+            'recordsTotal' => $total,
+            'recordsFiltered' => $total,
+            'data' => $data,
+        ]);
     }
 } 

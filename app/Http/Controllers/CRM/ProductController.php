@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Crm;
+namespace App\Http\Controllers\CRM;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProductRequest;
@@ -12,37 +12,21 @@ use Illuminate\Support\Facades\Validator;
 use Exception;
 use App\Models\ProductVariant;
 use Illuminate\Support\Facades\DB;
+use App\Models\Unit;
+use Illuminate\Support\Facades\Auth;
+use App\Traits\WebResponse;
 
 class ProductController extends Controller
 {
+    use WebResponse;
+
     public function index(Request $request)
     {
         try {
-            $query = Product::query();
-
-            // Apply filters
-            if ($request->has('search')) {
-                $search = $request->search;
-                $query->where(function ($q) use ($search) {
-                    $q->where('product_name', 'like', "%{$search}%")
-                        ->orWhere('sku', 'like', "%{$search}%")
-                        ->orWhere('hsn_code', 'like', "%{$search}%");
-                });
-            }
-
-            if ($request->has('status')) {
-                $query->where('status', $request->status);
-            }
-
-            if ($request->has('category_id')) {
-                $query->where('category_id', $request->category_id);
-            }
-
-            $data['products'] = $query->with('category')->paginate(10);
             $data['categories'] = Category::status()->get();
             $data['brands'] = Brand::status()->get();
 
-            return view('crm.product.index', $data);
+            return view('CRM.Product.index', $data);
         } catch (Exception $e) {
             return $this->failMsg($e->getMessage());
         }
@@ -51,10 +35,11 @@ class ProductController extends Controller
     public function create()
     {
         try {
-            $categories = Category::with('children')->whereNull('parent_id')->status()->get();
-            $products = Product::where('status', 1)->get();
-            $brands = Brand::status()->get();
-            return view('crm.product.create', compact('categories', 'brands', 'products'));
+            $data['categories'] = Category::with('children')->whereNull('parent_id')->status()->get();
+            $data['products'] = Product::where('status', 1)->get();
+            $data['brands'] = Brand::status()->get();
+            $data['units'] = Unit::status()->get();
+            return view('CRM.Product.create', $data);
         } catch (Exception $e) {
             return $this->failMsg($e->getMessage());
         }
@@ -76,8 +61,9 @@ class ProductController extends Controller
             }
 
                 $product = new Product();
-                $product->category_id = $request->category_id;
+                $product->category_id =  $request->category_id;
                 $product->brand_id = $request->brand_id;
+                $product->unit_id = $request->unit_id;
                 $product->product_name = $request->product_name;
                 $product->slug_url = generateSlug($request->product_name, 'products', 'slug_url');
                 $product->sku = $request->sku;
@@ -85,7 +71,7 @@ class ProductController extends Controller
                 $product->hsn_code = $request->hsn_code;
                 $product->mrp = $request->mrp;
                 $product->sale_price = $request->sale_price;
-                $product->cgst = $request->cgst;
+                $product->gst = $request->gst;
                 $product->up = $request->up;
                 $product->sv = $request->sv;
                 $product->offer = $request->offer ? 1 : 0;
@@ -102,6 +88,8 @@ class ProductController extends Controller
                 $product->is_combo = $request->is_combo ? 1 : 0;
                 $product->product_ids = $request->product_ids;
                 $product->is_variant = $request->has('variants') ? 1 : 0;
+                $product->bonus_point = $request->bonus_point;
+                $product->user_id = Auth::user()->_id;
 
                 if ($request->hasFile('images')) {
                     $images = [];
@@ -131,14 +119,35 @@ class ProductController extends Controller
 
                             $savePV = new ProductVariant();
                             $savePV->product_id = $product->_id;
-                            $savePV->sku = $request->variants['sku']??'';
+                            $savePV->sku = $request->variants['sku'][$key]??'';
                             $savePV->stock = $stock;
+                            $savePV->unit_id = $request->variants['unit_id'][$key] ?? null;
                             $savePV->attributes = $attributes;
                             $savePV->status = 1;
-                            $savePV->save();  
+                            $savePV->save();
+
+                            stockUpdate([
+                                'product_id' => $product->_id,
+                                'product_variant_id' => $savePV->_id,
+                                'stock' => $stock,
+                                'type' => 'up',
+                                'user_id' => Auth::user()->_id ?? null,
+                                'unit_id' => $request->variants['unit_id'][$key] ?? null,
+                                'remarks' => 'New Product Variant Added',
+                            ]);
                         }
+                    }else{
+                        stockUpdate([
+                            'product_id' => $product->_id,
+                            'stock' => $request->stock,
+                            'type' => 'up',
+                            'user_id' => Auth::user()->_id ?? null,
+                            'unit_id' => $request->unit_id ?? null,
+                            'remarks' => 'New Product Added',
+                        ]);
                     }
 
+            
                     return $this->successMsg('Product created successfully');
                 }
                 return $this->failMsg('Product not created');
@@ -154,8 +163,9 @@ class ProductController extends Controller
             $data['categories'] = Category::with('children')->whereNull('parent_id')->status()->get();
             $data['products'] = Product::where('status', 1)->get();
             $data['brands'] = Brand::status()->get();
+            $data['units'] = Unit::status()->get();
 
-            return view('crm.product.edit', $data);
+            return view('CRM.Product.edit', $data);
         } catch (Exception $e) {
             return $this->failMsg($e->getMessage());
         }
@@ -179,6 +189,7 @@ class ProductController extends Controller
                 $product = Product::findOrFail($id);
                 $product->category_id = $request->category_id;
                 $product->brand_id = $request->brand_id;
+                $product->unit_id = $request->unit_id;
                 $product->product_name = $request->product_name;
                 $product->slug_url = generateSlug($request->product_name, 'products', 'slug_url');
                 $product->sku = $request->sku;
@@ -186,7 +197,7 @@ class ProductController extends Controller
                 $product->hsn_code = $request->hsn_code;
                 $product->mrp = $request->mrp;
                 $product->sale_price = $request->sale_price;
-                $product->cgst = $request->cgst;
+                $product->gst = $request->gst;
                 $product->up = $request->up;
                 $product->sv = $request->sv;
                 $product->offer = $request->offer ? 1 : 0;
@@ -203,6 +214,7 @@ class ProductController extends Controller
                 $product->is_combo = $request->is_combo ? 1 : 0;
                 $product->product_ids = $request->product_ids;
                 $product->is_variant = $request->has('variants') ? 1 : 0;
+                $product->bonus_point = $request->bonus_point;
 
                 if ($request->hasFile('images')) {
                     $images = [];
@@ -236,14 +248,45 @@ class ProductController extends Controller
 
                             $savePV = new ProductVariant();
                             $savePV->product_id = $product->_id;
-                            $savePV->sku = $request->variants['sku']??'';
+                            $savePV->sku = $request->variants['sku'][$key]??'';
                             $savePV->stock = $stock;
+                            $savePV->unit_id = $request->variants['unit_id'][$key] ?? null;
                             $savePV->attributes = $attributes;
                             $savePV->status = 1;
                             $savePV->save();
+
+                            stockUpdate([
+                                'product_id' => $product->_id,
+                                'product_variant_id' => $savePV->_id,
+                                'stock' => $stock,
+                                'type' => 'up',
+                                'user_id' => Auth::user()->_id ?? null,
+                                'unit_id' => $request->variants['unit_id'][$key] ?? null,
+                                'remarks' => 'Product Variant Updated',
+                            ]);
                         }
                     } else {
+                        // Delete existing variants if switching from variant to non-variant
                         ProductVariant::where('product_id', $product->_id)->delete();
+                                
+                        // Calculate stock difference for main product
+                        $oldStock = $product->getOriginal('stock') ?? 0;
+                        $newStock = $request->stock;
+                        $stockDifference = abs($newStock - $oldStock);
+                        
+                        if ($stockDifference > 0) {
+                            $stockType = ($newStock > $oldStock) ? 'up' : 'down';
+                            $remarks = ($newStock > $oldStock) ? 'Stock Increased(Update Product)' : 'Stock Decreased(Update Product)';
+                            
+                            stockUpdate([
+                                'product_id' => $product->_id,
+                                'stock' => $stockDifference,
+                                'type' => $stockType,
+                                'user_id' => Auth::user()->_id ?? null,
+                                'unit_id' => $request->unit_id ?? null,
+                                'remarks' => $remarks,
+                            ]);
+                        }
                     }
 
                     return $this->successMsg('Product updated successfully');
@@ -294,5 +337,65 @@ class ProductController extends Controller
         } catch (Exception $e) {
             return $this->failMsg($e->getMessage());
         }
+    }
+
+    public function datatable(Request $request)
+    {
+        $query = Product::with('category');
+
+        // Filtering
+        if ($request->search) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('product_name', 'like', "%{$search}%")
+                  ->orWhere('sku', 'like', "%{$search}%")
+                  ->orWhere('hsn_code', 'like', "%{$search}%");
+            });
+        }
+        if (!empty($request->category_id)) {
+            $query->where('category_id', $request->category_id);
+        }
+        if (!empty($request->status)) {
+            $query->where('status', (int)$request->status);
+        }
+
+        $total = $query->count();
+
+        // Ordering
+        $columns = $request->columns;
+        if ($request->order && count($request->order)) {
+            foreach ($request->order as $order) {
+                $colIdx = $order['column'];
+                $colName = $columns[$colIdx]['data'];
+                $dir = $order['dir'];
+                $query->orderBy($colName, $dir);
+            }
+        }
+
+        // Pagination
+        $start = $request->start ?? 0;
+        $length = $request->length ?? 10;
+        $products = $query->skip($start)->take($length)->get();
+
+        $data = $products->map(function ($product) {
+            return [
+                '_id' => $product->_id,
+                'image' => ($product->images && count($product->images) > 0) ? asset($product->images[0]) : null,
+                'product_name' => $product->product_name,
+                'sku' => $product->sku,
+                'category' => $product->category->name ?? 'N/A',
+                'mrp' => number_format($product->mrp, 2),
+                'sale_price' => number_format($product->sale_price, 2),
+                'stock' => $product->stock,
+                'status' => $product->status,
+            ];
+        });
+
+        return response()->json([
+            'draw' => intval($request->draw),
+            'recordsTotal' => $total,
+            'recordsFiltered' => $total,
+            'data' => $data,
+        ]);
     }
 }

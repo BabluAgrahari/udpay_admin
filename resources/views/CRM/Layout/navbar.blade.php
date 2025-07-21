@@ -44,7 +44,7 @@
                                     data-size="large"
                                     data-show-count="true"
                                     aria-label="Star themeselection/sneat-html-admin-template-free on GitHub">Star</a> -->
-                <span>{{strtoupper(Auth::user()->name)}}</span>
+                <span>{{strtoupper(Auth::user()->role)}}</span>
             </li>
 
             <!-- User -->
@@ -82,9 +82,11 @@
                             <i class="bx bx-user bx-md me-3"></i><span>My Profile</span>
                         </a>
                         @endif
+                        @can('isSuperAdmin')
                         <a class="dropdown-item" href="{{url('crm/setting')}}">
                             <i class="bx bx-user bx-md me-3"></i><span>Account</span>
                         </a>
+                        @endcan
                     </li>
                     <li>
                         <a class="dropdown-item" href="{{url('crm/reset-password')}}"><i class='bx bxs-key me-3'></i><span>Reset Password</span> </a>

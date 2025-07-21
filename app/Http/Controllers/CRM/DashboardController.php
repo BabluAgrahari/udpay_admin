@@ -10,13 +10,30 @@ use App\Models\Merchant;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Order;
+use App\Models\User;
+use App\Models\WalletHistory;
 
 class DashboardController extends Controller
 {
     public function index(Request $request)
     {
+        try {
+            $totalOrders = Order::count();
+            $activeUsers = User::where('isactive', 1)->count();
+            $inactiveUsers = User::where('isactive', 0)->count();
+            $totalRecharges = WalletHistory::where('type', 'credit')->sum('amount');
+            $latestOrders = Order::orderBy('created', 'desc')->take(10)->get();
 
-        $data[] = [];
-        return view('CRM.Dashboard', $data);
+            return view('CRM.Dashboard', [
+                'totalOrders' => $totalOrders,
+                'activeUsers' => $activeUsers,
+                'inactiveUsers' => $inactiveUsers,
+                'totalRecharges' => $totalRecharges,
+                'latestOrders' => $latestOrders,
+            ]);
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
+        }
     }
 }

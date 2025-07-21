@@ -69,5 +69,6 @@ class Kernel extends HttpKernel
         'jwt.refresh' => 'Tymon\JWTAuth\Middleware\RefreshToken',
         'verify.ip' => \App\Http\Middleware\IPValidateMiddleware::class,
         'client.verify' => \App\Http\Middleware\ClientMiddleware::class,
+        'permission' => \App\Http\Middleware\CheckPermission::class,
     ];
 }

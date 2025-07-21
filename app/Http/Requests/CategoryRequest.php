@@ -24,7 +24,10 @@ class CategoryRequest extends FormRequest
             'icon' => 'nullable|file|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'status' => 'required|boolean',
             'parent_id' => 'nullable|exists:categories,_id',
-            'labels*' => 'nullable|string|max:50'
+            'labels*' => 'nullable|string|max:50',
+            'meta_title' => 'nullable|string|max:255',
+            'meta_keyword' => 'nullable|string|max:500',
+            'meta_description' => 'nullable|string|max:1000'
         ];
 
         return $rules;
@@ -55,7 +58,16 @@ class CategoryRequest extends FormRequest
             
             'labels.array' => 'Labels must be an array',
             'labels.*.string' => 'Each label must be a string',
-            'labels.*.max' => 'Each label must be less than 50 characters'
+            'labels.*.max' => 'Each label must be less than 50 characters',
+            
+            'meta_title.string' => 'Meta title must be a string',
+            'meta_title.max' => 'Meta title must be less than 255 characters',
+            
+            'meta_keyword.string' => 'Meta keyword must be a string',
+            'meta_keyword.max' => 'Meta keyword must be less than 500 characters',
+            
+            'meta_description.string' => 'Meta description must be a string',
+            'meta_description.max' => 'Meta description must be less than 1000 characters'
         ];
     }
 

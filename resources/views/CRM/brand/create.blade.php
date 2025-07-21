@@ -38,6 +38,35 @@
                         <span class="text-danger error" id="icon_error"></span>
                     </div>
 
+                    <!-- SEO Fields -->
+                    <div class="col-md-12 mb-3">
+                        <h6 class="text-primary">SEO Information</h6>
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label">Meta Title</label>
+                        <input type="text" name="meta_title" id="meta_title" class="form-control"
+                            placeholder="Enter meta title for SEO">
+                        <small class="text-muted">Recommended: 50-60 characters</small>
+                        <span class="text-danger error" id="meta_title_error"></span>
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label">Meta Keywords</label>
+                        <input type="text" name="meta_keyword" id="meta_keyword" class="form-control"
+                            placeholder="Enter meta keywords separated by commas">
+                        <small class="text-muted">Enter keywords separated by commas</small>
+                        <span class="text-danger error" id="meta_keyword_error"></span>
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label">Meta Description</label>
+                        <textarea name="meta_description" id="meta_description" class="form-control"
+                            rows="3" placeholder="Enter meta description for SEO"></textarea>
+                        <small class="text-muted">Recommended: 150-160 characters</small>
+                        <span class="text-danger error" id="meta_description_error"></span>
+                    </div>
+
                     <div class="col-md-12 mb-3">
                         <label class="form-label">Status</label>
                         <div class="form-check form-switch">
