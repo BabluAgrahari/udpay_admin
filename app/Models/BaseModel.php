@@ -5,11 +5,11 @@ namespace App\Models;
 use App\Observers\Timestamp;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\Auth;
-use MongoDB\Laravel\Eloquent\Model;
-use MongoDB\Laravel\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+// use MongoDB\Laravel\Eloquent\Model;
+// use MongoDB\Laravel\Eloquent\SoftDeletes;
 
-// use Jenssegers\Mongodb\Eloquent\Model as EloquentModel;
-// use Jenssegers\Mongodb\Eloquent\SoftDeletes;
 
 class BaseModel extends Model
 {
