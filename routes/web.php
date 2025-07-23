@@ -36,9 +36,10 @@ Route::group(['middleware' => 'guest'], function () {
     });
 });
 
+Route::get('dashboard', [DashboardController::class, 'index']);
 Route::group(['prefix' => 'crm', 'middleware' => 'auth'], function () {
 
-    Route::get('dashboard', [DashboardController::class, 'index']);
+   
 
     Route::get('user/datatable-list', [UserController::class, 'datatable'])->middleware('permission:user');
     Route::resource('user', UserController::class)->middleware('permission:user');

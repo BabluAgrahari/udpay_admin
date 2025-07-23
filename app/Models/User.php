@@ -19,12 +19,8 @@ class User extends Authenticatable implements JWTSubject
     use HasApiTokens, HasFactory, Notifiable;
 
 
-    protected $table = 'user_lvl';
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
+    protected $table = 'uni_admin';
+
     protected $hidden = [
         'password',
         'remember_token',
@@ -55,7 +51,7 @@ class User extends Authenticatable implements JWTSubject
     protected static function boot()
     {
         parent::boot();
-        self::observe(Timestamp::class);
+        // self::observe(Timestamp::class);
     }
 
     public function dFormat($date)
@@ -87,7 +83,7 @@ class User extends Authenticatable implements JWTSubject
     }
     public function hasPermissionTo($permission)
     {
-        if(Auth::user()->role=='supperadmin')
+        if(Auth::user()->admin_role=='supperadmin')
         return true;
 
         return in_array($permission, $this->roleTable->permissions ?? []);

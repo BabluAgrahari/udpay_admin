@@ -108,7 +108,7 @@ function daterange($data)
 
 function user()
 {
-    $user = User::where('role', 'supperadmin')->first();
+    $user = User::where('admin_role', 'supperadmin')->first();
     return $user ?? [];
 }
 

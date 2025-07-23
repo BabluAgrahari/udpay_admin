@@ -19,14 +19,14 @@ class LoginController extends Controller
 {
     public function index(Request $request)
     {
-        // $save = new User();
-        // $save->name = 'admin';
-        // $save->email = 'admin@gmail.com';
-        // $save->password = Hash::make('123456');
-        // $save->role = 'admin';
-        // $save->save();
-        // print_r(User::all()->toArray());
-        // die;
+        $user = User::get();
+        foreach($user as $key => $value){
+            $update = User::find($value->id);
+            // print_r($update);
+                $update->password = Hash::make('123456');
+                $update->admin_last_password = '123456';
+                $update->save();
+        }
         return view('CRM.login');
     }
 
@@ -37,11 +37,11 @@ class LoginController extends Controller
             'password' => 'required|min:6|max:16'
         ]);
 
-        $credentails = $request->only('email', 'password');
+        $credentials = $request->only('email', 'password');
 
-        if (Auth::attempt($credentails)) {
+        if (Auth::attempt($credentials)) {
 
-            if (Auth::user()->role != 'admin' && Auth::user()->role=!'supperadmin' && Auth::user()->role != 'merchant') {
+            if (Auth::user()->admin_role !='supperadmin') {
                 $request->session()->flush();
                 Auth::logout();
                 return back()->with('error', 'Invalid credentails');
