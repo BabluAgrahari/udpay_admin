@@ -20,11 +20,10 @@ class CategoryRequest extends FormRequest
     {
         $rules = [
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'icon' => 'nullable|file|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'img' => 'nullable|file|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'status' => 'required|boolean',
-            'parent_id' => 'nullable|exists:categories,_id',
-            'labels*' => 'nullable|string|max:50',
+            'parent_id' => 'nullable|integer|min:0',
+            'pro_section' => 'nullable|string|in:primary,deals',
             'meta_title' => 'nullable|string|max:255',
             'meta_keyword' => 'nullable|string|max:500',
             'meta_description' => 'nullable|string|max:1000'
@@ -40,25 +39,18 @@ class CategoryRequest extends FormRequest
             'name.string' => 'Category name must be a string',
             'name.max' => 'Category name must be less than 255 characters',
             
-            'description.string' => 'Description must be a string',
-            
-            'icon.file' => 'Icon must be a file',
-            'icon.mimes' => 'Icon must be a file of type: jpeg, png, jpg, gif, svg',
-            'icon.max' => 'Icon must not be greater than 2MB',
+            'img.file' => 'Image must be a file',
+            'img.mimes' => 'Image must be a file of type: jpeg, png, jpg, gif, svg',
+            'img.max' => 'Image must not be greater than 2MB',
             
             'status.required' => 'Status is required',
             'status.boolean' => 'Status must be true or false',
             
-            'parent_id.exists' => 'Selected parent category does not exist',
+            'parent_id.integer' => 'Parent ID must be an integer',
+            'parent_id.min' => 'Parent ID must be 0 or greater',
             
-            'short.required' => 'Short code is required',
-            'short.string' => 'Short code must be a string',
-            'short.max' => 'Short code must be less than 50 characters',
-            'short.unique' => 'This short code is already taken',
-            
-            'labels.array' => 'Labels must be an array',
-            'labels.*.string' => 'Each label must be a string',
-            'labels.*.max' => 'Each label must be less than 50 characters',
+            'pro_section.string' => 'Product section must be a string',
+            'pro_section.in' => 'Product section must be either primary or deals',
             
             'meta_title.string' => 'Meta title must be a string',
             'meta_title.max' => 'Meta title must be less than 255 characters',

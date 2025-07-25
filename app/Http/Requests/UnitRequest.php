@@ -19,14 +19,21 @@ class UnitRequest extends FormRequest
     public function rules()
     {
         $unitId = $this->route('unit');
-        $uniqueRule = 'unique:units,unit';
+        $uniqueRule = 'unique:uni_unit,unit';
         
         if ($unitId) {
-            $uniqueRule .= ',' . $unitId . ',_id';
+            $uniqueRule .= ',' . $unitId . ',id';
         }
 
         return [
-            'unit' => 'required|string|max:50|' . $uniqueRule,
+            'unit' => [
+                'required',
+                'string',
+                'max:50',
+                'min:1',
+                $uniqueRule,
+                'regex:/^[a-zA-Z0-9\s\-_]+$/'
+            ],
             'status' => 'nullable|boolean'
         ];
     }
@@ -37,10 +44,20 @@ class UnitRequest extends FormRequest
             'unit.required' => 'Unit name is required',
             'unit.string' => 'Unit name must be a string',
             'unit.max' => 'Unit name cannot exceed 50 characters',
+            'unit.min' => 'Unit name must be at least 1 character',
             'unit.unique' => 'This unit name already exists',
-            'status.nullable' => 'Status is required',
+            'unit.regex' => 'Unit name can only contain letters, numbers, spaces, hyphens, and underscores',
             'status.boolean' => 'Status must be true or false'
         ];
+    }
+
+    protected function prepareForValidation()
+    {
+        if ($this->has('unit')) {
+            $this->merge([
+                'unit' => trim($this->unit)
+            ]);
+        }
     }
 
     protected function failedValidation(Validator $validator)

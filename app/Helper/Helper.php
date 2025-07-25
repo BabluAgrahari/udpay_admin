@@ -108,7 +108,7 @@ function daterange($data)
 
 function user()
 {
-    $user = User::where('admin_role', 'supperadmin')->first();
+    $user = User::where('role', 'supperadmin')->first();
     return $user ?? [];
 }
 
@@ -262,6 +262,14 @@ if (!function_exists('userWalletUpdate')) {
             'success' => false,
             'message' => 'Failed to save wallet history',
         ];
+    }
+}
+
+
+//check a valid image url
+if (!function_exists('isValidImageUrl')) {
+    function isValidImageUrl($url) {
+        return filter_var($url, FILTER_VALIDATE_URL) !== false;
     }
 }
 

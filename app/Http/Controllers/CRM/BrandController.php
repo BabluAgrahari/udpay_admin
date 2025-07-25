@@ -15,46 +15,32 @@ class BrandController extends Controller
     public function index(Request $request)
     {
         try {
-            $query = Brand::query();
-
-            if ($request->has('search')) {
-                $search = $request->search;
-                $query->where(function($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%");
-                });
-            }
-
-            if ($request->has('status') && $request->status !== '') {
-                $query->where('status', $request->status);
-            }
-
-            $brands = $query->paginate(10);
-
-            return view('CRM.Brand.index', compact('brands'));
+            return view('CRM.Brand.index');
         } catch (Exception $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+           abort(500, $e->getMessage());
         }
     }
 
     public function create()
     {
-        return view('CRM.Brand.create');
+        try {
+            return view('CRM.Brand.create');
+        } catch (Exception $e) {
+            abort(500, $e->getMessage());
+        }
     }
 
     public function store(BrandRequest $request)
     {
         try {
-            $data = $request->validated();
-
             $save = new Brand();
             $save->name = $request->name;
-            $save->slug_url = generateSlug($request->name, 'brands', 'slug_url');
+            $save->slug = generateSlug($request->name, 'brands', 'slug');
             $save->description = $request->description;
-            $save->status = (int)$request->status;
+            $save->status = $request->status;
             $save->meta_title = $request->meta_title;
             $save->meta_keyword = $request->meta_keyword;
             $save->meta_description = $request->meta_description;
-            $save->user_id = Auth::user()->_id;
             if ($request->hasFile('icon')) {
                 $save->icon = singleFile($request->file('icon'), 'brands');
             }
@@ -84,7 +70,7 @@ class BrandController extends Controller
             $brand = Brand::findOrFail($id);
             return view('CRM.Brand.edit', compact('brand'));
         } catch (Exception $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+            return abort(500, $e->getMessage());
         }
     }
 
@@ -93,9 +79,9 @@ class BrandController extends Controller
         try {
             $brand = Brand::findOrFail($id);
             $brand->name = $request->name;
-            $brand->slug_url = generateSlug($request->name, 'brands', 'slug_url');
+            $brand->slug = generateSlug($request->name, 'brands', 'slug');
             $brand->description = $request->description;
-            $brand->status = (int)$request->status;
+            $brand->status = $request->status;
             $brand->meta_title = $request->meta_title;
             $brand->meta_keyword = $request->meta_keyword;
             $brand->meta_description = $request->meta_description;
@@ -126,7 +112,7 @@ class BrandController extends Controller
             }
 
             $brand = Brand::findOrFail($request->id);
-            $brand->status = (int)$request->status;
+            $brand->status = $request->status;
             $brand->save();
 
             return $this->successMsg('Status updated successfully');
@@ -160,7 +146,7 @@ class BrandController extends Controller
             });
         }
         if ($request->status !== null && $request->status !== '') {
-            $query->where('status', (int)$request->status);
+            $query->where('status', $request->status);
         }
 
         $total = $query->count();
@@ -183,10 +169,10 @@ class BrandController extends Controller
 
         $data = $brands->map(function ($brand) {
             return [
-                '_id' => $brand->_id,
+                'id' => $brand->id,
                 'icon' => $brand->icon ? asset($brand->icon) : null,
                 'name' => $brand->name,
-                'slug_url' => $brand->slug_url,
+                'slug' => $brand->slug,
                 'description' => $brand->description,
                 'status' => $brand->status,
             ];

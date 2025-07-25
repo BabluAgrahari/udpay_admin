@@ -15,20 +15,20 @@ class CategoryController extends Controller
     public function index(Request $request)
     {
         try {
-            $parentCategories = Category::whereNull('parent_id')->get();
+            $parentCategories = Category::where('parent_id', 0)->get();
             return view('CRM.Category.index', compact('parentCategories'));
         } catch (Exception $e) {
-            return $this->failMsg($e->getMessage());
+            return abort(500, $e->getMessage());
         }
     }
 
     public function create()
     {
         try {
-            $parentCategories = Category::whereNull('parent_id')->get();
+            $parentCategories = Category::where('parent_id', 0)->get();
             return view('CRM.Category.create', compact('parentCategories'));
         } catch (Exception $e) {
-            return $this->failMsg($e->getMessage());
+            return abort(500, $e->getMessage());
         }
     }
 
@@ -40,22 +40,21 @@ class CategoryController extends Controller
                 return $this->failMsg('Category already exists');
             }
 
-            $labels = explode(',',$request->labels);
             $save = new Category();
             $save->name = $request->name;
-            $save->slug_url = generateSlug($request->name, 'categories', 'slug_url');
-            $save->description = $request->description;
-            $save->status = (int)$request->status;
-            $save->parent_id = $request->parent_id;
-            $save->labels = $labels;
+            $save->slug = generateSlug($request->name,'uni_category');
+            $save->status = $request->status;
+            $save->parent_id = $request->parent_id ?? 0;
+            $save->cat_role = $request->parent_id == 0 ? 'super' : 'sub';
+            $save->pro_section = $request->pro_section;
             $save->meta_title = $request->meta_title;
             $save->meta_keyword = $request->meta_keyword;
             $save->meta_description = $request->meta_description;
-            $save->user_id = Auth::user()->_id;
 
-            if ($request->hasFile('icon')) {
-                $save->icon = singleFile($request->icon, 'category');
+            if ($request->hasFile('img')) {
+                $save->img = singleFile($request->img, 'category');
             }
+            
             if ($save->save()) {
                 return $this->successMsg('Category created successfully');
             }
@@ -69,8 +68,8 @@ class CategoryController extends Controller
     {
         try {
             $category = Category::findOrFail($id);
-            $parentCategories = Category::whereNull('parent_id')
-                ->where('_id', '!=', $category->_id)
+            $parentCategories = Category::where('parent_id', 0)
+                ->where('id', '!=', $category->id)
                 ->get();
 
             return view('CRM.Category.edit', compact('category', 'parentCategories'));
@@ -82,32 +81,30 @@ class CategoryController extends Controller
     public function update(CategoryRequest $request, $id)
     {
         try {
-
             $category = Category::findOrFail($id);
 
             // Check if name is being changed and if it already exists
             if ($category->name !== $request->name) {
                 $exist = Category::where('name', $request->name)
-                    ->where('_id', '!=', $id)
+                    ->where('id', '!=', $id)
                     ->first();
                 if ($exist) {
                     return $this->failMsg('Category name already exists');
                 }
             }
 
-            $labels = explode(',',$request->labels);
             $category->name = $request->name;
-            $category->slug_url = generateSlug($request->name, 'categories', 'slug_url');
-            $category->description = $request->description;
-            $category->status = (int)$request->status;
-            $category->parent_id = $request->parent_id;
-            $category->labels = $labels;
+            $category->slug = generateSlug($request->name,'uni_category');
+            $category->status = $request->status;
+            $category->parent_id = $request->parent_id ?? 0;
+            $category->cat_role = $request->parent_id == 0 ? 'super' : 'sub';
+            $category->pro_section = $request->pro_section;
             $category->meta_title = $request->meta_title;
             $category->meta_keyword = $request->meta_keyword;
             $category->meta_description = $request->meta_description;
 
-            if ($request->hasFile('icon')) {
-                $category->icon = singleFile($request->icon, 'category');
+            if ($request->hasFile('img')) {
+                $category->img = singleFile($request->img, 'category');
             }
 
             if ($category->save()) {
@@ -124,7 +121,7 @@ class CategoryController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'id' => 'required|exists:categories,_id',
+                'id' => 'required|exists:uni_category,id',
                 'status' => 'required|boolean'
             ]);
 
@@ -133,37 +130,12 @@ class CategoryController extends Controller
             }
 
             $category = Category::findOrFail($request->id);
-            $category->status = (int)$request->status;
+            $category->status = $request->status;
 
             if ($category->save()) {
                 return $this->successMsg('Status updated successfully');
             }
             return $this->failMsg('Status not updated');
-
-        } catch (Exception $e) {
-            return $this->failMsg($e->getMessage());
-        }
-    }
-
-    public function updateShortCode(Request $request)
-    {
-        try {
-            $validator = Validator::make($request->all(), [
-                'id' => 'required|exists:categories,_id',
-                'short' => 'required|string|max:50'
-            ]);
-
-            if ($validator->fails()) {
-                return $this->failMsg($validator->errors()->first());
-            }
-
-            $category = Category::findOrFail($request->id);
-            $category->short = (int) $request->short;
-
-            if ($category->save()) {
-                return $this->successMsg('Short code updated successfully');
-            }
-            return $this->failMsg('Short code not updated');
 
         } catch (Exception $e) {
             return $this->failMsg($e->getMessage());
@@ -198,8 +170,7 @@ class CategoryController extends Controller
         if ($request->search && $request->search['value']) {
             $search = $request->search['value'];
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%");
+                $q->where('name', 'like', "%{$search}%");
             });
         }
         if ($request->status !== null && $request->status !== '') {
@@ -229,13 +200,12 @@ class CategoryController extends Controller
 
         $data = $categories->map(function ($cat) {
             return [
-                '_id' => $cat->_id,
-                'icon' => $cat->icon,
+                '_id' => $cat->id,
+                'img' => $cat->img,
                 'name' => $cat->name,
-                'short' => $cat->short,
                 'parent_name' => $cat->parent ? $cat->parent->name : 'None',
                 'status' => $cat->status,
-                'labels' => $cat->labels,
+                'pro_section' => $cat->pro_section,
             ];
         });
 

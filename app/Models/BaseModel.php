@@ -16,9 +16,6 @@ class BaseModel extends Model
     use HasFactory;
     use SoftDeletes;
 
-    const CREATED_AT = 'created';
-    const UPDATED_AT = 'updated';
-    const DELETED_AT = 'deleted';
 
 
     public $timestamps = false;
@@ -26,13 +23,13 @@ class BaseModel extends Model
     protected static function boot()
     {
         parent::boot();
-        self::observe(Timestamp::class);
+        // self::observe(Timestamp::class);
     }
 
 
     public function scopeStatus($query)
     {
-        $query->where('status', 1);
+        $query->where('status', '1');
     }
 
     public function scopeDateRang($query, $dateRange = '')
@@ -82,6 +79,6 @@ class BaseModel extends Model
         if (empty($date))
             return false;
 
-        return date('d M,Y', (int)$date);
+        return date('d M,Y', strtotime($date));
     }
 }

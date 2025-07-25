@@ -30,16 +30,15 @@ Route::group(['middleware' => 'guest'], function () {
     Route::get('register', [LoginController::class, 'register']);
     Route::post('register', [LoginController::class, 'saveRegister']);
 
-    Route::get('/', function () {
-        // return view('welcome');
+    Route::get('/crm', function () {
         return redirect('login');
     });
 });
 
-Route::get('dashboard', [DashboardController::class, 'index']);
+// Route::get('dashboard', [DashboardController::class, 'index']);
 Route::group(['prefix' => 'crm', 'middleware' => 'auth'], function () {
 
-   
+   Route::get('dashboard', [DashboardController::class, 'index']);
 
     Route::get('user/datatable-list', [UserController::class, 'datatable'])->middleware('permission:user');
     Route::resource('user', UserController::class)->middleware('permission:user');
@@ -58,7 +57,6 @@ Route::group(['prefix' => 'crm', 'middleware' => 'auth'], function () {
     Route::get('categories/datatable-list', [CategoryController::class, 'datatable'])->middleware('permission:category');
     Route::resource('categories', CategoryController::class)->middleware('permission:category');
     Route::post('categories/update-status', [CategoryController::class, 'updateStatus'])->middleware('permission:category');
-    Route::post('categories/update-short', [CategoryController::class, 'updateShortCode'])->middleware('permission:category');
     
     // Product Routes
     Route::get('products/datatable-list', [ProductController::class, 'datatable'])->middleware('permission:product');

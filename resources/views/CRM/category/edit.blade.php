@@ -16,7 +16,7 @@
 
         <div class="card-body">
             <div id="message"></div>
-            <form id="save" method="post" action="{{ url('crm/categories/'.$category->_id) }}" enctype="multipart/form-data">
+            <form id="save" method="post" action="{{ url('crm/categories/'.$category->id) }}" enctype="multipart/form-data">
                 @csrf
                 <input type="hidden" name="_method" value="PUT">
                 
@@ -37,10 +37,10 @@
                         <select name="parent_id" 
                                 id="parent_id" 
                                 class="form-select @error('parent_id') is-invalid @enderror">
-                            <option value="">None</option>
+                            <option value="0" {{ old('parent_id', $category->parent_id) == 0 ? 'selected' : '' }}>None (Super Category)</option>
                             @foreach($parentCategories as $parent)
-                                <option value="{{ $parent->_id }}" 
-                                        {{ old('parent_id', $category->parent_id) == $parent->_id ? 'selected' : '' }}>
+                                <option value="{{ $parent->id }}" 
+                                        {{ old('parent_id', $category->parent_id) == $parent->id ? 'selected' : '' }}>
                                     {{ $parent->name }}
                                 </option>
                             @endforeach
@@ -49,39 +49,29 @@
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">Description</label>
-                        <textarea name="description" 
-                                  id="description" 
-                                  class="form-control @error('description') is-invalid @enderror" 
-                                  rows="3"
-                                  placeholder="Enter description">{{ old('description', $category->description) }}</textarea>
-                        <span class="text-danger error" id="description_error"></span>
+                        <label class="form-label">Product Section</label>
+                        <select name="pro_section" 
+                                id="pro_section" 
+                                class="form-select @error('pro_section') is-invalid @enderror">
+                            <option value="">Select Section</option>
+                            <option value="primary" {{ old('pro_section', $category->pro_section) == 'primary' ? 'selected' : '' }}>Primary</option>
+                            <option value="deals" {{ old('pro_section', $category->pro_section) == 'deals' ? 'selected' : '' }}>Deals</option>
+                        </select>
+                        <span class="text-danger error" id="pro_section_error"></span>
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">Icon</label>
+                        <label class="form-label">Image</label>
                         <input type="file" 
-                               name="icon" 
-                               id="icon" 
-                               class="form-control @error('icon') is-invalid @enderror">
-                        @if($category->icon)
+                               name="img" 
+                               id="img" 
+                               class="form-control @error('img') is-invalid @enderror">
+                        @if($category->img)
                             <div class="mt-2">
-                                <img src="{{ $category->icon }}" alt="Category Icon" class="img-thumbnail" style="max-height: 100px;">
+                                <img src="{{ $category->img }}" alt="Category Image" class="img-thumbnail" style="max-height: 100px;">
                             </div>
                         @endif
-                        <span class="text-danger error" id="icon_error"></span>
-                    </div>
-
-                    <div class="col-md-12 mb-3">
-                        <label class="form-label">Labels</label>
-                        <input type="text" 
-                               name="labels" 
-                               id="labels" 
-                               class="form-control @error('labels') is-invalid @enderror" 
-                               value="{{ old('labels', $category->labels ? implode(',', $category->labels) : '') }}"
-                               placeholder="Enter labels separated by commas">
-                        <small class="text-muted">Enter multiple labels separated by commas</small>
-                        <span class="text-danger error" id="labels_error"></span>
+                        <span class="text-danger error" id="img_error"></span>
                     </div>
 
                     <!-- SEO Fields -->

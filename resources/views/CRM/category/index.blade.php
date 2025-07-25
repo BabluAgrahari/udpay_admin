@@ -24,7 +24,7 @@
                             <div class="form-group">
                                 <label class="form-label">Search</label>
                                 <input type="text" name="search" id="search" class="form-control form-control-sm"
-                                    placeholder="Search by name or description">
+                                    placeholder="Search by name">
                             </div>
                         </div>
 
@@ -71,12 +71,11 @@
                 <table id="categoriesTable" class="table table-hover table-sm w-100 text-nowrap">
                     <thead>
                         <tr>
-                            <th>Icon</th>
+                            <th>Image</th>
                             <th>Name</th>
-                            <th>Short</th>
                             <th>Parent</th>
+                            <th>Product Section</th>
                             <th>Status</th>
-                            <th>Labels</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -105,14 +104,14 @@
                     }
                 },
                 columns: [{
-                        data: 'icon',
-                        name: 'icon',
+                        data: 'img',
+                        name: 'img',
                         orderable: false,
                         searchable: false,
                         render: function(data) {
                             return data ?
                                 `<img src="${data}" class="img-thumbnail" style="max-height:50px;">` :
-                                '<span class="text-muted">No icon</span>';
+                                '<span class="text-muted">No image</span>';
                         }
                     },
                     {
@@ -120,30 +119,24 @@
                         name: 'name'
                     },
                     {
-                        data: 'short',
-                        name: 'short',
-                        render: function(data, type, row) {
-                            return `<div class="input-group input-group-sm"><input type="text" class="form-control short-code" value="${data ?? ''}" data-id="${row._id}" placeholder="Enter short code"><button class="btn btn-outline-primary update-short" type="button" data-id="${row._id}"><i class='bx bx-save'></i></button></div>`;
-                        }
-                    },
-                    {
                         data: 'parent_name',
                         name: 'parent_name'
+                    },
+                    {
+                        data: 'pro_section',
+                        name: 'pro_section',
+                        render: function(data) {
+                            if (!data) return '<span class="text-muted">-</span>';
+                            return data === 'primary' ? 
+                                '<span class="badge bg-label-success">Primary</span>' : 
+                                '<span class="badge bg-label-warning">Deals</span>';
+                        }
                     },
                     {
                         data: 'status',
                         name: 'status',
                         render: function(data, type, row) {
-                            return `<div class="form-check form-switch"><input type="checkbox" class="form-check-input status-toggle" data-id="${row._id}" ${data ? 'checked' : ''}></div>`;
-                        }
-                    },
-                    {
-                        data: 'labels',
-                        name: 'labels',
-                        render: function(data) {
-                            if (!data) return '';
-                            return data.map(label =>
-                                `<span class="badge bg-label-info">${label}</span>`).join(' ');
+                            return `<div class="form-check form-switch"><input type="checkbox" class="form-check-input status-toggle" data-id="${row.id}" ${data ? 'checked' : ''}></div>`;
                         }
                     },
                     {
@@ -175,7 +168,7 @@
                 table.ajax.reload();
             });
 
-            // Delegate status toggle, short code update, and delete actions
+            // Delegate status toggle and delete actions
             $('#categoriesTable').on('change', '.status-toggle', function() {
                 const categoryId = $(this).data('id');
                 const status = $(this).prop('checked') ? 1 : 0;
@@ -213,43 +206,7 @@
                     }
                 });
             });
-            $('#categoriesTable').on('click', '.update-short', function() {
-                const categoryId = $(this).data('id');
-                const $input = $(this).closest('.input-group').find('.short-code');
-                const shortCode = $input.val();
-                const $btn = $(this);
 
-                $.ajax({
-                    url: "{{ url('crm/categories/update-short') }}",
-                    type: 'POST',
-                    data: {
-                        _token: "{{ csrf_token() }}",
-                        id: categoryId,
-                        short: shortCode
-                    },
-                    beforeSend: function() {
-                        $btn.prop('disabled', true);
-                    },
-                    success: function(res) {
-                        $btn.prop('disabled', false);
-                        alertMsg(res.status, res.msg, 3000);
-                        if (!res.status) {
-                            $input.val($input.data('original-value'));
-                        }
-                    },
-                    error: function(xhr) {
-                        $btn.prop('disabled', false);
-                        if (xhr.status === 422) {
-                            alertMsg(false, xhr.responseJSON.validation, 3000);
-                        } else if (xhr.status === 400) {
-                            alertMsg(false, xhr.responseJSON.msg, 3000);
-                        } else {
-                            alertMsg(false, xhr.responseJSON.msg ||
-                                'An error occurred while processing your request.', 3000);
-                        }
-                    }
-                });
-            });
             $('#categoriesTable').on('click', '.delete-category', function() {
                 const categoryId = $(this).data('id');
                 const $row = $(this).closest('tr');

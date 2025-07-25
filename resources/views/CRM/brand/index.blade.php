@@ -39,7 +39,6 @@
                         <tr>
                             <th>Icon</th>
                             <th>Name</th>
-                            <th>Slug URL</th>
                             <th>Description</th>
                             <th>Status</th>
                             <th>Actions</th>
@@ -49,9 +48,7 @@
                 </table>
             </div>
 
-            <div class="mt-3">
-                {{ $brands->links() }}
-            </div>
+            
         </div>
     </div>
 </div>
@@ -77,7 +74,9 @@ $(document).ready(function() {
                 return data ? `<img src="${data}" style="max-width:50px;">` : '<span class="text-muted">No image</span>';
             }},
             { data: 'name', name: 'name' },
-            { data: 'slug_url', name: 'slug_url' },
+           
+
+            
             { data: 'description', name: 'description', render: function(data) {
                 return data ? data.substring(0, 50) : '';
             }},

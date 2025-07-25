@@ -19,21 +19,23 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         try {
-            $totalOrders = Order::count();
-            $activeUsers = User::where('isactive', 1)->count();
-            $inactiveUsers = User::where('isactive', 0)->count();
-            $totalRecharges = WalletHistory::where('type', 'credit')->sum('amount');
-            $latestOrders = Order::orderBy('created', 'desc')->take(10)->get();
+            // $totalOrders = Order::count();
+            // $activeUsers = User::where('isactive', 1)->count();
+            // $inactiveUsers = User::where('isactive', 0)->count();
+            // $totalRecharges = WalletHistory::where('type', 'credit')->sum('amount');
+            // $latestOrders = Order::orderBy('created', 'desc')->take(10)->get();
 
             return view('CRM.Dashboard', [
-                'totalOrders' => $totalOrders,
-                'activeUsers' => $activeUsers,
-                'inactiveUsers' => $inactiveUsers,
-                'totalRecharges' => $totalRecharges,
-                'latestOrders' => $latestOrders,
+                'totalOrders' => $totalOrders??0,
+                'activeUsers' => $activeUsers??0,
+                'inactiveUsers' => $inactiveUsers??0,
+                'totalRecharges' => $totalRecharges??0,
+                'latestOrders' => $latestOrders??0,
             ]);
         } catch (\Exception $e) {
-            return back()->with('error', $e->getMessage());
+           abort(500, 'Internal Server Error', [
+                'message' => $e->getMessage(),
+            ]);
         }
     }
 }

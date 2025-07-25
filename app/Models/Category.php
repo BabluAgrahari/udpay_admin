@@ -3,31 +3,28 @@
 namespace App\Models;
 
 use App\Models\BaseModel;
-use App\Casts\ObjectIdCast;
 
 class Category extends BaseModel
 {
 
+    protected $table = 'uni_category';
+
     protected $fillable = [
-        'name',
-        'description',
-        'icon',
-        'short',
-        'status',
         'parent_id',
-        'user_id',
-        'labels',
+        'name',
+        'img',
+        'pro_section', //primary, deals
+        'status',
         'meta_title',
         'meta_keyword',
-        'meta_description',
-        'user_id'
+        'meta_description'
     ];
 
     protected $casts = [
-        'parent_id' => ObjectIdCast::class,
-        'user_id' => ObjectIdCast::class,
-        'labels' => 'array',
-        'status' => 'integer',
+        'parent_id' => 'integer',
+        'status' => 'boolean',//0 = inactive, 1 = active
+        'pro_section' => 'string', // primary, deals
+        'img' => 'string', // image path
         'meta_title' => 'string',
         'meta_keyword' => 'string',
         'meta_description' => 'string'
@@ -36,7 +33,7 @@ class Category extends BaseModel
     // Relationship with parent category
     public function parent()
     {
-        return $this->belongsTo(Category::class, 'parent_id');
+        return $this->hasOne(Category::class, 'id', 'parent_id');
     }
 
     // Relationship with child categories
@@ -50,4 +47,16 @@ class Category extends BaseModel
     {
         return $this->belongsTo(User::class);
     }
-} 
+
+    // Accessor for cat_role based on parent_id
+    public function getCatRoleAttribute()
+    {
+        return $this->parent_id == 0 ? 'super' : 'sub';
+    }
+
+    // Accessor for slug based on name
+    public function getSlugAttribute()
+    {
+        return \Str::slug($this->name);
+    }
+}

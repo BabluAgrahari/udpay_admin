@@ -31,9 +31,9 @@
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Parent Category</label>
                             <select name="parent_id" id="parent_id" class="form-select">
-                                <option value="">None</option>
+                                <option value="0">None (Super Category)</option>
                                 @foreach($parentCategories as $parent)
-                                    <option value="{{ $parent->_id }}">
+                                    <option value="{{ $parent->id }}">
                                         {{ $parent->name }}
                                     </option>
                                 @endforeach
@@ -42,24 +42,19 @@
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Description</label>
-                            <textarea name="description" id="description" class="form-control " 
-                                rows="3" placeholder="Enter description"></textarea>
-                            <span class="text-danger error" id="description_error"></span>
+                            <label class="form-label">Product Section</label>
+                            <select name="pro_section" id="pro_section" class="form-select">
+                                <option value="">Select Section</option>
+                                <option value="primary">Primary</option>
+                                <option value="deals">Deals</option>
+                            </select>
+                            <span class="text-danger error" id="pro_section_error"></span>
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Icon</label>
-                            <input type="file" name="icon" id="icon" class="form-control">
-                            <span class="text-danger error" id="icon_error"></span>
-                        </div>
-
-                        <div class="col-md-12 mb-3">
-                            <label class="form-label">Labels</label>
-                            <input type="text" name="labels" id="labels" class="form-control"
-                                placeholder="Enter labels separated by commas" value="">
-                            <small class="text-muted">Enter multiple labels separated by commas</small>
-                            <span class="text-danger error" id="labels_error"></span>
+                            <label class="form-label">Image</label>
+                            <input type="file" name="img" id="img" class="form-control">
+                            <span class="text-danger error" id="img_error"></span>
                         </div>
 
                         <!-- SEO Fields -->
