@@ -58,8 +58,9 @@
                                 <li class="menu-item"><a href="about-us.html">About Us</a></li>
                                 <li class="menu-item"><a href="contact-us.html">Contact Us</a></li>
                             </ul>
+                            {{-- openPopup --}}
                             <div class="header-right">
-                                <a href="#" data-popup="login1" class="openPopup thm-btn">Login/Sign</a>
+                                <a href="{{ url('signin') }}" data-popup="login1" class=" thm-btn">Login/Sign</a>
                                 <div class="profile-main">
                                     <a href="#" class="profile-icon">Abcd <i
                                             class="fa-solid fa-chevron-down"></i></a>
@@ -71,7 +72,7 @@
                                         <li><a href="#"><i class="fa-solid fa-book-bookmark"></i> Address Book</a></li> -->
                                             <li><a href="wishlist.html"><i class="fa-solid fa-heart"></i> My
                                                     Wishlist</a></li>
-                                            <li><a href="#"><i class="fa-solid fa-arrow-right-from-bracket"></i>
+                                            <li><a href="{{ url('logout') }}"><i class="fa-solid fa-arrow-right-from-bracket"></i>
                                                     Logout</a></li>
                                         </ul>
                                     </div>
