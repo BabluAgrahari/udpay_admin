@@ -19,7 +19,7 @@ class User extends Authenticatable implements JWTSubject
     use HasApiTokens, HasFactory, Notifiable;
 
 
-    protected $table = 'uni_admin';
+    protected $table = 'users_lvl';
 
     protected $hidden = [
         'password',
