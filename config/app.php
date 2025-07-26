@@ -172,7 +172,7 @@ return [
         Barryvdh\DomPDF\ServiceProvider::class,
         Tymon\JWTAuth\Providers\LaravelServiceProvider::class,
         Rap2hpoutre\LaravelLogViewer\LaravelLogViewerServiceProvider::class,
-        MongoDB\Laravel\MongoDBBusServiceProvider::class,
+       // MongoDB\Laravel\MongoDBBusServiceProvider::class,
     ])->toArray(),
 
     /*

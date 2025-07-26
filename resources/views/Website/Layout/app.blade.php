@@ -45,12 +45,12 @@
             <div class="col-lg-12">
                 <div class="navigaation-warpper">
                     <div class="logo">
-                        <a href="index.html"><img src="{{asset('front_assets')}}/images/logo.png" class="image-fit" alt="logo" /> </a>
+                        <a href="{{url('/')}}"><img src="{{asset('front_assets')}}/images/logo.png" class="image-fit" alt="logo" /> </a>
                     </div>
                     <nav class="navigation">
                         <ul class="main-menu">
-                            <li class="menu-item"><a href="index.html" class="">Home</a></li>
-                            <li class="menu-item"><a href="product-list.html">Products</a></li>
+                            <li class="menu-item"><a href="{{url('/')}}" class="">Home</a></li>
+                            <li class="menu-item"><a href="{{url('product')}}">Products</a></li>
                             <li class="menu-item"><a href="download.html">Downloads</a></li>
                             <li class="menu-item"><a href="about-us.html">About Us</a></li>
                             <li class="menu-item"><a href="contact-us.html">Contact Us</a></li>
@@ -98,7 +98,7 @@
 <footer class="footer section-padding pt-5 pb-0">
     <div class="container">
        <div class="ft-left">
-           <a href="index.html" class="ft-logo">
+           <a href="{{url('/')}}" class="ft-logo">
                <img src="{{asset('front_assets')}}/images/logo.png" alt="img" class="ft-logo">
            </a>
            <ul class="ft-social-icon">

@@ -59,4 +59,12 @@ class Category extends BaseModel
     {
         return \Str::slug($this->name);
     }
+    // public function products()
+    // {
+    //     return $this->belongsToMany(Product::class);
+    // }
+    public function products()
+    {
+        return $this->hasMany(Product::class, 'product_category_id', 'id'); // One-to-many relationship
+    }
 }

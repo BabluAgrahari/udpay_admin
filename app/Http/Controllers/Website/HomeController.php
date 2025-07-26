@@ -9,8 +9,21 @@
  {
     public function index(){
 
+    // $categories = Category::with('products')
+    // ->where('status', 1) // Filter categories by status
+    // ->where('parent_id','0')
+    // ->where('pro_section','primary')
+    // ->whereHas('products', function($query) {
+    //     $query->where('status', 1); // Filter products by status
+    // })
+    // ->get();
+
+
+    // dd($categories);
+
         $data['categories'] = Category::status()->where('parent_id','0')->get();
         $category = Category::status()->where('parent_id','0')->where('pro_section','primary')->get();
+       // dd($category);
 
        $products = Product::status()->get();
        $array = []; 
@@ -28,13 +41,9 @@
         }
     }
     $data['featured_products'] = $featured;
-       $data['products'] = $array;
-
-        //    echo "<pre>";
-        //    print_r($data['products']);
-        //    die;
+    $data['products'] = $array;
     
 
-        return view('Website.home',$data);
+      return view('Website.home',$data);
     }
  }

@@ -28,7 +28,7 @@
                 @foreach ($categories as $category)
                     <div class="category-card">
                         <img src="{{ $category->img }}" alt="{{ $category->name }}">
-                        <a href="product-list.html" class="category-name">{{ ucwords($category->name) }}</a>
+                        <a href="{{url('product/')}}/{{$category->slug}}" class="category-name">{{ ucwords($category->name) }}</a>
                     </div>
                 @endforeach
             </div>
@@ -67,7 +67,7 @@
                                             <span class="price-throuth">₹{{ $product->mrp }}</span><span
                                                 class="price-bg">₹{{ $product->product_sale_price }}</span>
                                         </div>
-                                        <a href="cart.html" class="thm-btn">+</a>
+                                        <a href="javascript:void(0)" class="thm-btn cart-btn">+</a>
                                     </div>
                                 </div>
                             </div>
@@ -90,7 +90,7 @@
                             <h2>{{ ucwords($category) }}</h2>
                             <p class="mb-0">Explore our best rated herbal products</p>
                         </div>
-                        <a href="#" class="veiw-btn">View More >></a>
+                        <a href="{{url('product')}}" class="veiw-btn">View More >></a>
                     </div>
                     <div class="row product-slider">
                         @foreach ($productSection as $product)

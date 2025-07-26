@@ -169,6 +169,6 @@ Route::get('/dump', function () {
     ]);
 });
 
-Route::prefix('jobs')->group(function () {
-    Route::queueMonitor();
-});
+// Route::prefix('jobs')->group(function () {
+//     Route::queueMonitor();
+// });
