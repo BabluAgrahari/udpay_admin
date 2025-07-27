@@ -15,6 +15,7 @@
             </div>
 
             <div class="card-body">
+               
                 <div id="message"></div>
                 <form id="save" method="post" action="{{ url('crm/products') }}" enctype="multipart/form-data">
                     @csrf

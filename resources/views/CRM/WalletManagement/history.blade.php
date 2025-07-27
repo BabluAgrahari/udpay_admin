@@ -11,7 +11,11 @@
                     <h5 class="mb-0">Transfer History</h5>
                     @can('isSuperAdmin')
                         <div>
+<<<<<<< HEAD
                             <a href="{{ url('crm/wallet/transfer') }}" class="btn btn-primary me-2">
+=======
+                            <a href="{{ url('crm/wallet/transfer') }}" class="btn btn-outline-primary me-2">
+>>>>>>> 9cae8d43cbd99df28bc9af661b0d7feb4165cf42
                                 <i class="bx bx-transfer me-1"></i>Transfer Money
                             </a>
                            
@@ -19,10 +23,17 @@
                     @endcan
                     @can('isAdmin')
                         <div>
+<<<<<<< HEAD
                             <a href="{{ url('crm/wallet/user-transfer') }}" class="btn btn-primary me-2">
                                 <i class="bx bx-user-plus me-1"></i>Transfer Money
                             </a>
                             <a href="{{ url('crm/wallet/user-to-user-transfer') }}" class="btn btn-secondary">
+=======
+                            <a href="{{ url('crm/wallet/user-transfer') }}" class="btn btn-outline-primary me-2">
+                                <i class="bx bx-user-plus me-1"></i>Transfer Money
+                            </a>
+                            <a href="{{ url('crm/wallet/user-to-user-transfer') }}" class="btn btn-outline-secondary">
+>>>>>>> 9cae8d43cbd99df28bc9af661b0d7feb4165cf42
                                 <i class="bx bx-group me-1"></i>User to User Transfer
                             </a>
                         </div>
@@ -30,17 +41,28 @@
                 </div>
                 <div class="card-body">
                     <!-- Filters -->
+<<<<<<< HEAD
                     <form method="GET" action="{{ url('crm/wallet/history') }}" class="mb-4">
+=======
+                    <form id="walletHistoryFilterForm" class="mb-4">
+>>>>>>> 9cae8d43cbd99df28bc9af661b0d7feb4165cf42
                         <div class="row">
                             <div class="col-md-3">
                                 <div class="mb-3">
                                     <label for="user_id" class="form-label">Filter by User</label>
+<<<<<<< HEAD
                                     <select class="form-select" name="user_id" id="user_id">
                                         <option value="">All Users</option>
                                         @foreach($users as $user)
                                             <option value="{{ $user->_id }}" {{ request('user_id') == $user->_id ? 'selected' : '' }}>
                                                 {{ $user->first_name }} {{ $user->last_name }}
                                             </option>
+=======
+                                    <select class="form-select form-select-sm" name="user_id" id="user_id">
+                                        <option value="">All Users</option>
+                                        @foreach($users as $user)
+                                            <option value="{{ $user->_id }}">{{ $user->first_name }} {{ $user->last_name }}</option>
+>>>>>>> 9cae8d43cbd99df28bc9af661b0d7feb4165cf42
                                         @endforeach
                                     </select>
                                 </div>
@@ -48,25 +70,41 @@
                             <div class="col-md-3">
                                 <div class="mb-3">
                                     <label for="type" class="form-label">Transaction Type</label>
+<<<<<<< HEAD
                                     <select class="form-select" name="type" id="type">
                                         <option value="">All Types</option>
                                         <option value="credit" {{ request('type') == 'credit' ? 'selected' : '' }}>Credit</option>
                                         <option value="debit" {{ request('type') == 'debit' ? 'selected' : '' }}>Debit</option>
+=======
+                                    <select class="form-select form-select-sm" name="type" id="type">
+                                        <option value="">All Types</option>
+                                        <option value="credit">Credit</option>
+                                        <option value="debit">Debit</option>
+>>>>>>> 9cae8d43cbd99df28bc9af661b0d7feb4165cf42
                                     </select>
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="mb-3">
                                     <label for="date_range" class="form-label">Date Range</label>
+<<<<<<< HEAD
                                     {!! daterange(request()->all()) !!}
+=======
+                                    <input type="text" class="form-control form-control-sm" name="date_range" id="date_range" placeholder="MM/DD/YYYY - MM/DD/YYYY">
+>>>>>>> 9cae8d43cbd99df28bc9af661b0d7feb4165cf42
                                 </div>
                             </div>
                             <div class="col-md-2">
                                 <div class="mb-3">
                                     <label class="form-label">&nbsp;</label>
                                     <div>
+<<<<<<< HEAD
                                         <button type="submit" class="btn btn-primary">Filter</button>
                                         <a href="{{ url('crm/wallet/history') }}" class="btn btn-secondary">Reset</a>
+=======
+                                        <button type="submit" class="btn btn-outline-primary btn-sm">Filter</button>
+                                        <button type="button" id="resetFilter" class="btn btn-outline-secondary btn-sm">Reset</button>
+>>>>>>> 9cae8d43cbd99df28bc9af661b0d7feb4165cf42
                                     </div>
                                 </div>
                             </div>
@@ -75,7 +113,11 @@
 
                     <!-- Transactions Table -->
                     <div class="table-responsive">
+<<<<<<< HEAD
                         <table class="table table-hover">
+=======
+                        <table id="walletHistoryTable" class="table table-hover table-sm w-100 text-nowrap">
+>>>>>>> 9cae8d43cbd99df28bc9af661b0d7feb4165cf42
                             <thead >
                                 <tr>
                                     <th>#</th>
@@ -89,6 +131,7 @@
                                     <th>Actions</th>
                                 </tr>
                             </thead>
+<<<<<<< HEAD
                             <tbody>
                                 @forelse($transactions as $index => $transaction)
                                     <tr>
@@ -162,6 +205,12 @@
                             {{ $transactions->appends(request()->query())->links() }}
                         </div>
                     @endif
+=======
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    {{-- DataTable handles pagination --}}
+>>>>>>> 9cae8d43cbd99df28bc9af661b0d7feb4165cf42
                 </div>
             </div>
         </div>
@@ -190,6 +239,7 @@
 @push('script')
 <script>
 $(document).ready(function() {
+<<<<<<< HEAD
     // View transaction details
     $('.view-details').click(function() {
         var transactionId = $(this).data('transaction-id');
@@ -199,6 +249,56 @@ $(document).ready(function() {
         $('#transactionDetailsModal').modal('show');
         
         // Fetch transaction details
+=======
+    var table = $('#walletHistoryTable').DataTable({
+        processing: true,
+        serverSide: true,
+        searching: false,
+        pagingType: 'simple_numbers',
+        ajax: {
+            url: '{{ url('crm/wallet/history/datatable-list') }}',
+            data: function (d) {
+                d.user_id = $('#user_id').val();
+                d.type = $('#type').val();
+                d.date_range = $('#date_range').val();
+            }
+        },
+        columns: [
+            { data: 'index', name: 'index', orderable: false, searchable: false },
+            { data: 'user', name: 'user' },
+            { data: 'type', name: 'type' },
+            { data: 'amount', name: 'amount' },
+            { data: 'closing_amount', name: 'closing_amount' },
+            { data: 'source', name: 'source' },
+            { data: 'action_by', name: 'action_by' },
+            { data: 'date', name: 'date' },
+            { data: '_id', name: 'actions', orderable: false, searchable: false, render: function(data, type, row) {
+                return `<button type="button" class="btn btn-sm btn-outline-primary view-details" data-transaction-id="${data}"><i class="bx bx-show"></i> View</button>`;
+            }}
+        ],
+        order: [[7, 'desc']],
+        lengthMenu: [10, 25, 50, 100, 500],
+        pageLength: 10,
+        scrollX: false,
+    });
+
+    // Filter form submit
+    $('#walletHistoryFilterForm').on('submit', function(e) {
+        e.preventDefault();
+        table.ajax.reload();
+    });
+    // Reset filter
+    $('#resetFilter').on('click', function() {
+        $('#walletHistoryFilterForm')[0].reset();
+        table.ajax.reload();
+    });
+
+    // View transaction details
+    $('#walletHistoryTable').on('click', '.view-details', function() {
+        var transactionId = $(this).data('transaction-id');
+        $('#transactionDetailsContent').html('<div class="text-center"><div class="spinner-border" role="status"></div><p class="mt-2">Loading...</p></div>');
+        $('#transactionDetailsModal').modal('show');
+>>>>>>> 9cae8d43cbd99df28bc9af661b0d7feb4165cf42
         $.ajax({
             url: '{{ url("crm/wallet/transaction-details") }}',
             type: 'GET',

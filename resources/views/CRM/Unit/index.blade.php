@@ -3,7 +3,11 @@
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
         <div class="card">
+<<<<<<< HEAD
             <div class="row card-header">
+=======
+            <div class="row card-header pb-3">
+>>>>>>> 9cae8d43cbd99df28bc9af661b0d7feb4165cf42
                 <div class="col-md-10">
                     <h5>Units</h5>
                 </div>
@@ -14,6 +18,7 @@
             </div>
 
             <div class="card-body">
+<<<<<<< HEAD
                 <form action="{{ url('crm/units') }}" method="GET" class="mb-3">
                     <div class="row">
                         <div class="col-md-4">
@@ -30,12 +35,33 @@
                         <div class="col-md-4">
                             <button type="submit" class="btn btn-primary">Filter</button>
                             <a href="{{ url('crm/units') }}" class="btn btn-secondary">Reset</a>
+=======
+                <form id="unitFilterForm" class="mb-3">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <input type="text" name="search" id="search" class="form-control form-control-sm" placeholder="Search unit...">
+                        </div>
+                        <div class="col-md-4">
+                            <select name="status" id="status-filter" class="form-select form-select-sm">
+                                <option value="">All Status</option>
+                                <option value="1">Active</option>
+                                <option value="0">Inactive</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+                            <button type="button" id="resetFilter" class="btn btn-secondary btn-sm">Reset</button>
+>>>>>>> 9cae8d43cbd99df28bc9af661b0d7feb4165cf42
                         </div>
                     </div>
                 </form>
 
                 <div class="table-responsive">
+<<<<<<< HEAD
                     <table class="table table-bordered table-striped">
+=======
+                    <table id="unitsTable" class="table table-hover table-sm w-100 text-nowrap">
+>>>>>>> 9cae8d43cbd99df28bc9af661b0d7feb4165cf42
                         <thead>
                             <tr>
                                 <th>#</th>
@@ -45,6 +71,7 @@
                                 <th>Actions</th>
                             </tr>
                         </thead>
+<<<<<<< HEAD
                         <tbody>
                             @forelse($units as $index => $unit)
                                 <tr>
@@ -77,6 +104,12 @@
                 <div class="mt-3">
                     {{ $units->appends($_GET)->links() }}
                 </div>
+=======
+                        <tbody></tbody>
+                    </table>
+                </div>
+                {{-- DataTable handles pagination --}}
+>>>>>>> 9cae8d43cbd99df28bc9af661b0d7feb4165cf42
             </div>
         </div>
     </div>
@@ -127,6 +160,7 @@
 
 
     <script>
+<<<<<<< HEAD
         $(document).on('click', '.add', function() {
             $('#createUnitModal').modal('show');
             $('#save').attr('action', '{{ url('crm/units') }}');
@@ -237,6 +271,98 @@
                     alertMsg(false, xhr.responseJSON.msg ||
                         'An error occurred while updating status.', 3000);
                 }
+=======
+        $(document).ready(function() {
+            var table = $('#unitsTable').DataTable({
+                processing: true,
+                serverSide: true,
+                searching: false,
+                pagingType: 'simple_numbers',
+                ajax: {
+                    url: '{{ url('crm/units/datatable-list') }}',
+                    data: function (d) {
+                        d.search = $('#search').val();
+                        d.status = $('#status-filter').val();
+                    }
+                },
+                columns: [
+                    { data: 'index', name: 'index', orderable: false, searchable: false },
+                    { data: 'unit', name: 'unit' },
+                    { data: 'status', name: 'status', orderable: false, searchable: false },
+                    { data: 'created', name: 'created' },
+                    { data: '_id', name: 'actions', orderable: false, searchable: false, render: function(data, type, row) {
+                        return `<a href="javascript:void(0);" _id="${data}" data-bs-toggle="tooltip" data-bs-offset="0,4" data-bs-placement="bottom" data-bs-html="true" title="Edit" class="edit text-primary"><i class='bx bxs-edit'></i></a>`;
+                    }}
+                ],
+                order: [[3, 'desc']],
+                lengthMenu: [10, 25, 50, 100, 500],
+                pageLength: 10,
+                scrollX: false,
+            });
+
+            // Filter form submit
+            $('#unitFilterForm').on('submit', function(e) {
+                e.preventDefault();
+                table.ajax.reload();
+            });
+            // Reset filter
+            $('#resetFilter').on('click', function() {
+                $('#unitFilterForm')[0].reset();
+                table.ajax.reload();
+            });
+
+            // Status switch handler
+            $('#unitsTable').on('change', '.status-switch', function() {
+                const id = $(this).data('id');
+                const status = $(this).prop('checked');
+                $.ajax({
+                    url: '{{ url("crm/units/update-status") }}',
+                    method: 'POST',
+                    data: {
+                        id: id,
+                        status: status,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        alertMsg(response.status, response.msg, 3000);
+                    },
+                    error: function(xhr) {
+                        alertMsg(false, xhr.responseJSON.msg || 'An error occurred while updating status.', 3000);
+                    }
+                });
+            });
+
+            // Edit handler
+            $('#unitsTable').on('click', '.edit', function(e) {
+                var id = $(this).attr('_id');
+                var url = "{{ url('crm/units') }}/" + id + '/edit';
+                var selector = $(this);
+                $.ajax({
+                    url: url,
+                    dataType: "JSON",
+                    type: "GET",
+                    beforeSend: function() {
+                        selector.html(
+                            `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>&nbsp;Loading...`
+                        ).attr('disabled', true);
+                    },
+                    success: function(res) {
+                        if (res.status) {
+                            $('#unit').val(res.record.unit);
+                            $('#status').prop('checked', res.record.status);
+                            var url_ = "{{ url('crm/units') }}/" + res.record._id;
+                            $('#save').attr('action', url_);
+                            $('#put').html(
+                                `<input type="hidden" id="putField" name="_method" value="PUT">`);
+                            $('#saveBtn').html('<i class="bx bx-save"></i> Update');
+                            selector.html('<i class="bx bxs-edit"></i>').removeAttr('disabled');
+                            $('#createUnitModal').modal('show');
+                        } else {
+                            alertMsg(res.status, res.msg, 3000);
+                        }
+                    }
+                })
+>>>>>>> 9cae8d43cbd99df28bc9af661b0d7feb4165cf42
             });
         });
     </script>

@@ -69,35 +69,35 @@ class UserController extends Controller
         // }
     }
 
-    public function store()
+    public function store(Request $request)
     {
         try {
-            // $validator = Validator::make($request->all(), [
-            //     // 'first_name' => 'required|string|max:100',
-            //     // 'last_name' => 'required|string|max:100',
-            //     'email' => 'required|email|unique:customers,email',
-            //     // 'mobile' => 'required|string|max:20|unique:customers,mobile',
-            //     'password' => 'required|string|min:6',
-            //     // 'role' => 'required|string|in:admin,customer,merchant',
-            //     'dob' => 'nullable|date',
-            //     'gender' => 'nullable|string|in:male,female,other',
-            //     // 'status' => 'nullable|boolean'
-            // ]);
+            $validator = Validator::make($request->all(), [
+                // 'first_name' => 'required|string|max:100',
+                // 'last_name' => 'required|string|max:100',
+                'email' => 'required|email|unique:customers,email',
+                // 'mobile' => 'required|string|max:20|unique:customers,mobile',
+                'password' => 'required|string|min:6',
+                // 'role' => 'required|string|in:admin,customer,merchant',
+                'dob' => 'nullable|date',
+                'gender' => 'nullable|string|in:male,female,other',
+                // 'status' => 'nullable|boolean'
+            ]);
 
-            // if ($validator->fails()) {
-            //     return response(['status' => false, 'msg' => $validator->errors()->first()]);
-            // }
+            if ($validator->fails()) {
+                return response(['status' => false, 'msg' => $validator->errors()->first()]);
+            }
 
             $customer = new User();
-            $customer->first_name = 'Ravi';
-            $customer->last_name = 'Kumar';
-            $customer->email = 'ravi@gmail.com';
-            $customer->mobile = '8899121012';
-            $customer->password = bcrypt('123456');
+            $customer->first_name = $request->first_name;
+            $customer->last_name = $request->last_name;
+            $customer->email = $request->email;
+            $customer->mobile = $request->mobile;
+            $customer->password = bcrypt($request->password);
             $customer->role = 'customer';
-            $customer->dob = '1990-01-01';
-            $customer->gender = 'make';
-            $customer->isactive =1;
+            $customer->dob = $request->dob;
+            $customer->gender = $request->gender;
+            $customer->isactive = $request->status ? 1 : 0;
 
             if ($customer->save()) {
                 return response(['status' => true, 'msg' => 'Customer Created Successfully.']);
@@ -315,5 +315,102 @@ class UserController extends Controller
         } catch (Exception $e) {
             return response(['status' => false, 'msg' => $e->getMessage()]);
         }
+    }
+
+    public function datatable(Request $request)
+    {
+        $query = User::with('kyc')->where('role', 'customer');
+
+        // Filtering
+        if ($request->search) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('first_name', 'like', "%{$search}%")
+                  ->orWhere('last_name', 'like', "%{$search}%")
+                  ->orWhere('mobile', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+        if ($request->kyc_status) {
+            switch ($request->kyc_status) {
+                case 'with_kyc':
+                    $query->withKyc();
+                    break;
+                case 'without_kyc':
+                    $query->withoutKyc();
+                    break;
+                case 'verified':
+                    $query->kycVerified();
+                    break;
+                case 'pending':
+                    $query->kycPending();
+                    break;
+            }
+        }
+        if ($request->status || $request->status == 0) {
+            $query->where('isactive', (int)$request->status);
+        }
+        if (!empty($request->gender)) {
+            $query->where('gender', $request->gender);
+        }
+
+        $total = $query->count();
+
+        // Ordering
+        $columns = $request->columns;
+        if ($request->order && count($request->order)) {
+            foreach ($request->order as $order) {
+                $colIdx = $order['column'];
+                $colName = $columns[$colIdx]['data'];
+                $dir = $order['dir'];
+                if ($colName !== 'index' && $colName !== 'actions') {
+                    $query->orderBy($colName, $dir);
+                }
+            }
+        }
+
+        // Pagination
+        $start = $request->start ?? 0;
+        $length = $request->length ?? 10;
+        $users = $query->skip($start)->take($length)->get();
+
+        $data = $users->map(function ($user, $key) use ($start) {
+            $kyc = $user->kyc;
+            $kycStatus = '<span class="badge bg-label-secondary">Not Submitted</span>';
+            if ($kyc) {
+                if ($kyc->kyc_flag == 1) {
+                    $kycStatus = '<span class="badge bg-label-success">Verified</span>';
+                } else {
+                    $kycStatus = '<span class="badge bg-label-warning">Pending</span>';
+                }
+                $kycStatus .= '<br><small class="text-muted">';
+                if ($kyc->personal_flag == 1) {
+                    $kycStatus .= '<i class="bx bx-check text-success"></i> Personal ';
+                }
+                if ($kyc->bank_flag == 1) {
+                    $kycStatus .= '<i class="bx bx-check text-success"></i> Bank ';
+                }
+                $kycStatus .= '</small>';
+            }
+            $address = $kyc ? ($kyc->address . '<br><small class="text-muted">' . ($kyc->locality ?? '') . ', ' . ($kyc->district ?? '') . '<br>' . ($kyc->state ?? '') . ' - ' . ($kyc->pincode ?? '') . '</small>') : '<span class="text-muted">No address</span>';
+            return [
+                'index' => $start + $key + 1,
+                '_id' => $user->_id,
+                'name' => '<strong>' . ($user->full_name ?? ($user->first_name . ' ' . $user->last_name)) . '</strong><br><small class="text-muted">' . ucfirst($user->gender ?? '') . '</small>' . ($user->dob ? '<br><small class="text-muted">' . $user->dob . '</small>' : ''),
+                'email_mobile' => '<strong>' . ($user->email ?? '') . '</strong><br><small class="text-muted">' . ($user->mobile ?? '') . '</small>',
+                'role' => '<span class="badge bg-label-' . ($user->role == 'admin' ? 'danger' : ($user->role == 'customer' ? 'info' : 'warning')) . '">' . ucfirst($user->role ?? '') . '</span>',
+                'kyc_status' => $kycStatus,
+                'address' => $address,
+                'status' => status($user->isactive),
+                'created_at' => date('D M,Y', strtotime($user->created_at)),
+            ];
+        });
+
+        return response()->json([
+            'draw' => intval($request->draw),
+            'recordsTotal' => $total,
+            'recordsFiltered' => $total,
+            'data' => $data,
+        ]);
     }
 } 

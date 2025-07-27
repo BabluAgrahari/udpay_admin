@@ -146,4 +146,57 @@ class BrandController extends Controller
             return $this->failMsg($e->getMessage());
         }
     }
+
+    public function datatable(Request $request)
+    {
+        $query = Brand::query();
+
+        // Filtering
+        if ($request->search && $request->search['value']) {
+            $search = $request->search['value'];
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+        if ($request->status !== null && $request->status !== '') {
+            $query->where('status', (int)$request->status);
+        }
+
+        $total = $query->count();
+
+        // Ordering
+        $columns = $request->columns;
+        if ($request->order && count($request->order)) {
+            foreach ($request->order as $order) {
+                $colIdx = $order['column'];
+                $colName = $columns[$colIdx]['data'];
+                $dir = $order['dir'];
+                $query->orderBy($colName, $dir);
+            }
+        }
+
+        // Pagination
+        $start = $request->start ?? 0;
+        $length = $request->length ?? 10;
+        $brands = $query->skip($start)->take($length)->get();
+
+        $data = $brands->map(function ($brand) {
+            return [
+                '_id' => $brand->_id,
+                'icon' => $brand->icon ? asset($brand->icon) : null,
+                'name' => $brand->name,
+                'slug_url' => $brand->slug_url,
+                'description' => $brand->description,
+                'status' => $brand->status,
+            ];
+        });
+
+        return response()->json([
+            'draw' => intval($request->draw),
+            'recordsTotal' => $total,
+            'recordsFiltered' => $total,
+            'data' => $data,
+        ]);
+    }
 } 

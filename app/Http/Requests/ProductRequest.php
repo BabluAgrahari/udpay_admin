@@ -28,7 +28,7 @@ class ProductRequest extends FormRequest
             'stock' => 'nullable|numeric|min:0',
             'mrp' => 'required|numeric|min:0',
             'sale_price' => 'required|numeric|min:0',
-            // 'gst' => 'required|numeric|min:0|max:100',
+            'gst' => 'required|numeric|min:0|max:100',
             'up' => 'nullable|numeric|min:0',
             'sv' => 'nullable|numeric|min:0',
             'offer' => 'nullable|boolean|in:0,1',

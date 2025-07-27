@@ -14,6 +14,7 @@ use App\Http\Controllers\CRM\StockController;
 use App\Http\Controllers\CRM\StockHistoryController;
 use App\Http\Controllers\CRM\UnitController;
 use App\Http\Controllers\CRM\UserController;
+<<<<<<< HEAD
 use App\Http\Controllers\CRM\WalletManagementController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
@@ -28,6 +29,16 @@ use Illuminate\Support\Facades\Route;
  * | be assigned to the "web" middleware group. Make something great!
  * |
  */
+=======
+use App\Http\Controllers\CRM\PickupAddressController;
+use App\Http\Controllers\CRM\SliderController;
+use App\Http\Controllers\CRM\WalletManagementController;
+use App\Http\Controllers\CRM\RolePermissionController;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Route;
+
+
+>>>>>>> 9cae8d43cbd99df28bc9af661b0d7feb4165cf42
 
 Route::group(['middleware' => 'guest'], function () {
     Route::get('login', [LoginController::class, 'index'])->name('login');
@@ -43,15 +54,105 @@ Route::group(['middleware' => 'guest'], function () {
 });
 
 Route::group(['prefix' => 'crm', 'middleware' => 'auth'], function () {
+
     Route::get('dashboard', [DashboardController::class, 'index']);
 
+<<<<<<< HEAD
     Route::resource('user', UserController::class);
+=======
+    Route::get('user/datatable-list', [UserController::class, 'datatable'])->middleware('permission:user');
+    Route::resource('user', UserController::class)->middleware('permission:user');
+    Route::get('user/{id}/kyc', [UserController::class, 'kyc'])->middleware('permission:user');
+    Route::post('user/{id}/kyc', [UserController::class, 'storeKyc'])->middleware('permission:user');
+    Route::post('user/{id}/kyc-status', [UserController::class, 'updateKycStatus'])->middleware('permission:user');
+    
+
+    // Panel User Routes
+    Route::get('panel-users/datatable-list', [PanelUserController::class, 'datatable'])->middleware('permission:panel_user');
+    Route::resource('panel-users', PanelUserController::class)->middleware('permission:panel_user');
+    Route::get('panel-users/{id}/change-password', [PanelUserController::class, 'changePassword'])->middleware('permission:panel_user');
+    Route::post('panel-users/{id}/change-password', [PanelUserController::class, 'updatePassword'])->middleware('permission:panel_user');
+    Route::post('panel-users/update-status', [PanelUserController::class, 'updateStatus'])->middleware('permission:panel_user');
+
+    Route::get('categories/datatable-list', [CategoryController::class, 'datatable'])->middleware('permission:category');
+    Route::resource('categories', CategoryController::class)->middleware('permission:category');
+    Route::post('categories/update-status', [CategoryController::class, 'updateStatus'])->middleware('permission:category');
+    Route::post('categories/update-short', [CategoryController::class, 'updateShortCode'])->middleware('permission:category');
+    
+    // Product Routes
+    Route::get('products/datatable-list', [ProductController::class, 'datatable'])->middleware('permission:product');
+    Route::resource('products', ProductController::class)->middleware('permission:product');
+    Route::post('products/update-status', [ProductController::class, 'updateStatus'])->middleware('permission:product');
+
+    // Brand Routes
+    Route::get('brands/datatable-list', [BrandController::class, 'datatable'])->middleware('permission:brand');
+    Route::resource('brands', BrandController::class)->middleware('permission:brand');
+    Route::post('brands/update-status', [BrandController::class, 'updateStatus'])->middleware('permission:brand');
+   
+    // Unit Routes
+    Route::get('units/datatable-list', [UnitController::class, 'datatable'])->middleware('permission:unit');
+    Route::resource('units', UnitController::class)->middleware('permission:unit');
+    Route::post('units/update-status', [UnitController::class, 'updateStatus'])->middleware('permission:unit');
+
+    // Pickup Address Routes
+    Route::get('pickup-addresses/datatable-list', [PickupAddressController::class, 'datatable'])->middleware('permission:pickup_address');
+    Route::get('pickup-addresses/get-by-type', [PickupAddressController::class, 'getByType'])->middleware('permission:pickup_address');
+    Route::resource('pickup-addresses', PickupAddressController::class)->middleware('permission:pickup_address');
+    Route::post('pickup-addresses/update-status', [PickupAddressController::class, 'updateStatus'])->middleware('permission:pickup_address');
+
+    // Order Routes
+    Route::get('order', [OrderController::class, 'index'])->middleware('permission:order');
+    Route::get('orders/datatable-list', [OrderController::class, 'datatable'])->middleware('permission:order');
+    Route::get('orders/ship/{id}', [OrderController::class, 'ship'])->middleware('permission:order');
+    Route::post('orders/ship', [OrderController::class, 'saveShipment'])->middleware('permission:order');
+    Route::get('orders/invoice/{id}', [OrderController::class, 'downloadInvoice'])->middleware('permission:order');
+    Route::post('orders/push-to-courier/{id}', [OrderController::class, 'pushToCourier'])->middleware('permission:order');
+    Route::get('orders/insert-test-data', [OrderController::class, 'insertTestData'])->middleware('permission:order');
+
+    // Stock History Routes
+    Route::get('stock-history/datatable-list', [StockHistoryController::class, 'datatable'])->middleware('permission:stock_history');
+    Route::get('stock-history', [StockHistoryController::class, 'index'])->middleware('permission:stock_history');
+    Route::get('stock-history/create', [StockHistoryController::class, 'create'])->name('stock-history.create')->middleware('permission:stock_history');
+    Route::post('stock-history', [StockHistoryController::class, 'store'])->name('stock-history.store')->middleware('permission:stock_history');
+    
+
+    // Wallet Management
+    Route::prefix('wallet')->group(function () {
+        Route::get('/transfer', [WalletManagementController::class, 'index'])->middleware('permission:transfer_money_to_admin');
+        Route::post('/transfer', [WalletManagementController::class, 'store'])->middleware('permission:transfer_money_to_admin');
+        Route::get('/get-admin-wallet', [WalletManagementController::class, 'getAdminWallet'])->middleware('permission:transfer_money_to_admin');
+
+        Route::get('/history', [WalletManagementController::class, 'history'])->middleware('permission:transfer_history');
+        Route::get('/transaction-details', [WalletManagementController::class, 'getTransactionDetails'])->middleware('permission:transfer_history');
+        
+        // User Transfer Routes
+        Route::get('/user-transfer', [WalletManagementController::class, 'userTransferIndex'])->middleware('permission:transfer_money_to_user');
+        Route::post('/user-transfer', [WalletManagementController::class, 'userTransfer'])->middleware('permission:transfer_money_to_user');
+       
+        Route::get('/get-user-details', [WalletManagementController::class, 'getUserDetails'])->middleware('permission:transfer_money_to_user | transfer_money_to_user_to_user');
+        Route::get('/get-user-wallet', [WalletManagementController::class, 'getUserWallet'])->middleware('permission:transfer_money_to_user | transfer_money_to_user_to_user');
+
+        // User to User Transfer Routes
+        Route::get('/user-to-user-transfer', [WalletManagementController::class, 'userToUserTransferIndex'])->middleware('permission:transfer_money_to_user_to_user');
+        Route::post('/user-to-user-transfer', [WalletManagementController::class, 'userToUserTransfer'])->middleware('permission:transfer_money_to_user_to_user');
+    });
+
+    Route::get('wallet/history/datatable-list', [WalletManagementController::class, 'datatable'])->middleware('permission:transfer_history');
+
+    // Slider Module
+    Route::resource('slider',SliderController::class)->middleware('permission:slider');
+    Route::post('slider/{slider}/status', [SliderController::class, 'updateStatus'])->middleware('permission:slider');
+
+    Route::resource('role-permission', RolePermissionController::class)->middleware('can:isSuperAdmin');
+    Route::post('save-module-permission', [RolePermissionController::class, 'saveModulePermission'])->middleware('can:isSuperAdmin');
+>>>>>>> 9cae8d43cbd99df28bc9af661b0d7feb4165cf42
 
     // KYC Management Routes
     Route::get('user/{id}/kyc', [UserController::class, 'kyc']);
     Route::post('user/{id}/kyc', [UserController::class, 'storeKyc']);
     Route::post('user/{id}/kyc-status', [UserController::class, 'updateKycStatus']);
 
+<<<<<<< HEAD
     // Panel User Routes
     Route::resource('panel-users', PanelUserController::class)->middleware('can:isSuperAdmin');
     Route::get('panel-users/{id}/change-password', [PanelUserController::class, 'changePassword'])->middleware('can:isSuperAdmin');
@@ -69,11 +170,14 @@ Route::group(['prefix' => 'crm', 'middleware' => 'auth'], function () {
     // Route::post('save-webhook', [AccountSettingController::class, 'saveWebhook']);
     // Route::post('reset-key', [AccountSettingController::class, 'resetKey']);
 
+=======
+    Route::resource('profile', ProfileController::class);
+>>>>>>> 9cae8d43cbd99df28bc9af661b0d7feb4165cf42
     Route::resource('setting', SettingController::class);
     Route::get('reset-password', [SettingController::class, 'resetPassword']);
     Route::post('reset-password-save', [SettingController::class, 'saveResetPassword']);
-
     Route::get('logout', [LoginController::class, 'logout']);
+<<<<<<< HEAD
 
     Route::get('categories/datatable-list', [CategoryController::class, 'datatable']);
     Route::resource('categories', CategoryController::class);
@@ -118,10 +222,26 @@ Route::group(['prefix' => 'crm', 'middleware' => 'auth'], function () {
         Route::get('/user-to-user-transfer', [WalletManagementController::class, 'userToUserTransferIndex'])->middleware('can:isAdmin');
         Route::post('/user-to-user-transfer', [WalletManagementController::class, 'userToUserTransfer'])->middleware('can:isAdmin');
     });
+=======
+>>>>>>> 9cae8d43cbd99df28bc9af661b0d7feb4165cf42
 });
+
+
+<<<<<<< HEAD
+=======
+
+
+
+
+
+
+
+
+
 
 Route::get('logs', [\Rap2hpoutre\LaravelLogViewer\LogViewerController::class, 'index']);
 
+>>>>>>> 9cae8d43cbd99df28bc9af661b0d7feb4165cf42
 Route::get('/optimize', function () {
     Artisan::call('config:cache');
     Artisan::call('route:cache');

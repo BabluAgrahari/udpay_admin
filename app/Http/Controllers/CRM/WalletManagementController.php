@@ -89,30 +89,7 @@ class WalletManagementController extends Controller
     public function history(Request $request)
     {
         try {
-            $query = WalletHistory::with(['user', 'actionBy'])->access();
-
-            // Apply filters
-            if ($request->filled('user_id')) {
-                $query->where('user_id', new ObjectId($request->user_id));
-            }
-
-            if ($request->filled('type')) {
-                $query->where('type', $request->type);
-            }
-
-            if ($request->filled('date_range')) {
-                $dateRange = $request->date_range;
-                $dates = explode('-', $dateRange);
-                $startDate = trim($dates[0]);
-                $endDate = trim($dates[1]);
-
-                $query->whereBetween('created', [
-                    date('Y-m-d 00:00:00', strtotime($startDate)),
-                    date('Y-m-d 23:59:59', strtotime($endDate))
-                ]);
-            }
-
-            $transactions = $query->orderBy('created', 'desc')->paginate(15);
+            
             $query = User::query();
             if (Auth::user()->role == 'supperadmin') {
                 $query->where('role', 'admin');
@@ -121,7 +98,7 @@ class WalletManagementController extends Controller
             }
             $users = $query->get();
 
-            return view('CRM.WalletManagement.history', compact('transactions', 'users'));
+            return view('CRM.WalletManagement.history', compact('users'));
         } catch (Exception $e) {
             return $this->failMsg($e->getMessage());
         }
@@ -343,5 +320,81 @@ class WalletManagementController extends Controller
         } catch (Exception $e) {
             return $this->failMsg('Something went wrong. Please try again.');
         }
+    }
+
+    public function datatable(Request $request)
+    {
+        $query = WalletHistory::with(['user', 'actionBy'])->access();
+
+        // Filtering
+        if ($request->filled('user_id')) {
+            $query->where('user_id', new ObjectId($request->user_id));
+        }
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
+        }
+        if ($request->filled('date_range')) {
+            $dateRange = $request->date_range;
+            $dates = explode('-', $dateRange);
+            $startDate = trim($dates[0]);
+            $endDate = trim($dates[1]);
+            $query->whereBetween('created', [
+                date('Y-m-d 00:00:00', strtotime($startDate)),
+                date('Y-m-d 23:59:59', strtotime($endDate))
+            ]);
+        }
+
+        $total = $query->count();
+
+        // Ordering
+        $columns = $request->columns;
+        if ($request->order && count($request->order)) {
+            foreach ($request->order as $order) {
+                $colIdx = $order['column'];
+                $colName = $columns[$colIdx]['data'];
+                $dir = $order['dir'];
+                if ($colName !== 'index' && $colName !== 'actions') {
+                    if ($colName === 'date') {
+                        $query->orderBy('created', $dir);
+                    } else {
+                        $query->orderBy($colName, $dir);
+                    }
+                }
+            }
+        }
+
+        // Pagination
+        $start = $request->start ?? 0;
+        $length = $request->length ?? 10;
+        $transactions = $query->skip($start)->take($length)->get();
+
+        $data = $transactions->map(function ($transaction, $key) use ($start) {
+            $user = $transaction->user;
+            $actionBy = $transaction->actionBy;
+            return [
+                'index' => $start + $key + 1,
+                '_id' => $transaction->_id,
+                'user' => $user ? ($user->first_name . ' ' . $user->last_name . '<br><small class="text-muted">' . $user->email . '</small>') : '<span class="text-muted">User not found</span>',
+                'type' => $transaction->type == 'credit' ? '<span class="badge bg-label-success">Credit</span>' : '<span class="badge bg-label-danger">Debit</span>',
+                'amount' => '<strong>' . mSign($transaction->amount) . '</strong>',
+                'closing_amount' => mSign($transaction->closing_amount),
+                'source' => match($transaction->source) {
+                    'admin_transfer' => '<span class="badge bg-label-primary">Admin Transfer</span>',
+                    'user_transfer' => '<span class="badge bg-label-warning">User Transfer</span>',
+                    'user_to_user_transfer' => '<span class="badge bg-label-secondary">User to User Transfer</span>',
+                    'system' => '<span class="badge bg-label-info">System</span>',
+                    default => '<span class="badge bg-label-info">' . ucwords(str_replace('_', ' ', $transaction->source)) . '</span>',
+                },
+                'action_by' => $actionBy ? ($actionBy->first_name . ' ' . $actionBy->last_name) : '<span class="text-muted">System</span>',
+                'date' => $transaction->created ? $transaction->dFormat($transaction->created) : 'N/A',
+            ];
+        });
+
+        return response()->json([
+            'draw' => intval($request->draw),
+            'recordsTotal' => $total,
+            'recordsFiltered' => $total,
+            'data' => $data,
+        ]);
     }
 }

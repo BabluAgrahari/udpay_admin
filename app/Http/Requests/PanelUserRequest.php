@@ -15,11 +15,7 @@ class PanelUserRequest extends FormRequest
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
+  
     public function rules(): array
     {
         $userId = $this->route('panel_user');
@@ -41,7 +37,7 @@ class PanelUserRequest extends FormRequest
             'last_name' => 'required|string|max:100',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:6|max:255',
-            'role' => 'required|string|in:admin,vendor',
+            'role_id' => 'required|string',
             'address' => 'nullable|string|max:255',
             'city' => 'nullable|string|max:100',
             'state' => 'nullable|string|max:100',
@@ -58,7 +54,7 @@ class PanelUserRequest extends FormRequest
         return [
             'first_name' => 'required|string|max:100',
             'last_name' => 'required|string|max:100',
-            'role' => 'required|string|in:admin,vendor',
+            'role_id' => 'required|string',
             'address' => 'nullable|string|max:255',
             'city' => 'nullable|string|max:100',
             'state' => 'nullable|string|max:100',

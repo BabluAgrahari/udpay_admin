@@ -4,6 +4,7 @@ namespace App\Http\Controllers\CRM;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PanelUserRequest;
+use App\Models\Role;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -19,30 +20,7 @@ class PanelUserController extends Controller
     public function index(Request $request)
     {
         try {
-            $perPage = $request->perPage ?? config('global.perPage', 10);
-            $query = User::whereIn('role', ['admin', 'vendor']);
-
-            // Apply search filter
-            if ($request->has('search')) {
-                $search = $request->search;
-                $query->where(function ($q) use ($search) {
-                    $q->where('first_name', 'like', "%{$search}%")
-                        ->orWhere('last_name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%");
-                });
-            }
-
-            // Apply role filter
-            if ($request->has('role') && in_array($request->role, ['admin', 'vendor'])) {
-                $query->where('role', $request->role);
-            }
-
-            // Apply status filter
-            if ($request->has('status')) {
-                $query->where('isactive', $request->status);
-            }
-
-            $data['users'] = $query->orderBy('created', 'desc')->paginate($perPage);
+            $data['roles'] = Role::all();
             return view('CRM.PanelUser.index', $data);
         } catch (Exception $e) {
             return $this->failRes($e->getMessage());
@@ -55,7 +33,8 @@ class PanelUserController extends Controller
     public function create()
     {
         try {
-            return view('CRM.PanelUser.create');
+            $data['roles'] = Role::all();
+            return view('CRM.PanelUser.create', $data);
         } catch (Exception $e) {
             return $this->failRes($e->getMessage());
         }
@@ -72,7 +51,7 @@ class PanelUserController extends Controller
             $user->last_name = $request->last_name;
             $user->email = $request->email;
             $user->password = Hash::make($request->password);
-            $user->role = $request->role;
+            $user->role_id = $request->role_id;
             $user->address = $request->address;
             $user->city = $request->city;
             $user->state = $request->state;
@@ -117,8 +96,9 @@ class PanelUserController extends Controller
     public function edit($id)
     {
         try {
-            $user = User::whereIn('role', ['admin', 'vendor'])->findOrFail($id);
-            return view('CRM.PanelUser.edit', compact('user'));
+            $data['user'] = User::whereIn('role', ['admin', 'vendor'])->findOrFail($id);
+            $data['roles'] = Role::all();
+            return view('CRM.PanelUser.edit', $data);
         } catch (Exception $e) {
             return $this->failRes($e->getMessage());
         }
@@ -134,7 +114,7 @@ class PanelUserController extends Controller
             
             $user->first_name = $request->first_name;
             $user->last_name = $request->last_name;
-            $user->role = $request->role;
+            $user->role_id = $request->role_id;
             $user->address = $request->address;
             $user->city = $request->city;
             $user->state = $request->state;
@@ -260,5 +240,73 @@ class PanelUserController extends Controller
         } catch (Exception $e) {
             return $this->failMsg($e->getMessage());
         }
+    }
+
+    public function datatable(Request $request)
+    {
+        $query = User::with('roleTable')->whereNotIn('role', ['supperadmin', 'customer']);
+
+        // Filtering
+        if ($request->search) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('first_name', 'like', "%{$search}%")
+                  ->orWhere('last_name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+        if (!empty($request->role)) {
+            $query->where('role_id', $request->role);
+        }
+        if ($request->status || $request->status == 0 && $request->status !== null) {
+            $query->where('isactive', (int)$request->status);
+        }
+
+        $total = $query->count();
+
+        // Ordering
+        $columns = $request->columns;
+        if ($request->order && count($request->order)) {
+            foreach ($request->order as $order) {
+                $colIdx = $order['column'];
+                $colName = $columns[$colIdx]['data'];
+                $dir = $order['dir'];
+                if ($colName !== 'index' && $colName !== 'actions') {
+                    $query->orderBy($colName, $dir);
+                }
+            }
+        }
+
+        // Pagination
+        $start = $request->start ?? 0;
+        $length = $request->length ?? 10;
+        $users = $query->skip($start)->take($length)->get();
+
+        $data = $users->map(function ($user, $key) use ($start) {
+            $profile = $user->profile_pic ? '<img src="' . asset($user->profile_pic) . '" alt="Profile" class="rounded-circle" width="40" height="40">'
+                : '<img src="' . asset('assets/img/avatars/1.png') . '" alt="Default Profile" class="rounded-circle" width="40" height="40">';
+            $address = $user->address ? ($user->address . ', ' . $user->city . ', ' . $user->state . ' ' . $user->zip_code) : '<span class="text-muted">No address</span>';
+            $statusSwitch = '<div class="form-check form-switch">'
+                . '<input class="form-check-input status-switch" type="checkbox" data-id="' . $user->_id . '" ' . ($user->isactive ? 'checked' : '') . '>'
+                . '</div>';
+            return [
+                'index' => $start + $key + 1,
+                '_id' => $user->_id,
+                'profile' => $profile,
+                'name' => '<strong>' . $user->first_name . ' ' . $user->last_name . '</strong>',
+                'email' => $user->email,
+                'role' => '<span class="badge bg-label-info">' . ucwords(str_replace('_', ' ', $user->roleTable->role ?? '')) . '</span>',
+                'address' => $address,
+                'status' => $statusSwitch,
+                'created_at' => $user->dFormat($user->created),
+            ];
+        });
+
+        return response()->json([
+            'draw' => intval($request->draw),
+            'recordsTotal' => $total,
+            'recordsFiltered' => $total,
+            'data' => $data,
+        ]);
     }
 } 

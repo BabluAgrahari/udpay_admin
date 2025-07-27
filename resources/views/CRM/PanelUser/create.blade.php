@@ -58,10 +58,18 @@
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label class="form-label">Role <span class="text-danger">*</span></label>
+<<<<<<< HEAD
                             <select class="form-select" name="role" id="role" required>
                                 <option value="">Select Role</option>
                                 <option value="admin">Admin</option>
                                 <option value="vendor">Vendor</option>
+=======
+                            <select class="form-select" name="role_id" id="role_id" required>
+                                <option value="">Select Role</option>
+                                @foreach ($roles as $role)
+                                    <option value="{{ $role->_id }}">{{ ucwords(str_replace('_', ' ', $role->role)) }}</option>
+                                @endforeach
+>>>>>>> 9cae8d43cbd99df28bc9af661b0d7feb4165cf42
                             </select>
                             <span class="text-danger" id="role_msg"></span>
                         </div>

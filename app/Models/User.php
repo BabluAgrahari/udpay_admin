@@ -10,6 +10,11 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use MongoDB\Laravel\Auth\User as Authenticatable;
 use MongoDB\Laravel\Eloquent\Model;
+<<<<<<< HEAD
+=======
+use App\Casts\ObjectIdCast;
+use Illuminate\Support\Facades\Auth;
+>>>>>>> 9cae8d43cbd99df28bc9af661b0d7feb4165cf42
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject
@@ -33,6 +38,10 @@ class User extends Authenticatable implements JWTSubject
         'email',
         'password',
         'role',
+<<<<<<< HEAD
+=======
+        'role_id',
+>>>>>>> 9cae8d43cbd99df28bc9af661b0d7feb4165cf42
         'restricted',
         'uflag',
         'royalty',
@@ -50,7 +59,12 @@ class User extends Authenticatable implements JWTSubject
         'city',
         'state',
         'zip_code',
+<<<<<<< HEAD
         'profile_pic'
+=======
+        'profile_pic',
+        'gender'
+>>>>>>> 9cae8d43cbd99df28bc9af661b0d7feb4165cf42
     ];
 
 
@@ -66,6 +80,10 @@ class User extends Authenticatable implements JWTSubject
         'email' => 'string',
         'password' => 'hashed',
         'role' => 'string',
+<<<<<<< HEAD
+=======
+        'role_id' => ObjectIdCast::class,
+>>>>>>> 9cae8d43cbd99df28bc9af661b0d7feb4165cf42
         'restricted' => 'integer',
         'uflag' => 'integer',
         'royalty' => 'integer',
@@ -84,6 +102,10 @@ class User extends Authenticatable implements JWTSubject
         'state' => 'string',
         'zip_code' => 'string',
         'profile_pic' => 'string',
+<<<<<<< HEAD
+=======
+        'gender' => 'string',
+>>>>>>> 9cae8d43cbd99df28bc9af661b0d7feb4165cf42
     ];
     /**
      * The attributes that should be hidden for serialization.
@@ -100,7 +122,11 @@ class User extends Authenticatable implements JWTSubject
      *
      * @var array<string, string>
      */
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> 9cae8d43cbd99df28bc9af661b0d7feb4165cf42
 
     public function getJWTIdentifier()
     {
@@ -145,4 +171,19 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasOne(UserKyc::class, 'user_id', '_id');
     }
+<<<<<<< HEAD
+=======
+
+    public function roleTable()
+    {
+        return $this->hasOne(Role::class, '_id', 'role_id');
+    }
+    public function hasPermissionTo($permission)
+    {
+        if(Auth::user()->role=='supperadmin')
+        return true;
+
+        return in_array($permission, $this->roleTable->permissions ?? []);
+    }
+>>>>>>> 9cae8d43cbd99df28bc9af661b0d7feb4165cf42
 }

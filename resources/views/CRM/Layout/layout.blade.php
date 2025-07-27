@@ -279,6 +279,20 @@
                 $('#' + selector).fadeOut('slow');
             }, delay)
         }
+
+
+        //alert msg toast
+        function alertMsgSwal(status, msg, delay = 1000, remove = false, id = false) {
+            Swal.fire({
+                icon: status ? 'success' : 'error',
+                title: status ? 'Success' : 'Error',
+                text: msg,
+                timer: delay,
+            });
+            setTimeout(function() {
+                $('#' + selector).fadeOut('slow');
+            }, delay)
+        }
         /*end single image preview*/
     </script>
 
@@ -323,6 +337,10 @@
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
     @stack('script')
+<<<<<<< HEAD
+=======
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+>>>>>>> 9cae8d43cbd99df28bc9af661b0d7feb4165cf42
 </body>
 
 </html>

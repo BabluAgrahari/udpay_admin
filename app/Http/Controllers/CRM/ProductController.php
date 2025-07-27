@@ -23,27 +23,6 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         try {
-            $query = Product::query();
-
-            // Apply filters
-            if ($request->has('search')) {
-                $search = $request->search;
-                $query->where(function ($q) use ($search) {
-                    $q->where('product_name', 'like', "%{$search}%")
-                        ->orWhere('sku', 'like', "%{$search}%")
-                        ->orWhere('hsn_code', 'like', "%{$search}%");
-                });
-            }
-
-            if ($request->has('status')) {
-                $query->where('status', $request->status);
-            }
-
-            if ($request->has('category_id')) {
-                $query->where('category_id', $request->category_id);
-            }
-
-            $data['products'] = $query->with('category')->paginate(10);
             $data['categories'] = Category::status()->get();
             $data['brands'] = Brand::status()->get();
 
@@ -358,5 +337,65 @@ class ProductController extends Controller
         } catch (Exception $e) {
             return $this->failMsg($e->getMessage());
         }
+    }
+
+    public function datatable(Request $request)
+    {
+        $query = Product::with('category');
+
+        // Filtering
+        if ($request->search) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('product_name', 'like', "%{$search}%")
+                  ->orWhere('sku', 'like', "%{$search}%")
+                  ->orWhere('hsn_code', 'like', "%{$search}%");
+            });
+        }
+        if (!empty($request->category_id)) {
+            $query->where('category_id', $request->category_id);
+        }
+        if (!empty($request->status)) {
+            $query->where('status', (int)$request->status);
+        }
+
+        $total = $query->count();
+
+        // Ordering
+        $columns = $request->columns;
+        if ($request->order && count($request->order)) {
+            foreach ($request->order as $order) {
+                $colIdx = $order['column'];
+                $colName = $columns[$colIdx]['data'];
+                $dir = $order['dir'];
+                $query->orderBy($colName, $dir);
+            }
+        }
+
+        // Pagination
+        $start = $request->start ?? 0;
+        $length = $request->length ?? 10;
+        $products = $query->skip($start)->take($length)->get();
+
+        $data = $products->map(function ($product) {
+            return [
+                '_id' => $product->_id,
+                'image' => ($product->images && count($product->images) > 0) ? asset($product->images[0]) : null,
+                'product_name' => $product->product_name,
+                'sku' => $product->sku,
+                'category' => $product->category->name ?? 'N/A',
+                'mrp' => number_format($product->mrp, 2),
+                'sale_price' => number_format($product->sale_price, 2),
+                'stock' => $product->stock,
+                'status' => $product->status,
+            ];
+        });
+
+        return response()->json([
+            'draw' => intval($request->draw),
+            'recordsTotal' => $total,
+            'recordsFiltered' => $total,
+            'data' => $data,
+        ]);
     }
 }
