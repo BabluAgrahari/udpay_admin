@@ -4,18 +4,22 @@
         background-color: #e8fadf !important;
         color: #4ba41b !important;
     }
+
     /* Global Select2 Styling */
     .select2-container--bootstrap-5 .select2-selection {
         min-height: 38px;
         border: 1px solid #d9dee3;
         border-radius: 0.375rem;
     }
+
     .select2-container--bootstrap-5 .select2-selection--single {
         padding: 0.375rem 0.75rem;
     }
+
     .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__rendered {
         padding: 0.375rem 0.75rem;
     }
+
     .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__choice {
         background-color: #696cff;
         border: none;
@@ -24,18 +28,22 @@
         padding: 0.25rem 0.5rem;
         margin: 0.25rem;
     }
+
     .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__choice__remove {
         color: #fff;
         margin-right: 0.5rem;
     }
+
     .select2-container--bootstrap-5 .select2-dropdown {
         border: 1px solid #d9dee3;
         border-radius: 0.375rem;
         box-shadow: 0 0.125rem 0.25rem rgba(161, 172, 184, 0.45);
     }
+
     .select2-container--bootstrap-5 .select2-results__option--highlighted {
         background-color: #696cff;
     }
+
     .select2-container--bootstrap-5 .select2-search__field {
         padding: 0.375rem 0.75rem;
         border: 1px solid #d9dee3;
@@ -86,25 +94,25 @@
 
     <!-- build:js assets/vendor/js/core.js -->
 
-    <script src="{{asset('')}}assets/vendor/libs/jquery/jquery.js"></script>
-    <script src="{{asset('')}}assets/vendor/libs/popper/popper.js"></script>
-    <script src="{{asset('')}}assets/vendor/js/bootstrap.js"></script>
-    <script src="{{asset('')}}assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-    <script src="{{asset('')}}assets/vendor/js/menu.js"></script>
+    <script src="{{ asset('') }}assets/vendor/libs/jquery/jquery.js"></script>
+    <script src="{{ asset('') }}assets/vendor/libs/popper/popper.js"></script>
+    <script src="{{ asset('') }}assets/vendor/js/bootstrap.js"></script>
+    <script src="{{ asset('') }}assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+    <script src="{{ asset('') }}assets/vendor/js/menu.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 
     <!-- endbuild -->
 
     <!-- Vendors JS -->
-    <script src="{{asset('')}}assets/vendor/libs/apex-charts/apexcharts.js"></script>
+    <script src="{{ asset('') }}assets/vendor/libs/apex-charts/apexcharts.js"></script>
 
     <!-- Main JS -->
-    <script src="{{asset('')}}assets/js/main.js"></script>
+    <script src="{{ asset('') }}assets/js/main.js"></script>
 
     <!-- Page JS -->
-    <script src="{{asset('')}}assets/js/dashboards-analytics.js"></script>
-    <script src="{{asset('')}}assets/js/ui-popover.js"></script>
+    <script src="{{ asset('') }}assets/js/dashboards-analytics.js"></script>
+    <script src="{{ asset('') }}assets/js/ui-popover.js"></script>
 
     <!-- Place this tag before closing body tag for github widget button. -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>
@@ -112,12 +120,14 @@
 
     <!-- Core CSS -->
     <link rel="stylesheet" href="{{ asset('assets/vendor/css/core.css') }}" class="template-customizer-core-css" />
-    <link rel="stylesheet" href="{{ asset('assets/vendor/css/theme-default.css') }}" class="template-customizer-theme-css" />
+    <link rel="stylesheet" href="{{ asset('assets/vendor/css/theme-default.css') }}"
+        class="template-customizer-theme-css" />
     <link rel="stylesheet" href="{{ asset('assets/css/demo.css') }}" />
 
     <!-- Select2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css"
+        rel="stylesheet" />
 
     <!-- Vendors CSS -->
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}" />
@@ -141,6 +151,36 @@
                 theme: 'bootstrap4'
             })
             $('[data-toggle="tooltip"]').tooltip();
+
+            // Ensure wallet management menu is open for wallet pages
+            if (window.location.pathname.includes('/wallet/')) {
+                $('#layout-menu .menu-item:has(.menu-link[href*="wallet"])').addClass('open');
+            }
+
+            // Ensure product management menu is open for product pages
+            if (window.location.pathname.includes('/products/') ||
+                window.location.pathname.includes('/categories/') ||
+                window.location.pathname.includes('/brands/') ||
+                window.location.pathname.includes('/units/') ||
+                window.location.pathname.includes('/stock-history')) {
+                $('#layout-menu .menu-item:has(.menu-link[href*="products"])').addClass('open');
+            }
+
+            // Handle internal wallet navigation
+            $(document).on('click', 'a[href*="wallet"]', function() {
+                setTimeout(function() {
+                    $('#layout-menu .menu-item:has(.menu-link[href*="wallet"])').addClass('open');
+                }, 100);
+            });
+
+            // Handle internal product navigation
+            $(document).on('click',
+                'a[href*="products"], a[href*="categories"], a[href*="brands"], a[href*="units"], a[href*="stock-history"]',
+                function() {
+                    setTimeout(function() {
+                        $('#layout-menu .menu-item:has(.menu-link[href*="products"])').addClass('open');
+                    }, 100);
+                });
         });
 
         //popover
@@ -156,7 +196,8 @@
                     'Last 7 Days': [moment().subtract(6, 'days'), moment()],
                     'Last 30 Days': [moment().subtract(29, 'days'), moment()],
                     'This Month': [moment().startOf('month'), moment().endOf('month')],
-                    'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+                    'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf(
+                        'month')],
                     'All Time': ['01/01/2023', moment()],
                 },
                 // startDate: moment().subtract(365, 'days'),
@@ -242,7 +283,7 @@
     </script>
 
     @stack('modal')
-    @stack('script')
+
 
     <!-- Core JS -->
     <script src="{{ asset('assets/vendor/libs/jquery/jquery.js') }}"></script>
@@ -263,7 +304,7 @@
             $('.select2').each(function() {
                 const $element = $(this);
                 const isMultiple = $element.prop('multiple');
-                
+
                 $element.select2({
                     theme: 'bootstrap-5',
                     width: '100%',
@@ -276,6 +317,12 @@
         });
     </script>
 
+    <!-- DataTables CSS/JS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" />
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+    @stack('script')
 </body>
 
 </html>

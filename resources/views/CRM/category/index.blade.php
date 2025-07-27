@@ -18,26 +18,22 @@
             <div id="message"></div>
             
             <!-- Filter Section -->
-            <form action="{{ url('crm/categories') }}" method="GET" class="mb-4">
+            <form id="filterForm" action="javascript:void(0);" class="mb-4">
                 <div class="row">
                     <div class="col-md-3">
                         <div class="form-group">
                             <label class="form-label">Search</label>
-                            <input type="text" 
-                                   name="search" 
-                                   class="form-control" 
-                                   value="{{ request('search') }}" 
-                                   placeholder="Search by name or description">
+                            <input type="text" name="search" id="search" class="form-control form-control-sm" placeholder="Search by name or description">
                         </div>
                     </div>
                     
                     <div class="col-md-3">
                         <div class="form-group">
                             <label class="form-label">Status</label>
-                            <select name="status" class="form-select">
+                            <select name="status" id="status" class="form-select form-select-sm">
                                 <option value="">All</option>
-                                <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>Active</option>
-                                <option value="0" {{ request('status') == '0' ? 'selected' : '' }}>Inactive</option>
+                                <option value="1">Active</option>
+                                <option value="0">Inactive</option>
                             </select>
                         </div>
                     </div>
@@ -45,13 +41,10 @@
                     <div class="col-md-3">
                         <div class="form-group">
                             <label class="form-label">Parent Category</label>
-                            <select name="parent_id" class="form-select">
+                            <select name="parent_id" id="parent_id" class="form-select form-select-sm">
                                 <option value="">All</option>
                                 @foreach($parentCategories as $parent)
-                                    <option value="{{ $parent->_id }}" 
-                                            {{ request('parent_id') == $parent->_id ? 'selected' : '' }}>
-                                        {{ $parent->name }}
-                                    </option>
+                                    <option value="{{ $parent->_id }}">{{ $parent->name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -61,12 +54,12 @@
                         <div class="form-group">
                             <label class="form-label">&nbsp;</label>
                             <div>
-                                <button type="submit" class="btn btn-primary">
+                                <button type="submit" class="btn btn-primary btn-sm">
                                     <i class='bx bx-search'></i> Filter
                                 </button>
-                                <a href="{{ url('crm/categories') }}" class="btn btn-secondary">
+                                <button type="button" id="resetBtn" class="btn btn-secondary btn-sm">
                                     <i class='bx bx-reset'></i> Reset
-                                </a>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -74,86 +67,20 @@
             </form>
 
             <!-- Table Section -->
-            <div class="table-responsive">
-                <table class="table table-bordered table-striped">
-                    <thead>
-                        <tr>
-                            <th>Icon</th>
-                            <th>Name</th>
-                            <th>Short</th>
-                            <th>Parent</th>
-                            <th>Status</th>
-                            <th>Labels</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($categories as $category)
-                            <tr>
-                                <td>
-                                    @if($category->icon)
-                                        <img src="{{ $category->icon }}" alt="Category Icon" class="img-thumbnail" style="max-height: 50px;">
-                                    @else
-                                        <span class="text-muted">No icon</span>
-                                    @endif
-                                </td>
-                                <td>{{ $category->name }}</td>
-                                <td>
-                                    <div class="input-group input-group-sm">
-                                        <input type="text" 
-                                               class="form-control short-code" 
-                                               value="{{ $category->short }}" 
-                                               data-id="{{ $category->_id }}"
-                                               placeholder="Enter short code">
-                                        <button class="btn btn-outline-primary update-short" 
-                                                type="button"
-                                                data-id="{{ $category->_id }}">
-                                            <i class='bx bx-save'></i>
-                                        </button>
-                                    </div>
-                                </td>
-                                <td>{{ $category->parent ? $category->parent->name : 'None' }}</td>
-                                <td>
-                                    <div class="form-check form-switch">
-                                        <input type="checkbox" 
-                                               class="form-check-input status-toggle" 
-                                               id="status_{{ $category->_id }}" 
-                                               data-id="{{ $category->_id }}"
-                                               {{ $category->status ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="status_{{ $category->_id }}"></label>
-                                    </div>
-                                </td>
-                                <td>
-                                    @if($category->labels)
-                                        @foreach($category->labels as $label)
-                                            <span class="badge bg-label-info">{{ $label }}</span>
-                                        @endforeach
-                                    @endif
-                                </td>
-                                <td>
-                                    <a href="{{ url('crm/categories/'.$category->_id.'/edit') }}" 
-                                       class="btn btn-sm btn-icon btn-outline-primary">
-                                        <i class='bx bx-edit'></i>
-                                    </a>
-                                    <button type="button" 
-                                            class="btn btn-sm btn-icon btn-outline-danger delete-category" 
-                                            data-id="{{ $category->_id }}">
-                                        <i class='bx bx-trash'></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="7" class="text-center">No categories found.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-            
-            <div class="mt-3">
-                {{ $categories->links() }}
-            </div>
+            <table id="categoriesTable" class="table table-hover w-100">
+                <thead>
+                    <tr>
+                        <th>Icon</th>
+                        <th>Name</th>
+                        <th>Short</th>
+                        <th>Parent</th>
+                        <th>Status</th>
+                        <th>Labels</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </div>
     </div>
 </div>
@@ -162,8 +89,58 @@
 @push('script')
 <script>
 $(document).ready(function() {
-    // Status toggle functionality
-    $('.status-toggle').change(function() {
+
+    var table = $('#categoriesTable').DataTable({
+        processing: true,
+        serverSide: true,
+        searching: false,
+        pagingType: 'simple_numbers',
+        ajax: {
+            url: '{{ url('crm/categories/datatable-list') }}',
+            data: function (d) {
+                d.search = $('#search').val();
+                d.status = $('#status').val();
+                d.parent_id = $('#parent_id').val();
+            }
+        },
+        columns: [
+            { data: 'icon', name: 'icon', orderable: false, searchable: false, render: function(data) {
+                return data ? `<img src="${data}" class="img-thumbnail" style="max-height:50px;">` : '<span class="text-muted">No icon</span>';
+            }},
+            { data: 'name', name: 'name' },
+            { data: 'short', name: 'short', render: function(data, type, row) {
+                return `<div class="input-group input-group-sm"><input type="text" class="form-control short-code" value="${data ?? ''}" data-id="${row._id}" placeholder="Enter short code"><button class="btn btn-outline-primary update-short" type="button" data-id="${row._id}"><i class='bx bx-save'></i></button></div>`;
+            }},
+            { data: 'parent_name', name: 'parent_name' },
+            { data: 'status', name: 'status', render: function(data, type, row) {
+                return `<div class="form-check form-switch"><input type="checkbox" class="form-check-input status-toggle" data-id="${row._id}" ${data ? 'checked' : ''}></div>`;
+            }},
+            { data: 'labels', name: 'labels', render: function(data) {
+                if (!data) return '';
+                return data.map(label => `<span class="badge bg-label-info">${label}</span>`).join(' ');
+            }},
+            { data: '_id', name: 'actions', orderable: false, searchable: false, render: function(data, type, row) {
+                return `<a href="${baseUrl}/crm/categories/${data}/edit" class="btn btn-sm btn-icon btn-outline-primary"><i class='bx bx-edit'></i></a> <button type="button" class="btn btn-sm btn-icon btn-outline-danger delete-category" data-id="${data}"><i class='bx bx-trash'></i></button>`;
+            }}
+        ],
+        order: [[1, 'asc']],
+        lengthMenu: [10, 25, 50, 100,500],
+        pageLength: 10,
+        scrollX: false,
+    });
+
+    // Filter form
+    $('#filterForm').on('submit', function(e) {
+        e.preventDefault();
+        table.ajax.reload();
+    });
+    $('#resetBtn').on('click', function() {
+        $('#filterForm')[0].reset();
+        table.ajax.reload();
+    });
+
+    // Delegate status toggle, short code update, and delete actions
+    $('#categoriesTable').on('change', '.status-toggle', function() {
         const categoryId = $(this).data('id');
         const status = $(this).prop('checked') ? 1 : 0;
         const $toggle = $(this);
@@ -199,9 +176,7 @@ $(document).ready(function() {
             }
         });
     });
-
-    // Short code update functionality
-    $('.update-short').click(function() {
+    $('#categoriesTable').on('click', '.update-short', function() {
         const categoryId = $(this).data('id');
         const $input = $(this).closest('.input-group').find('.short-code');
         const shortCode = $input.val();
@@ -237,14 +212,7 @@ $(document).ready(function() {
             }
         });
     });
-
-    // Store original short code value
-    $('.short-code').each(function() {
-        $(this).data('original-value', $(this).val());
-    });
-
-    // Delete functionality
-    $('.delete-category').click(function() {
+    $('#categoriesTable').on('click', '.delete-category', function() {
         const categoryId = $(this).data('id');
         const $row = $(this).closest('tr');
         
@@ -283,5 +251,6 @@ $(document).ready(function() {
         }
     });
 });
+var baseUrl = '{{ url('') }}';
 </script>
 @endpush

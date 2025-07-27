@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\BaseModel;
+use App\Casts\ObjectIdCast;
 
 class Category extends BaseModel
 {
@@ -15,12 +16,21 @@ class Category extends BaseModel
         'status',
         'parent_id',
         'user_id',
-        'labels'
+        'labels',
+        'meta_title',
+        'meta_keyword',
+        'meta_description',
+        'user_id'
     ];
 
     protected $casts = [
+        'parent_id' => ObjectIdCast::class,
+        'user_id' => ObjectIdCast::class,
         'labels' => 'array',
-        'status' => 'integer'
+        'status' => 'integer',
+        'meta_title' => 'string',
+        'meta_keyword' => 'string',
+        'meta_description' => 'string'
     ];
 
     // Relationship with parent category

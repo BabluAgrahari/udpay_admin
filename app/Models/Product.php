@@ -3,19 +3,21 @@
 namespace App\Models;
 
 use App\Models\BaseModel;
+use App\Casts\ObjectIdCast;
 
 class Product extends BaseModel
 {
     protected $fillable = [
         'category_id',
         'brand_id',
+        'unit_id',
         'product_name',
         'slug_url',
         'sku',
         'hsn_code',
         'mrp',
         'sale_price',
-        'cgst',
+        'gst',
         'up',
         'sv',
         'offer',
@@ -33,22 +35,39 @@ class Product extends BaseModel
         'status',
         'is_combo',
         'product_ids',
-        'is_variant'
+        'is_variant',
+        'bonus_point'
     ];
 
     protected $casts = [
+        'product_name' => 'string',
+        'slug_url' => 'string',
+        'sku' => 'string',
+        'hsn_code' => 'string',
+        'unit_id' => ObjectIdCast::class,
+        'brand_id' => ObjectIdCast::class,
+        'category_id' => ObjectIdCast::class,
+        'short_description' => 'string',
+        'description' => 'string',
+        'images' => 'array',
+        'thumbnail' => 'string',
+        'meta_title' => 'string',
+        'meta_keyword' => 'string',
+        'meta_description' => 'string',
         'mrp' => 'float',
         'sale_price' => 'float',
-        'cgst' => 'float',
+        'gst' => 'float',
         'up' => 'float',
         'sv' => 'float',
-        'offer' => 'boolean',
+        'offer' => 'integer',
         'offer_date' => 'datetime',
-        'mart_status' => 'boolean',
+        'mart_status' => 'integer',
         'images' => 'array',
-        'status' => 'boolean',
-        'is_combo' => 'boolean',
-        'product_ids' => 'array'
+        'status' => 'integer',
+        'is_combo' => 'integer',
+        'product_ids' => 'array',
+        'is_variant' => 'integer',
+        'bonus_point' => 'float'
     ];
 
     public function category()
@@ -60,4 +79,4 @@ class Product extends BaseModel
     {
         return $this->hasMany(ProductVariant::class, 'product_id', '_id');
     }
-} 
+}

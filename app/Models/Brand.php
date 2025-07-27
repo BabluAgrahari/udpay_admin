@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Casts\ObjectIdCast;
 
 class Brand extends BaseModel
 {
@@ -11,10 +12,19 @@ class Brand extends BaseModel
         'slug_url',
         'description',
         'status',
-        'icon'
+        'icon',
+        'meta_title',
+        'meta_keyword',
+        'meta_description',
+        'user_id',
+        'user_id'
     ];
 
     protected $casts = [
-        'status' => 'integer'
+        'status' => 'integer',
+        'meta_title' => 'string',
+        'meta_description' => 'string',
+        'user_id' => ObjectIdCast::class,
+        'meta_keyword' => 'string'
     ];
 } 

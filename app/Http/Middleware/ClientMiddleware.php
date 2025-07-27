@@ -6,7 +6,7 @@ use App\Traits\Response;
 use Closure;
 use Exception;
 use App\Models\AccountSetting;
-use App\Models\User;
+use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -39,11 +39,11 @@ class ClientMiddleware
 
     private function clientId($client_id)
     {
-        $user = User::with('Account')->Where('client_id', $client_id)->first();
-        if (empty($user->Account))
+        $customer = Customer::with('Account')->Where('client_id', $client_id)->first();
+        if (empty($customer->Account))
             return false;
 
-        Auth::login($user);
+        Auth::login($customer);
 
         return true;
     }
