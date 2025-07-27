@@ -77,6 +77,11 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasOne(UserKyc::class, 'user_id', '_id');
     }
 
+    public function userAddresses()
+    {
+        return $this->hasMany(UserAddress::class, 'user_id', 'id');
+    }
+
     public function roleTable()
     {
         return $this->hasOne(Role::class, '_id', 'role_id');

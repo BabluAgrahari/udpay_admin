@@ -4,6 +4,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Nutraoshadhi Web Html </title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- <link rel="icon" type="image/png" sizes="32x32" href="favicon.ico"> -->
   <!-- css -->
   <link rel="stylesheet" href="{{asset('front_assets')}}/css/plugins/slick.css">
@@ -15,6 +16,108 @@
   <link rel="stylesheet" href="{{asset('front_assets')}}/css/plugins/bootstrap.min.css">
   <link rel="stylesheet" href="{{asset('front_assets')}}/css/responsive.css">
   <link rel="stylesheet" href="{{asset('front_assets')}}/css/style.css">
+      <style>
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+        }
+        .success{
+          color:green;
+        }
+        .error{
+          color:red;
+        }
+
+        /* Snackbar Styles */
+        .snackbar {
+            visibility: hidden;
+            min-width: 300px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 16px;
+            position: fixed;
+            z-index: 9999;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: visibility 0.3s, opacity 0.3s;
+            opacity: 0;
+        }
+
+        .snackbar.show {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .snackbar.success {
+            background-color: #4CAF50;
+        }
+
+        .snackbar.error {
+            background-color: #f44336;
+        }
+
+        .snackbar.warning {
+            background-color: #ff9800;
+        }
+
+        .snackbar-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .snackbar-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            margin-left: 10px;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .snackbar-close:hover {
+            opacity: 0.8;
+        }
+
+        /* Loading spinner for cart operations */
+        .cart-loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 9998;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .cart-loading.show {
+            display: flex;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 <!--  -->
 </head>
 <body>
@@ -75,7 +178,7 @@
                                     <input type="text" id="searchInput" class="form-control" placeholder="Search..." />
                                 </div>
 
-                                <a href="cart.html" class="profile-icon"><i class="fa-solid fa-cart-shopping"></i></a>
+                                <a href="{{url('cart')}}" class="profile-icon header-cart"><span class="total-cart-count">{{total_cart_count()}}</span><i class="fa-solid fa-cart-shopping"></i></a>
                             </div>
                         </div>
                     </nav>
@@ -191,12 +294,44 @@
        </div>
      </div>
    </div>
+
+
+   <!-- Snackbar for cart messages -->
+   <div id="snackbar" class="snackbar">
+       <div class="snackbar-content">
+           <span id="snackbar-message"></span>
+           <button class="snackbar-close" onclick="closeSnackbar()">×</button>
+       </div>
+   </div>
+
+   <!-- Loading overlay for cart operations -->
+   <div class="cart-loading">
+       <div class="spinner"></div>
+   </div>
+
+   <div class="toast-container">
+    <div class="toast" id="myToast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <strong class="me-auto toast-title">Add To Cart</strong>
+          <!--   <small>Just now</small> -->
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            
+        </div>
+    </div>
+</div>
    <!-- js -->
+   <script type="text/javascript">
+     let base_url = "{{url('/')}}"
+     console.log('base_url ', base_url);
+   </script>
    <script src="{{asset('front_assets')}}/js/plugins/jquery.min.js"></script>
    <script src="{{asset('front_assets')}}/js/plugins/slick.min.js"></script>
    <script src="{{asset('front_assets')}}/js/plugins/bootstrap.js"></script>
    <script src="{{asset('front_assets')}}/js/plugins/bootstrap.min.js"></script>
    <script src="{{asset('front_assets')}}/js/custom.js"></script>
+   <script src="{{asset('front_assets')}}/js/scripts.js"></script>
    
    <script>
      // Open any popup
@@ -224,7 +359,43 @@
          }
        });
      });
+
+     // Snackbar Functions
+     function showSnackbar(message, type = 'success', duration = 3000) {
+         const snackbar = document.getElementById('snackbar');
+         const messageElement = document.getElementById('snackbar-message');
+         
+         messageElement.textContent = message;
+         snackbar.className = `snackbar ${type}`;
+         snackbar.classList.add('show');
+         
+         setTimeout(() => {
+             closeSnackbar();
+         }, duration);
+     }
+
+     function closeSnackbar() {
+         const snackbar = document.getElementById('snackbar');
+         snackbar.classList.remove('show');
+     }
+
+     function showCartLoading() {
+         const loading = document.querySelector('.cart-loading');
+         if (loading) {
+             loading.classList.add('show');
+         }
+     }
+
+     function hideCartLoading() {
+         const loading = document.querySelector('.cart-loading');
+         if (loading) {
+             loading.classList.remove('show');
+         }
+     }
+    
    </script>
+
+   @stack('scripts')
    
    </body>
    </html>
