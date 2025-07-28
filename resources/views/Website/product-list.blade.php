@@ -27,7 +27,7 @@
         <div class="col-lg-3 col-md-6">
             <div class="product-card">
                 <div class="product-image">
-                    <a href="{{url('detail')}}/{{$product->slug_url}}"><img src="{{ isValidImageUrl($product->product_image) ? $product->product_image : asset('front_assets') . '/images/product/5.jpg' }}" alt="img" class=""></a>
+                    <a href="{{url('detail')}}/{{$product->slug_url}}"><img src="{{ getImageWithFallback($product->product_image) }}" alt="img" class="" onerror="this.src='{{ asset('front_assets/images/no-image.svg') }}'"></a>
                      <p class="product-review"><i class="fa fa-star"></i> 3.25 (12 Reviews)</p>
                     <!-- <span class="discount-prod">10% OFF</span>
                     <span class="prod-wish"><i class="fa-regular fa-heart"></i></span> -->

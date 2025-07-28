@@ -273,6 +273,29 @@ if (!function_exists('isValidImageUrl')) {
     }
 }
 
+// Get image with fallback to no-image placeholder
+if (!function_exists('getImageWithFallback')) {
+    function getImageWithFallback($imageUrl, $placeholder = null) {
+        // If no image URL provided, return placeholder
+        if (empty($imageUrl)) {
+            return $placeholder ?? asset('front_assets/images/no-image.png');
+        }
+        
+        // If it's a valid URL, return it (we'll handle 404s with CSS/JS)
+        if (filter_var($imageUrl, FILTER_VALIDATE_URL) !== false) {
+            return $imageUrl;
+        }
+        
+        // If it's a relative path, check if file exists
+        if (file_exists(public_path($imageUrl))) {
+            return asset($imageUrl);
+        }
+        
+        // Return placeholder if image doesn't exist
+        return $placeholder ?? asset('front_assets/images/no-image.svg');
+    }
+}
+
 // if (!function_exists('walletCredit')) {
 //     function walletCredit($userId, $amount, $remarks = null, $source = 'system', $actionBy = null)
 //     {
