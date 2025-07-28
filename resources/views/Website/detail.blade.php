@@ -748,3 +748,74 @@
     </div>
  </section>
  @endsection
+
+
+ @push('scripts')
+
+ <script>
+    // Open any popup
+    document.querySelectorAll(".openPopup").forEach(button => {
+      button.addEventListener("click", (e) => {
+        // Prevent default form submission if inside a form
+        e.preventDefault();
+  
+        const popupId = button.getAttribute("data-popup");
+        const popup = document.getElementById(popupId);
+        if (popup) popup.style.display = "flex";
+      });
+    });
+  
+    // Close any popup
+    document.querySelectorAll(".popup-overlay").forEach(popup => {
+      popup.querySelector(".close-btn").addEventListener("click", () => {
+        popup.style.display = "none";
+      });
+  
+      // Close when clicking outside the popup content
+      popup.addEventListener("click", (e) => {
+        if (e.target === popup) {
+          popup.style.display = "none";
+        }
+      });
+    });
+  </script>
+  <script>
+    const thumbSwiper = new Swiper(".thumb-slider", {
+      slidesPerView: 4,
+      spaceBetween: 10,
+      watchSlidesProgress: true,
+      loop: true,
+    });
+  
+    const mainSwiper = new Swiper(".main-slider", {
+      spaceBetween: 10,
+      loop: true,
+      thumbs: {
+        swiper: thumbSwiper,
+      },
+    });
+  </script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const quantityControls = document.querySelectorAll('.quantity');
+  
+    quantityControls.forEach(control => {
+      const minusBtn = control.querySelector('button:first-child');
+      const plusBtn = control.querySelector('button:last-child');
+      const input = control.querySelector('input');
+  
+      minusBtn.addEventListener('click', () => {
+        let currentValue = parseInt(input.value);
+        if (currentValue > 1) {
+          input.value = currentValue - 1;
+        }
+      });
+  
+      plusBtn.addEventListener('click', () => {
+        let currentValue = parseInt(input.value);
+        input.value = currentValue + 1;
+      });
+    });
+  });
+  </script>
+ @endpush

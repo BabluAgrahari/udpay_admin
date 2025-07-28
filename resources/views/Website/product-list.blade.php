@@ -40,7 +40,7 @@
                         <div class="price-mian">
                             <span class="price-throuth">₹{{ $product->mrp }}</span><span class="price-bg">₹{{ $product->product_sale_price }}</span>
                         </div>
-                        <a href="javascript:void(0)" class="thm-btn cart-btn">+</a>
+                        <a href="javascript:void(0)" data-id="{{$product->id}}" class="thm-btn cart-btn">+</a>
                     </div>
                 </div>
             </div>

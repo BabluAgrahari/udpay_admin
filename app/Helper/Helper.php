@@ -10,6 +10,15 @@ use App\Models\WalletHistory;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use MongoDB\BSON\ObjectId;
+use App\Models\Cart;
+use Illuminate\Support\Facades\Cookie;
+
+if (!function_exists('getCookieData')) {
+    function getCookieData($cookieName)
+    {
+        return Cookie::get($cookieName);
+    }
+}
 
 if (!function_exists('uniqCode')) {
     function uniqCode($lenght)
@@ -268,10 +277,71 @@ if (!function_exists('userWalletUpdate')) {
 
 //check a valid image url
 if (!function_exists('isValidImageUrl')) {
-    function isValidImageUrl($url) {
+    function isValidImageUrl($url)
+    {
         return filter_var($url, FILTER_VALIDATE_URL) !== false;
     }
 }
+if (!function_exists('viewCart')) {
+    function viewCart(Request $request)
+    {
+        $cartItems = [];
+
+        if ($request->user()) {
+            $cartItems = Cart::where('user_id', $request->user()->id)->get();
+        } else {
+            $cookieId = $request->cookie('cart_cookie_id');
+            if ($cookieId) {
+                $cartItems = Cart::where('cookie_id', $cookieId)->get();
+            }
+        }
+
+        return view('cart.index', compact('cartItems'));
+    }
+}
+
+if (!function_exists('cartCount')) {
+    function cartCount()
+    {
+        $cartCount = 0;
+
+        if (Auth::user()) {
+            $cartCount = Cart::where('user_id', Auth::user()->id)->sum('quantity');
+        } else {
+            $cookieId = Cookie::get('cart_cookie_id');
+            if ($cookieId) {
+                $cartCount = Cart::where('cart_cookie_id', $cookieId)->sum('quantity');
+            }
+        }
+        return (int)$cartCount;
+    }
+}
+
+
+if (!function_exists('total_cart_amount')) {
+    function total_cart_amount()
+    {
+        $totalAmount = 0;
+        if (auth()->user()) {
+            $userId = auth()->user()->id;
+            $totalAmount = DB::table('uni_cart')
+                ->join('uni_products', 'uni_cart.product_id', '=', 'uni_products.id')
+                ->where('uni_cart.user_id', $userId)
+                ->sum(DB::raw('uni_products.price * uni_cart.quantity'));
+        } else {
+            $cookieId = Cookie::get('cart_cookie_id'); // $request->cookie('');
+            if ($cookieId) {
+                $totalAmount = DB::table('uni_cart')
+                    ->join('uni_products', 'uni_cart.product_id', '=', 'uni_products.id')
+                    ->where('uni_cart.cart_cookie_id', $cookieId)
+                    ->sum(DB::raw('uni_products.price * uni_cart.quantity'));
+            }
+        }
+
+        return $totalAmount;
+    }
+}
+
 
 // Get image with fallback to no-image placeholder
 if (!function_exists('getImageWithFallback')) {
