@@ -28,7 +28,7 @@
         }
     }
     $data['featured_products'] = $featured;
-       $data['products'] = $array;
+    $data['products'] = $array;
 
         //    echo "<pre>";
         //    print_r($data['products']);

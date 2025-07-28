@@ -15,17 +15,28 @@
                         <div id="phone-step" class="signup-step active">
                             <form id="phone-form" method="POST" action="{{ url('signup/verify-phone') }}">
                                 @csrf
+
+                                <div class="form-group mb-3">
+                                    <label for="referral_id" class="form-label">Referral ID<span class="text-danger">
+                                            *</span></label>
+                                    <input type="text" class="form-control" id="referral_id" name="referral_id"
+                                        placeholder="Enter referral ID" value="{{ old('referral_id') }}" required>
+                                    <span class="text-danger error" id="referral_id_error"></span>
+                                    <small class="form-text text-muted">Enter your referral ID to continue</small>
+                                </div>
+
                                 <div class="form-group mb-3">
                                     <label for="mobile" class="form-label">Mobile Number *</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text">+91</span>
-                                        <input type="tel" class="form-control" id="mobile" name="mobile"
-                                            placeholder="Enter your mobile number" value="{{ old('mobile') }}"
-                                            maxlength="10" pattern="[0-9]{10}" required>
-                                    </div>
+
+                                    <input type="tel" class="form-control" id="mobile" name="mobile"
+                                        placeholder="Enter your mobile number" value="{{ old('mobile') }}" maxlength="10"
+                                        pattern="[0-9]{10}" required>
                                     <span class="text-danger error" id="mobile_error"></span>
                                     <small class="form-text text-muted">We'll send you a verification code</small>
                                 </div>
+
+
+
                                 <button type="submit" class="btn theme-btn w-100">Send Verification Code</button>
                             </form>
                         </div>
@@ -53,7 +64,8 @@
                                     <span class="text-danger error" id="otp_error"></span>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <button type="button" class="theme-link p-0 border-0 bg-transparent" id="resend-otp" disabled>
+                                    <button type="button" class="theme-link p-0 border-0 bg-transparent" id="resend-otp"
+                                        disabled>
                                         Resend Code (<span id="resend-timer">30</span>s)
                                     </button>
                                     <button type="button" class="theme-link p-0 border-0 bg-transparent" id="change-phone">
@@ -71,30 +83,27 @@
                                 @csrf
                                 <input type="hidden" name="mobile" id="reg-mobile">
                                 <input type="hidden" name="otp_verified" value="1">
+                                <input type="hidden" name="referral_id" id="reg-referral-id">
 
                                 <div class="form-group mb-3">
-                                    <label for="referral_id" class="form-label">Referral ID<span class="text-danger"> *</span></label>
-                                    <input type="text" class="form-control" id="referral_id" name="referral_id"
-                                        placeholder="Enter referral ID if any" value="{{ old('referral_id') }}">
-                                    <span class="text-danger error" id="referral_id_error"></span>
-                                </div>
-
-                                <div class="form-group mb-3">
-                                    <label for="full_name" class="form-label">Full Name<span class="text-danger"> *</span></label>
+                                    <label for="full_name" class="form-label">Full Name<span class="text-danger">
+                                            *</span></label>
                                     <input type="text" class="form-control" id="full_name" name="full_name"
                                         placeholder="Enter your full name" value="{{ old('full_name') }}" required>
                                     <span class="text-danger error" id="full_name_error"></span>
                                 </div>
 
                                 <div class="form-group mb-3">
-                                    <label for="email" class="form-label">Email Address<span class="text-danger"> *</span></label>
+                                    <label for="email" class="form-label">Email Address<span class="text-danger">
+                                            *</span></label>
                                     <input type="email" class="form-control" id="email" name="email"
                                         placeholder="Enter your email address" value="{{ old('email') }}" required>
                                     <span class="text-danger error" id="email_error"></span>
                                 </div>
 
                                 <div class="form-group mb-3">
-                                    <label for="password" class="form-label">Password<span class="text-danger"> *</span></label>
+                                    <label for="password" class="form-label">Password<span class="text-danger">
+                                            *</span></label>
                                     <input type="password" class="form-control" id="password" name="password"
                                         placeholder="Create a strong password" required>
                                     <span class="text-danger error" id="password_error"></span>
@@ -102,7 +111,8 @@
                                 </div>
 
                                 <div class="form-group mb-4">
-                                    <label for="confirm_password" class="form-label">Confirm Password<span class="text-danger"> *</span></label>
+                                    <label for="confirm_password" class="form-label">Confirm Password<span
+                                            class="text-danger"> *</span></label>
                                     <input type="password" class="form-control" id="confirm_password"
                                         name="confirm_password" placeholder="Confirm your password" required>
                                     <span class="text-danger error" id="confirm_password_error"></span>
@@ -195,10 +205,12 @@
             transition: width 0.3s ease;
             background: #006038;
         }
+
         .signup-progress .text-muted {
             color: #bdbdbd !important;
             font-weight: 500;
         }
+
         .signup-progress .step-active {
             color: #006038 !important;
             font-weight: 700;
@@ -303,10 +315,23 @@
                 $('#phone-form').on('submit', function(e) {
                     e.preventDefault();
                     var phone = $('#mobile').val();
+                    var referralId = $('#referral_id').val();
+
+                    // Clear previous errors
+                    $('#mobile_error').html('');
+                    $('#referral_id_error').html('');
+
+                    // Validate referral ID
+                    if (!referralId || referralId.trim() === '') {
+                        $('#referral_id_error').html('Referral ID is required');
+                        return;
+                    }
+
                     if (phone.length !== 10 || !/^\d+$/.test(phone)) {
                         $('#mobile_error').html('Please enter a valid 10-digit phone number');
                         return;
                     }
+
                     var submitBtn = $(this).find('button[type="submit"]');
                     var originalText = submitBtn.text();
                     submitBtn.text('Sending...').prop('disabled', true);
@@ -319,6 +344,7 @@
                             if (data.status) {
                                 $('#otp-mobile').val(phone);
                                 $('#reg-mobile').val(phone);
+                                $('#reg-referral-id').val(referralId);
                                 $('#display-phone').text('+91 ' + phone);
                                 showStep(2);
                                 startResendTimer();
@@ -429,7 +455,7 @@
                             }
                         },
                         error: function(xhr) {
-                            if (xhr.responseJSON?.errors) { 
+                            if (xhr.responseJSON?.errors) {
                                 $.each(xhr.responseJSON.errors, function(key, value) {
                                     $('#' + key + '_error').html(value[0]);
                                 });
@@ -531,7 +557,7 @@
                         </div>
                     `;
                     $('#messageError').html(alertHtml);
-                    
+
                     // Auto dismiss after 5 seconds
                     setTimeout(function() {
                         $('#messageError .alert').alert('close');

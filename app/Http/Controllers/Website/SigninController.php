@@ -50,8 +50,8 @@ class SigninController extends Controller
             if (isset($user->status) && $user->status != 1) {
                 return $this->failMsg('Your account is deactivated. Please contact support.');
             }
-
-            if (Auth::login($user, $request->has('remember'))) {
+            Auth::login($user);
+            if (Auth::check()) {
                 return $this->successMsg('Login successful!', ['redirect' => url('/dashboard')]);
             } else {
                 return $this->failMsg('Something went wrong. Please try again.');
