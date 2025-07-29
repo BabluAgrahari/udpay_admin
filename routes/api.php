@@ -48,14 +48,18 @@ use App\Http\Controllers\Api\CardServiceController;
 Route::get('download-invoice/{id}',[UserOrderController::class, 'downloadInvoice']);
 
 Route::controller(AuthController::class)->group(function () {
-    Route::post('login-with-email', 'emailLogin');
-    Route::post('login-with-uid', 'loginWithUserId');
-    Route::post('verify-login-otp', 'verifyOtp');
+    // Route::post('login-with-email', 'emailLogin');
+    // Route::post('login-with-uid', 'loginWithUserId');
+    // Route::post('verify-login-otp', 'verifyOtp');
     Route::post('forget-password-otp', 'forgetPassword');
     Route::post('verify-forget-otp', 'verifyFrogetOtp');
     Route::post('change-password', 'changePassword');
-    Route::post('resend-login-otp', 'resendOtp');
+    // Route::post('resend-login-otp', 'resendOtp');
     Route::post('media-link', 'social_media');
+
+    Route::post('send-otp', [AuthController::class, 'sendOtp']);
+    Route::post('verify-otp', [AuthController::class, 'verifyOtp']);
+    Route::post('resend-otp', [AuthController::class, 'resendOtp']);
 });
 
 
