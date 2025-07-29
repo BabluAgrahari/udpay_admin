@@ -292,6 +292,7 @@
                             </div>
                         </div>
                     </nav>
+                    @include('Website.Layout.login')
                     
                     <!-- <a href="#" class="thm-btn"><i class="fa-solid fa-circle-right"></i> <span>Appointment</span></a> -->
                     <div class="hamburger">
@@ -339,72 +340,7 @@
    <div id="back-top" class="back-top"><a href="#top"><i class="fa-solid fa-chevron-up"></i></a> </div>
    <!-- ----copyright end------- -->
     <!-- Popup Modal -->
-   <div id="login1" class="popup-overlay">
-     <div class="popup-content">
-       <button class="close-btn">&times;</button>
-       <div class="bg-popup">
-           <div class="row h-100 align-items-center">
-               <div class="col-6 h-100">
-                   <div class="back-image">
-                       <div class="login-image">
-                           <img src="{{asset('front_assets')}}/images/logo.png" alt="img" class="login-logo" />
-                       </div>
-                   </div>
-               </div>
-               <div class="col-6">
-                   <div class="login-box">
-                       <p class="skip-text">Skip</p>
-                       <h2 class="login-title">Login/Signup</h2>
-                       <form>
-                           <div class="form-group">
-                               <label>Enter your phone number</label>
-                               <input type="text" class="form-control" value="+91" placeholder="+91" />
-                           </div>
-                           <button data-popup="otp" class="openPopup thm-btn w-100">Continue</button>
-                       </form>
-                   </div>
-               </div>
-           </div>
-       </div>
-     </div>
-   </div>
-   <div id="otp" class="popup-overlay">
-     <div class="popup-content">
-       <button class="close-btn">&times;</button>
-       <div class="bg-popup">
-           <div class="row h-100 align-items-center">
-               <div class="col-6 h-100">
-                   <div class="back-image">
-                       <div class="login-image">
-                           <img src="{{asset('front_assets')}}/images/logo.png" alt="img" class="login-logo" />
-                       </div>
-                   </div>
-               </div>
-               <div class="col-6">
-                   <div class="login-box">
-                       <p class="skip-text">Skip</p>
-                        <h4 class="mb-2">Enter code</h4>
-                        <p class="mb-0">We have sent an OTP verification code to</p>
-                       <h6>+91-9874563210</h6>
-                       <form>
-                           <div class="">
-                               <div class="otp-inputs">
-                                   <input type="text" maxlength="1" class="otp-box" />
-                                   <input type="text" maxlength="1" class="otp-box" />
-                                   <input type="text" maxlength="1" class="otp-box" />
-                                   <input type="text" maxlength="1" class="otp-box" />
-                               </div>
-                           </div>
-                           <p>Didn’t get the OTP? Resend SMS in <strong class="text-black">00:20</strong></p>
-                           <button class="openPopup thm-btn w-100">Continue</button>
-                       </form>
-                   </div>
-               </div>
-           </div>
-       </div>
-     </div>
-   </div>
-
+  
 
    <!-- Snackbar for cart messages -->
    <div id="snackbar" class="snackbar">
@@ -431,6 +367,7 @@
         </div>
     </div>
 </div>
+
    <!-- js -->
    <script type="text/javascript">
      let base_url = "{{url('/')}}"
@@ -444,34 +381,6 @@
    <script src="{{asset('front_assets')}}/js/scripts.js"></script>
    
    <script>
-     // Open any popup
-     document.querySelectorAll(".openPopup").forEach(button => {
-       button.addEventListener("click", (e) => {
-         // Prevent default form submission if inside a form
-         e.preventDefault();
-   
-         const popupId = button.getAttribute("data-popup");
-         const popup = document.getElementById(popupId);
-         if (popup) popup.style.display = "flex";
-       });
-     });
-   
-     // Close any popup
-     document.querySelectorAll(".popup-overlay").forEach(popup => {
-       popup.querySelector(".close-btn").addEventListener("click", () => {
-         popup.style.display = "none";
-       });
-   
-       // Close when clicking outside the popup content
-       popup.addEventListener("click", (e) => {
-         if (e.target === popup) {
-           popup.style.display = "none";
-         }
-       });
-     });
-
-
-
      //for cart functio nality
      $(function () {
     $(document).on("click", ".cart-btn", function () {

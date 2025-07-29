@@ -6,6 +6,7 @@ use App\Http\Controllers\Website\ProductDetailController;
 use App\Http\Controllers\Website\CartController;
 use App\Http\Controllers\Website\CheckoutController;
 use App\Http\Controllers\Website\StaticPageController;
+use App\Http\Controllers\Website\AuthController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -36,6 +37,12 @@ Route::get('/faq', [StaticPageController::class, 'faq'])->name('faq');
 Route::get('/grievance-cell', [StaticPageController::class, 'grievanceCell'])->name('grievance.cell');
 Route::get('/track-order', [StaticPageController::class, 'trackOrder'])->name('track.order');
 Route::get('/compliance-documents', [StaticPageController::class, 'complianceDocuments'])->name('compliance.documents');
+
+// Auth Routes
+Route::post('/send-otp', [AuthController::class, 'sendOtp']);
+Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
+Route::post('/logout', [AuthController::class, 'logout']);
+Route::get('/check-auth', [AuthController::class, 'checkAuth']);
 
 Route::get('/sitemap.xml', function () {
     return response()->view('sitemap')->header('Content-Type', 'text/xml');
