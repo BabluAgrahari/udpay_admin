@@ -106,7 +106,7 @@ class LoginController extends Controller
 
             UsersLvlS1::where('mobile', $userLvl->mobile)->delete();
 
-            $res = $this->saveUserDetail($userLvl->refid, $userLvl->user_nm, $user_id, $save->alpha_num_uid, $save->pwd, $save->email, $save->fname, $save->mobile);
+            $res = $this->saveUserDetail($userLvl->refid, $userLvl->user_nm, $user_id);
             if (!$res['status']) {
                 return $this->failRes($res['msg'] ?? '');
             }
@@ -298,7 +298,7 @@ class LoginController extends Controller
         }
     }
 
-    private function saveUserDetail($refered_by, $user_nm, $user_id, $userName, $password, $email, $fname, $mobile)
+    private function saveUserDetail($refered_by, $user_nm, $user_id)
     {
         $wallet = $this->insertWallet($user_id, $user_nm);
         if (!$wallet) {
@@ -317,13 +317,13 @@ class LoginController extends Controller
         $walletUpdate->bp = $existbp + 100;
 
         if ($walletUpdate->save()) {
-            $sms = new SMSSender;
-            $msgSend = $sms->sendMessage('reg_msg', $mobile, '', 'UNI' . $user_nm, $password);
-            if (!$msgSend)
-                Log::warning('Something went wrong, SMS not sent - UserId', [$user_nm]);
+            // $sms = new SMSSender;
+            // $msgSend = $sms->sendMessage('reg_msg', $mobile, '', 'UNI' . $user_nm, $password);
+            // if (!$msgSend)
+            //     Log::warning('Something went wrong, SMS not sent - UserId', [$user_nm]);
 
             // for send mail by job queue
-            dispatch(new MailJob(['email' => $email, 'user_name' => 'UNI' . $user_nm, 'password' => $password, 'full_name' => $fname], 'sign_up'));
+          //  dispatch(new MailJob(['email' => $email, 'user_name' => 'UNI' . $user_nm, 'password' => $password, 'full_name' => $fname], 'sign_up'));
 
             return ['status' => true, 'msg' => 'Wallet Amount Updated Successfully!'];
         } else {
