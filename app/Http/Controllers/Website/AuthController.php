@@ -43,7 +43,7 @@ class AuthController extends Controller
                 }
             }
 
-            $otp = str_pad(rand(0, 9999), 4, '0', STR_PAD_LEFT);
+            $otp = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
 
             $expiryTime = now()->addMinutes(5);
 
@@ -69,7 +69,7 @@ class AuthController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'otp' => 'required|numeric|digits:4',
+                'otp' => 'required|numeric|digits:6',
                 'mobile' => 'required|numeric|digits:10|regex:/^[6-9]\d{9}$/'
             ], [
                 'mobile.regex' => 'Please enter a valid Indian mobile number starting with 6, 7, 8, or 9.'
