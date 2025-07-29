@@ -14,12 +14,13 @@
                   <div class="login-box">
                       <p class="skip-text">Skip</p>
                       <h2 class="login-title">Login/Signup</h2>
-                      <form id="sendOtpForm" >
+                      <form id="sendOtpForm" method="post">
                           <div class="form-group">
                               <label>Enter your phone number</label>
-                              <input type="text" class="form-control" id="mobileInput" value="" placeholder="+91" />
+                              <input type="text" class="form-control" id="mobileInput" value="" placeholder="Enter 10-digit mobile number" maxlength="10" />
+                              <div id="mobileError" class="text-danger mt-1" style="display: none;"></div>
                           </div>
-                          <button id="sendOtpBtn" class="openPopup thm-btn w-100">Continue</button>
+                          <button id="sendOtpBtn" type="submit" class="openPopup thm-btn w-100">Continue</button>
                       </form>
                   </div>
               </div>
@@ -44,16 +45,18 @@
                       <p class="skip-text">Skip</p>
                        <h4 class="mb-2">Enter code</h4>
                        <p class="mb-0">We have sent an OTP verification code to</p>
-                      <h6>+91-9874563210</h6>
+                      <h6 id="otpMobileDisplay">+91-</h6>
                       <form id="verifyOtpForm">
                           <div class="">
                               <div class="otp-inputs">
-                                  <input type="text" maxlength="1" class="otp-box" />
-                                  <input type="text" maxlength="1" class="otp-box" />
-                                  <input type="text" maxlength="1" class="otp-box" />
-                                  <input type="text" maxlength="1" class="otp-box" />
+                                  <input type="text" maxlength="1" class="otp-box" data-index="0" />
+                                  <input type="text" maxlength="1" class="otp-box" data-index="1" />
+                                  <input type="text" maxlength="1" class="otp-box" data-index="2" />
+                                  <input type="text" maxlength="1" class="otp-box" data-index="3" />
                               </div>
+                              <div id="otpError" class="text-danger mt-1" style="display: none;"></div>
                           </div>
+                          <input type="hidden" id="verifyMobileInput" value="" />
                           <p>Didn’t get the OTP? Resend SMS in <strong class="text-black">00:20</strong></p>
                           <button id="verifyOtpBtn" class="openPopup thm-btn w-100">Continue</button>
                       </form>
@@ -65,9 +68,6 @@
   </div>
 
 
-
-
-@push('scripts')
 <script>
 $(document).ready(function() {
    
@@ -97,13 +97,17 @@ $(document).ready(function() {
        });
      });
 
-     
-    
-    // Send OTP Form
-    $('#sendOtpForm').on('submit', function(e) {
+     $('#sendOtpBtn').on('click', function(e) {
         e.preventDefault();
+        alert('submit');
         sendOtp();
-    });
+     });
+
+     $('#sendOtpForm').submit(function(e) {
+        e.preventDefault();
+        alert('submit');
+        sendOtp();
+     });
     
     // Verify OTP Form
     $('#verifyOtpForm').on('submit', function(e) {
@@ -111,23 +115,7 @@ $(document).ready(function() {
         verifyOtp();
     });
     
-    // OTP Input handling
-    $('.otp-box').on('input', function() {
-        const value = $(this).val();
-        const index = $(this).data('index');
-        
-        if (value.length === 1) {
-            // Move to next input
-            if (index < 3) {
-                $('.otp-box[data-index="' + (index + 1) + '"]').focus();
-            }
-        } else if (value.length === 0) {
-            // Move to previous input on backspace
-            if (index > 0) {
-                $('.otp-box[data-index="' + (index - 1) + '"]').focus();
-            }
-        }
-    });
+
     
     // Resend OTP
     $('#resendOtpLink').on('click', function(e) {
@@ -159,16 +147,16 @@ function sendOtp(isResend = false) {
     const mobile = $('#mobileInput').val();
     
     if (!mobile || mobile.length !== 10) {
-        $('#mobileError').text('Please enter a valid 10-digit mobile number');
+        showError('mobileError', 'Please enter a valid 10-digit mobile number');
         return;
     }
     
-    $('#mobileError').text('');
+    hideError('mobileError');
     $('#sendOtpBtn').html('<span class="btn-loading">Loading...</span>');
     $('#sendOtpBtn').prop('disabled', true);
     
     $.ajax({
-        url: base_url + '/send-otp',
+        url: base_url1 + '/send-otp',
         type: 'POST',
         data: {
             mobile: mobile,
@@ -208,17 +196,17 @@ function verifyOtp() {
     }).get().join('');
     
     if (otp.length !== 4) {
-        $('#otpError').text('Please enter the complete 4-digit OTP');
+        showError('otpError', 'Please enter the complete 4-digit OTP');
         return;
     }
     
-    $('#otpError').text('');
+    hideError('otpError');
     $('#verifyOtpBtn .btn-text').hide();
     $('#verifyOtpBtn .btn-loading').show();
     $('#verifyOtpBtn').prop('disabled', true);
     
     $.ajax({
-        url: base_url + '/verify-otp',
+        url: base_url1 + '/verify-otp',
         type: 'POST',
         data: {
             mobile: mobile,
@@ -252,7 +240,7 @@ function verifyOtp() {
 
 function logout() {
     $.ajax({
-        url: base_url + '/logout',
+        url: base_url1 + '/logout',
         type: 'POST',
         data: {
             '_token': '{{ csrf_token() }}'
@@ -298,5 +286,59 @@ function startResendTimer() {
     }, 1000);
 }
 
+// Add missing variables and functions
+var base_url1 = '{{ url("/") }}';
+
+function showSnackbar(message, type = 'info') {
+    // Simple alert for now - you can replace with a proper snackbar/toast
+    alert(message);
+}
+
+function checkAuthStatus() {
+    $.ajax({
+        url: base_url1 + '/check-auth',
+        type: 'GET',
+        success: function(response) {
+            if (response.status && response.logged_in) {
+                // User is logged in - update UI accordingly
+                console.log('User logged in:', response.user);
+                // You can update the UI here to show user info
+            } else {
+                // User is not logged in
+                console.log('User not logged in');
+            }
+        },
+        error: function(xhr) {
+            console.log('Error checking auth status');
+        }
+    });
+}
+
+// Fix OTP input handling
+$(document).on('input', '.otp-box', function() {
+    const value = $(this).val();
+    const index = parseInt($(this).data('index'));
+    
+    if (value.length === 1) {
+        // Move to next input
+        if (index < 3) {
+            $('.otp-box[data-index="' + (index + 1) + '"]').focus();
+        }
+    } else if (value.length === 0) {
+        // Move to previous input on backspace
+        if (index > 0) {
+            $('.otp-box[data-index="' + (index - 1) + '"]').focus();
+        }
+    }
+});
+
+// Fix error display functions
+function showError(elementId, message) {
+    $('#' + elementId).text(message).show();
+}
+
+function hideError(elementId) {
+    $('#' + elementId).hide();
+}
+
 </script>
-@endpush

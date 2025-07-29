@@ -292,7 +292,7 @@
                             </div>
                         </div>
                     </nav>
-                    @include('Website.Layout.login')
+                    
                     
                     <!-- <a href="#" class="thm-btn"><i class="fa-solid fa-circle-right"></i> <span>Appointment</span></a> -->
                     <div class="hamburger">
@@ -380,6 +380,7 @@
    <script src="{{asset('front_assets')}}/js/custom.js"></script>
    <script src="{{asset('front_assets')}}/js/scripts.js"></script>
    
+   @include('Website.Layout.login')
    <script>
      //for cart functio nality
      $(function () {

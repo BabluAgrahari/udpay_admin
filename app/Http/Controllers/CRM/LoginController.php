@@ -39,11 +39,11 @@ class LoginController extends Controller
 
         $credentials = $request->only('email', 'password');
 
-        if (Auth::attempt($credentials)) {
+        if (Auth::guard('admin')->attempt($credentials)) {
 
-            if (Auth::user()->role !='supperadmin') {
+            if (Auth::guard('admin')->user()->role !='supperadmin') {
                 $request->session()->flush();
-                Auth::logout();
+                Auth::guard('admin')->logout();
                 return back()->with('error', 'Invalid credentails');
             }
 
@@ -194,7 +194,7 @@ class LoginController extends Controller
     public function logout(Request $request)
     {
         $request->session()->flush();
-        Auth::logout();
+        Auth::guard('admin')->logout();
         return redirect('/');
     }
 }

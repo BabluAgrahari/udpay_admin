@@ -3,24 +3,21 @@
 namespace App\Http\Controllers\Website;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Models\Customer;
+use App\Services\SmsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
-    /**
-     * Send OTP to mobile number
-     */
     public function sendOtp(Request $request)
     {
         try {
-
             $validator = Validator::make($request->all(), [
                 'mobile' => 'required|numeric|digits:10|regex:/^[6-9]\d{9}$/'
             ], messages: [
@@ -28,13 +25,12 @@ class AuthController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return $this->fail($validator->errors()->first());
+                return $this->failMsg($validator->errors()->first());
             }
-
             $mobile = $request->mobile;
 
             if ($this->isMobileBlocked($mobile)) {
-                return $this->fail('This mobile number is temporarily blocked. Please try again later.');
+                return $this->failMsg('This mobile number is temporarily blocked. Please try again later.');
             }
 
             if (Session::has('otp_sent_time') && Session::has('mobile') && Session::get('mobile') === $mobile) {
@@ -43,7 +39,7 @@ class AuthController extends Controller
 
                 if ($timeDiff < 60) {
                     $remainingTime = 60 - $timeDiff;
-                    return $this->fail("Please wait {$remainingTime} seconds before requesting another OTP.");
+                    return $this->failMsg("Please wait {$remainingTime} seconds before requesting another OTP.");
                 }
             }
 
@@ -51,27 +47,27 @@ class AuthController extends Controller
 
             $expiryTime = now()->addMinutes(5);
 
+            // $smsService = new SmsService();
+            // $res = $smsService->sendOtp($mobile, $otp);
+            // if ($res['status'] == false) {
+            //     return $this->failMsg($res['msg']);
+            // }
+
             Session::put('otp', $otp);
             Session::put('mobile', $mobile);
             Session::put('otp_expiry', $expiryTime);
             Session::put('otp_sent_time', now());
             Session::put('otp_attempts', 0);
 
-
-            return $this->success('OTP sent successfully to +91-' . $mobile, ['otp' => $otp, 'mobile' => $mobile]);
+            return $this->successMsg('OTP sent successfully to +91-' . $mobile, ['otp' => $otp, 'mobile' => $mobile]);
         } catch (\Exception $e) {
-
-            return $this->fail('Something went wrong. Please try again.');
+            return $this->failMsg('Something went wrong. Please try again.');
         }
     }
 
-    /**
-     * Verify OTP and login user
-     */
     public function verifyOtp(Request $request)
     {
         try {
-
             $validator = Validator::make($request->all(), [
                 'otp' => 'required|numeric|digits:4',
                 'mobile' => 'required|numeric|digits:10|regex:/^[6-9]\d{9}$/'
@@ -80,140 +76,64 @@ class AuthController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return response()->json([
-                    'status' => false,
-                    'msg' => $validator->errors()->first()
-                ], 422);
+                return $this->failMsg($validator->errors()->first());
             }
 
             $mobile = $request->mobile;
             $otp = $request->otp;
 
-            // Check if OTP exists in session
             if (!Session::has('otp') || !Session::has('mobile') || !Session::has('otp_expiry')) {
-                return response()->json([
-                    'status' => false,
-                    'msg' => 'OTP expired or not found. Please request new OTP.'
-                ], 400);
+                return $this->failMsg('OTP expired or not found. Please request new OTP.');
             }
 
-            // Verify mobile number matches
             if (Session::get('mobile') !== $mobile) {
-                Log::warning('Mobile number mismatch during OTP verification', [
-                    'session_mobile' => Session::get('mobile'),
-                    'request_mobile' => $mobile,
-                    'ip' => $request->ip()
-                ]);
-
-                return response()->json([
-                    'status' => false,
-                    'msg' => 'Mobile number mismatch.'
-                ], 400);
+                return $this->failMsg('Mobile number mismatch.');
             }
 
-            // Check OTP expiry
             if (now()->isAfter(Session::get('otp_expiry'))) {
-                // Clear expired session data
                 Session::forget(['otp', 'mobile', 'otp_expiry', 'otp_sent_time', 'otp_attempts']);
-                return response()->json([
-                    'status' => false,
-                    'msg' => 'OTP has expired. Please request new OTP.'
-                ], 400);
+                return $this->failMsg('OTP has expired. Please request new OTP.');
             }
 
-            // Track OTP attempts
             $attempts = Session::get('otp_attempts', 0) + 1;
             Session::put('otp_attempts', $attempts);
 
-            // Block after 5 failed attempts
             if ($attempts > 5) {
                 Session::forget(['otp', 'mobile', 'otp_expiry', 'otp_sent_time', 'otp_attempts']);
                 $this->blockMobile($mobile);
-
-                Log::warning('Mobile number blocked due to multiple failed OTP attempts', [
-                    'mobile' => $mobile,
-                    'ip' => $request->ip()
-                ]);
-
-                return response()->json([
-                    'status' => false,
-                    'msg' => 'Too many failed attempts. Please try again after 1 hour.'
-                ], 429);
+                return $this->failMsg('Too many failed attempts. Please try again after 1 hour.');
             }
 
-            // Verify OTP
             if (Session::get('otp') !== $otp) {
-                return response()->json([
-                    'status' => false,
-                    'msg' => 'Invalid OTP. Please try again. (' . (5 - $attempts) . ' attempts remaining)'
-                ], 400);
+                return $this->failMsg('Invalid OTP. Please try again. (' . (5 - $attempts) . ' attempts remaining)');
             }
 
-            // OTP is valid, now handle user login/registration
-            $user = User::where('mobile', $mobile)->where('role', 'customer')->first();
+            $user = Customer::where('mobile', $mobile)->first();
 
             if (!$user) {
-                // First time user - create new user
                 $user = $this->createNewUser($mobile);
 
                 if (!$user) {
-                    return response()->json([
-                        'status' => false,
-                        'msg' => 'Failed to create user account.'
-                    ], 500);
+                    return $this->failMsg('Failed to create user account.');
                 }
-
-                Log::info('New user created via OTP', [
-                    'mobile' => $mobile,
-                    'user_id' => $user->_id
-                ]);
             }
 
-            // Login the user
-            Auth::login($user);
+            Auth::guard('web')->login($user);
 
-            // Clear OTP session data
             Session::forget(['otp', 'mobile', 'otp_expiry', 'otp_sent_time', 'otp_attempts']);
 
-            Log::info('User logged in successfully', [
-                'user_id' => $user->_id,
-                'mobile' => $mobile,
-                'ip' => $request->ip()
-            ]);
-
-            return response()->json([
-                'status' => true,
-                'msg' => 'Login successful!',
-                'user' => [
-                    'id' => $user->_id,
-                    'name' => trim($user->first_name . ' ' . $user->last_name) ?: 'User',
-                    'mobile' => $user->mobile,
-                    'email' => $user->email
-                ]
-            ]);
+            return $this->successMsg('Login successful!', ['user' => $user]);
         } catch (\Exception $e) {
-            Log::error('Error verifying OTP', [
-                'mobile' => $request->mobile ?? 'unknown',
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            return response()->json([
-                'status' => false,
-                'msg' => 'Something went wrong. Please try again.'
-            ], 500);
+            return $this->failMsg('Something went wrong. Please try again.');
         }
     }
 
-    /**
-     * Logout user
-     */
     public function logout(Request $request)
     {
         try {
-            $user = Auth::user();
+            $user = Auth::guard('web')->user();
 
-            Auth::logout();
+            Auth::guard('web')->logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
@@ -242,14 +162,11 @@ class AuthController extends Controller
         }
     }
 
-    /**
-     * Check if user is logged in
-     */
     public function checkAuth()
     {
         try {
-            if (Auth::check()) {
-                $user = Auth::user();
+            if (Auth::guard('web')->check()) {
+                $user = Auth::guard('web')->user();
                 return response()->json([
                     'status' => true,
                     'logged_in' => true,
@@ -278,38 +195,23 @@ class AuthController extends Controller
         }
     }
 
-    /**
-     * Create new user account
-     */
     private function createNewUser($mobile)
     {
-        try {
-            $user = new User();
-            $user->mobile = $mobile;
-            $user->role = 'customer';
-            $user->isactive = 1;
-            $user->first_name = 'User';
-            $user->last_name = '';
-            $user->email = $mobile . '@temp.com';
-            $user->password = Hash::make(Str::random(16));
+        $user = Customer::select('id')->orderBy('id', 'DESC')->first();
+        $user_id = !empty($user->id) ? $user->user_id + 1 : 1;
+        $user_nm = uniqCode(8);
 
-            return $user->save() ? $user : null;
-        } catch (\Exception $e) {
-            Log::error('Error creating new user', [
-                'mobile' => $mobile,
-                'error' => $e->getMessage()
-            ]);
-            return null;
-        }
+        $customer = new Customer();
+        $customer->mobile = $mobile;
+        $customer->usre_id = $user_id;
+        $customer->user_num = $user_nm;
+        $customer->alpha_num_uid = 'UNI'.$user_nm;
+        $customer->isactive = 1;
+        return $customer->save() ? $customer : null;
     }
 
-    /**
-     * Check if mobile number is blocked
-     */
     private function isMobileBlocked($mobile)
     {
-        // This is a simple implementation using session
-        // In production, you might want to use Redis or database
         $blockedMobiles = Session::get('blocked_mobiles', []);
         $blockedMobile = $blockedMobiles[$mobile] ?? null;
 
@@ -317,7 +219,6 @@ class AuthController extends Controller
             return true;
         }
 
-        // Remove expired blocks
         if ($blockedMobile && now()->isAfter($blockedMobile['blocked_until'])) {
             unset($blockedMobiles[$mobile]);
             Session::put('blocked_mobiles', $blockedMobiles);
@@ -326,9 +227,6 @@ class AuthController extends Controller
         return false;
     }
 
-    /**
-     * Block mobile number
-     */
     private function blockMobile($mobile)
     {
         $blockedMobiles = Session::get('blocked_mobiles', []);
