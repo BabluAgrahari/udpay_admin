@@ -121,18 +121,7 @@
                     </div>
                 </div>
             </div>
-            <div class="cart-items p-3">
-                <h6 class="mb-2">Payment Method</h6>
-                <form method="POST" action="{{ url('checkout') }}">
-                    @csrf
-                    <input type="hidden" name="address_id" value="">
-                    <select name="payment_method" class="form-control mb-2">
-                        <option value="cod">Cash on Delivery</option>
-                        <option value="online">Online Payment</option>
-                    </select>
-                    <button type="submit" class="thm-btn">Proceed to Pay</button>
-                </form>
-            </div>
+            
         </div>
         <div class="col-lg-4">
             <div class="cart-summary">
@@ -145,6 +134,18 @@
                     <hr />
                     <p class="total text-black">Payable Amount <span>₹{{ $subtotal }}</span></p>
                 </div>
+            </div>
+            <div class="cart-items p-3">
+                <h6 class="mb-2">Payment Method</h6>
+                <form method="POST" action="{{ url('checkout') }}">
+                    @csrf
+                    <input type="hidden" name="address_id" value="">
+                    <select name="payment_method" class="form-control mb-2">
+                        <option value="cod">Cash on Delivery</option>
+                        <option value="online">Online Payment</option>
+                    </select>
+                    <button type="submit" class="thm-btn">Proceed to Pay</button>
+                </form>
             </div>
         </div>
     </div>

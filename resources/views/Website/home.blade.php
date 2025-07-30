@@ -97,7 +97,7 @@
                             <div class="col-lg-3 col-md-6"> 
                                 <div class="product-card">
                                     <div class="product-image">
-                                        <a href="product-details.html"><img src="{{ isValidImageUrl($product->product_image) ? $product->product_image : asset('front_assets') . '/images/no_image.jpeg' }}"
+                                        <a href="{{url('detail')}}/{{$product->id}}"><img src="{{ isValidImageUrl($product->product_image) ? $product->product_image : asset('front_assets') . '/images/no_image.jpeg' }}"
                                                 alt="img" class=""></a>
                                         <p class="product-review"><i class="fa fa-star"></i> 3.25 (12 Reviews)</p>
                                         <!-- <span class="discount-prod">10% OFF</span>
@@ -105,7 +105,7 @@
                                     </div>
                                     <div class="product-perra">
                                         <div class="prduct-perra-top">
-                                            <a href="product-details.html">
+                                            <a href="{{url('detail')}}/{{$product->id}}">
                                                 <h3>{{ $product->product_name }}</h3>
                                             </a>
                                         </div>
