@@ -50,7 +50,7 @@ class CategoryController extends Controller
             $save->meta_title = $request->meta_title;
             $save->meta_keyword = $request->meta_keyword;
             $save->meta_description = $request->meta_description;
-
+            $save->description = $request->description;
             if ($request->hasFile('img')) {
                 $save->img = singleFile($request->img, 'category');
             }
@@ -102,7 +102,7 @@ class CategoryController extends Controller
             $category->meta_title = $request->meta_title;
             $category->meta_keyword = $request->meta_keyword;
             $category->meta_description = $request->meta_description;
-
+            $category->description = $request->description;
             if ($request->hasFile('img')) {
                 $category->img = singleFile($request->img, 'category');
             }

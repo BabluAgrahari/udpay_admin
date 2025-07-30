@@ -13,7 +13,7 @@ class ProductVariant extends BaseModel
         'product_id',
         'sku',
         'stock',
-        'varient_name',
+        'variant_name',
         'price',
         'status'
     ];

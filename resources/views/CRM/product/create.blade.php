@@ -293,7 +293,7 @@
                                             <div class="col-md-3">
                                                 <label class="form-label">Variant Name <span class="text-danger">*</span></label>
                                                 <input type="text" name="variants[0][varient_name]" class="form-control variant-name" 
-                                                       placeholder="e.g., Red, Large, etc.">
+                                                       placeholder="Product Variant Name">
                                             </div>
                                             <div class="col-md-2">
                                                 <label class="form-label">SKU</label>
@@ -326,7 +326,7 @@
                                         </div>
                                     </div>
                                     <button type="button" class="btn btn-success btn-sm" id="add-variant">
-                                        <i class='bx bx-plus'></i> Add Variant
+                                        <i class='bx bx-plus'></i> Add
                                     </button>
                                 </div>
                             </div>

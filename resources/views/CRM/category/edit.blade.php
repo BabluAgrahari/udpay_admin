@@ -74,6 +74,12 @@
                         <span class="text-danger error" id="img_error"></span>
                     </div>
 
+                    <div class="col-md-12 mb-3">
+                        <label>Description</label>
+                        <textarea name="description" id="description" class="form-control" rows="2" placeholder="Enter description">{{ $category->description }}</textarea>
+                        <span class="text-danger error" id="description_error"></span>
+                    </div>
+
                     <!-- SEO Fields -->
                     <div class="col-md-12 mb-3">
                         <h6 class="text-primary">SEO Information</h6>

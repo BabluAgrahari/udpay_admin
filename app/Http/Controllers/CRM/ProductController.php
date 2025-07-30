@@ -118,9 +118,9 @@ class ProductController extends Controller
                                 'product_id' => $product->id,
                                 'sku' => $variantData['sku'] ?? '',
                                 'stock' => $variantData['stock'] ?? 0,
-                                'varient_name' => $variantData['varient_name'],
+                                'variant_name' => $variantData['varient_name'],
                                 'price' => $variantData['price'] ?? 0,
-                                'status' => isset($variantData['status']) ? 1 : 0
+                                'status' => isset($variantData['status']) ? '1' : '0'
                             ]);
                         }
                     }
@@ -230,9 +230,9 @@ class ProductController extends Controller
                                 'product_id' => $product->id,
                                 'sku' => $variantData['sku'] ?? '',
                                 'stock' => $variantData['stock'] ?? 0,
-                                'varient_name' => $variantData['varient_name'],
+                                'variant_name' => $variantData['varient_name'],
                                 'price' => $variantData['price'] ?? 0,
-                                'status' => isset($variantData['status']) ? 1 : 0
+                                'status' => isset($variantData['status']) ? '1' : '0'
                             ]);
                         }
                     }
@@ -368,7 +368,7 @@ class ProductController extends Controller
             $length = (int)($request->length ?? 10);
             $length = min($length, 100); // Limit max records per page
             
-            $products = $query->skip($start)->take($length)->get();
+            $products = $query->skip($start)->take($length)->orderBy('id', 'desc')->get();
 
             $data = $products->map(function ($product) {
  

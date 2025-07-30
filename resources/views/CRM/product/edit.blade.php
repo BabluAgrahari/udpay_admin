@@ -330,7 +330,7 @@
                                                     <div class="col-md-3">
                                                         <label class="form-label">Variant Name <span class="text-danger">*</span></label>
                                                         <input type="text" name="variants[{{ $index }}][varient_name]" class="form-control variant-name" 
-                                                               placeholder="e.g., Red, Large, etc." value="{{ $variant->varient_name }}" required>
+                                                               placeholder="e.g., Red, Large, etc." value="{{ $variant->variant_name }}" required>
                                                     </div>
                                                     <div class="col-md-2">
                                                         <label class="form-label">SKU</label>
