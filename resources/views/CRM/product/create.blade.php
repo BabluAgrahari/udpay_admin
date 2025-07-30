@@ -280,6 +280,58 @@
                             <span class="text-danger error" id="images_error"></span>
                         </div>
 
+                        <!-- Product Variants Section -->
+                        <div class="col-md-12 mb-3">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Product Variants</h6>
+                                    <small class="text-muted">Add multiple variants of this product (e.g., different sizes, colors, etc.)</small>
+                                </div>
+                                <div class="card-body">
+                                    <div id="variants-container">
+                                        <div class="variant-row row mb-3" data-index="0">
+                                            <div class="col-md-3">
+                                                <label class="form-label">Variant Name <span class="text-danger">*</span></label>
+                                                <input type="text" name="variants[0][varient_name]" class="form-control variant-name" 
+                                                       placeholder="e.g., Red, Large, etc.">
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label class="form-label">SKU</label>
+                                                <input type="text" name="variants[0][sku]" class="form-control" 
+                                                       placeholder="Variant SKU">
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label class="form-label">Stock</label>
+                                                <input type="number" name="variants[0][stock]" class="form-control" 
+                                                       placeholder="0" min="0" value="0">
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label class="form-label">Price</label>
+                                                <input type="number" step="0.01" name="variants[0][price]" class="form-control" 
+                                                       placeholder="0.00" min="0" value="0">
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label class="form-label">Status</label>
+                                                <div class="form-check form-switch">
+                                                    <input type="checkbox" class="form-check-input" name="variants[0][status]" value="1" checked>
+                                                    <label class="form-check-label">Active</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-1">
+                                                <label class="form-label">&nbsp;</label>
+                                                <button type="button" class="btn btn-danger btn-sm remove-variant" style="display: none;">
+                                                    <i class='bx bx-trash'></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-success btn-sm" id="add-variant">
+                                        <i class='bx bx-plus'></i> Add Variant
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="col-md-12 mb-3">
                             <label class="form-label">Meta Title</label>
                             <input type="text" name="product_meta_title" id="product_meta_title" class="form-control"
@@ -314,6 +366,27 @@
         </div>
     </div>
 @endsection
+
+@push('style')
+    <style>
+        .variant-row {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .variant-row:hover {
+            background-color: #e9ecef;
+        }
+        .remove-variant {
+            margin-top: 25px;
+        }
+        #add-variant {
+            margin-top: 10px;
+        }
+    </style>
+@endpush
 
 @push('script')
     <script>
@@ -359,6 +432,80 @@
                 if (mrp > 0 && productPrice > 0) {
                     $('#product_sale_price').val(productPrice);
                 }
+            });
+
+            // Variant functionality
+            let variantIndex = 1;
+
+            // Add new variant
+            $('#add-variant').click(function() {
+                const newVariant = `
+                    <div class="variant-row row mb-3" data-index="${variantIndex}">
+                        <div class="col-md-3">
+                            <label class="form-label">Variant Name <span class="text-danger">*</span></label>
+                            <input type="text" name="variants[${variantIndex}][varient_name]" class="form-control variant-name" 
+                                   placeholder="e.g., Red, Large, etc.">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">SKU</label>
+                            <input type="text" name="variants[${variantIndex}][sku]" class="form-control" 
+                                   placeholder="Variant SKU">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Stock</label>
+                            <input type="number" name="variants[${variantIndex}][stock]" class="form-control" 
+                                   placeholder="0" min="0" value="0">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Price</label>
+                            <input type="number" step="0.01" name="variants[${variantIndex}][price]" class="form-control" 
+                                   placeholder="0.00" min="0" value="0">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Status</label>
+                            <div class="form-check form-switch">
+                                <input type="checkbox" class="form-check-input" name="variants[${variantIndex}][status]" value="1" checked>
+                                <label class="form-check-label">Active</label>
+                            </div>
+                        </div>
+                        <div class="col-md-1">
+                            <label class="form-label">&nbsp;</label>
+                            <button type="button" class="btn btn-danger btn-sm remove-variant">
+                                <i class='bx bx-trash'></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                $('#variants-container').append(newVariant);
+                variantIndex++;
+                
+                // Show remove button for first variant if there are multiple variants
+                if ($('.variant-row').length > 1) {
+                    $('.remove-variant').show();
+                }
+            });
+
+            // Remove variant
+            $(document).on('click', '.remove-variant', function() {
+                $(this).closest('.variant-row').remove();
+                
+                // Hide remove button for first variant if only one remains
+                if ($('.variant-row').length === 1) {
+                    $('.remove-variant').hide();
+                }
+                
+                // Reindex variants
+                $('.variant-row').each(function(index) {
+                    $(this).attr('data-index', index);
+                    $(this).find('input, select').each(function() {
+                        const name = $(this).attr('name');
+                        if (name) {
+                            const newName = name.replace(/variants\[\d+\]/, `variants[${index}]`);
+                            $(this).attr('name', newName);
+                        }
+                    });
+                });
+                variantIndex = $('.variant-row').length;
             });
 
             // Form submission

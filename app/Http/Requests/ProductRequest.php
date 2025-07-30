@@ -60,6 +60,13 @@ class ProductRequest extends FormRequest
             'pro_section' => 'nullable|in:primary,deals',
             'product_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            // Variant validation
+            'variants' => 'nullable|array',
+            'variants.*.sku' => 'nullable|string|max:100',
+            'variants.*.stock' => 'nullable|integer|min:0',
+            'variants.*.varient_name' => 'nullable|string|max:255',
+            'variants.*.price' => 'nullable|numeric|min:0',
+            'variants.*.status' => 'nullable|boolean',
         ];
     }
 
@@ -115,6 +122,14 @@ class ProductRequest extends FormRequest
             'images.*.image' => 'Each image must be an image file',
             'images.*.mimes' => 'Each image must be a JPEG, PNG, JPG, GIF, or WebP file',
             'images.*.max' => 'Each image cannot exceed 2MB',
+            // Variant validation messages
+            'variants.array' => 'Variants must be an array',
+            'variants.*.sku.max' => 'Variant SKU cannot exceed 100 characters',
+            'variants.*.stock.integer' => 'Variant stock must be a whole number',
+            'variants.*.stock.min' => 'Variant stock cannot be negative',
+            'variants.*.varient_name.max' => 'Variant name cannot exceed 255 characters',
+            'variants.*.price.numeric' => 'Variant price must be a number',
+            'variants.*.price.min' => 'Variant price cannot be negative',
         ];
     }
 

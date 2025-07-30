@@ -7,18 +7,21 @@ use App\Casts\ObjectIdCast;
 
 class ProductVariant extends BaseModel
 {
+    protected $table = 'uni_product_variant';
+    
     protected $fillable = [
         'product_id',
         'sku',
         'stock',
-        'attributes',
+        'varient_name',
+        'price',
         'status'
     ];
 
     protected $casts = [
         'product_id' => ObjectIdCast::class,
         'stock' => 'integer',
-        'attributes' => 'array',
+        'price' => 'decimal:2',
         'status' => 'boolean'
     ];
 

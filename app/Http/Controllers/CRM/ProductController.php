@@ -110,6 +110,22 @@ class ProductController extends Controller
                     }
                 }
 
+                // Handle product variants
+                if ($request->has('variants') && is_array($request->variants)) {
+                    foreach ($request->variants as $variantData) {
+                        if (!empty($variantData['varient_name'])) {
+                            ProductVariant::create([
+                                'product_id' => $product->id,
+                                'sku' => $variantData['sku'] ?? '',
+                                'stock' => $variantData['stock'] ?? 0,
+                                'varient_name' => $variantData['varient_name'],
+                                'price' => $variantData['price'] ?? 0,
+                                'status' => isset($variantData['status']) ? 1 : 0
+                            ]);
+                        }
+                    }
+                }
+
                 DB::commit();
                 return $this->successMsg('Product created successfully');
             }
@@ -125,7 +141,7 @@ class ProductController extends Controller
     public function edit($id)
     {
         try {
-            $data['product'] = Product::with(['images'])->findOrFail($id);
+            $data['product'] = Product::with(['images', 'variants'])->findOrFail($id);
             $data['categories'] = Category::with('children')->where('parent_id','0')->status()->get();
             $data['products'] = Product::where('status','1')->get();
             $data['brands'] = Brand::status()->get();
@@ -199,6 +215,26 @@ class ProductController extends Controller
                             'product_id' => $product->id,
                             'image' => $imagePath
                         ]);
+                    }
+                }
+
+                // Handle product variants
+                if ($request->has('variants') && is_array($request->variants)) {
+                    // Delete existing variants
+                    ProductVariant::where('product_id', $product->id)->delete();
+                    
+                    // Create new variants
+                    foreach ($request->variants as $variantData) {
+                        if (!empty($variantData['varient_name'])) {
+                            ProductVariant::create([
+                                'product_id' => $product->id,
+                                'sku' => $variantData['sku'] ?? '',
+                                'stock' => $variantData['stock'] ?? 0,
+                                'varient_name' => $variantData['varient_name'],
+                                'price' => $variantData['price'] ?? 0,
+                                'status' => isset($variantData['status']) ? 1 : 0
+                            ]);
+                        }
                     }
                 }
 
