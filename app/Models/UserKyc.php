@@ -6,6 +6,7 @@ use App\Models\BaseModel;
 
 class UserKyc extends BaseModel
 {
+    protected $table = 'user_kyc';
     protected $fillable = [
         'user_id',
         'mobile_no',
@@ -69,75 +70,5 @@ class UserKyc extends BaseModel
         'created_on' => 'datetime'
     ];
 
-    /**
-     * Get the user that owns the KYC.
-     */
-    public function user()
-    {
-        return $this->belongsTo(User::class, 'user_id', '_id');
-    }
-
-    /**
-     * Scope to get only active KYC records
-     */
-    public function scopeActive($query)
-    {
-        return $query->where('status', 1);
-    }
-
-    /**
-     * Scope to get KYC by user ID
-     */
-    public function scopeByUserId($query, $userId)
-    {
-        return $query->where('user_id', $userId);
-    }
-
-    /**
-     * Scope to get verified KYC records
-     */
-    public function scopeVerified($query)
-    {
-        return $query->where('kyc_flag', 1);
-    }
-
-    /**
-     * Scope to get pending KYC records
-     */
-    public function scopePending($query)
-    {
-        return $query->where('kyc_flag', 0);
-    }
-
-    /**
-     * Scope to get KYC with personal details completed
-     */
-    public function scopePersonalCompleted($query)
-    {
-        return $query->where('personal_flag', 1);
-    }
-
-    /**
-     * Scope to get KYC with bank details completed
-     */
-    public function scopeBankCompleted($query)
-    {
-        return $query->where('bank_flag', 1);
-    }
-
-    /**
-     * Get full address
-     */
-    public function getFullAddressAttribute()
-    {
-        $parts = array_filter([
-            $this->address,
-            $this->locality,
-            $this->district,
-            $this->state,
-            $this->pincode
-        ]);
-        
-        return implode(', ', $parts);
-    }
+    
 }

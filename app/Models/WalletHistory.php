@@ -10,7 +10,7 @@ use MongoDB\BSON\ObjectId;
 
 class WalletHistory extends BaseModel
 {
-    protected $collection = 'wallet_history';
+    protected $table = 'wallet_history';
     
     protected $fillable = [
         'user_id',

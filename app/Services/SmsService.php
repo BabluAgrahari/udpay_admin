@@ -23,6 +23,18 @@ class SmsService
             $message = 'Welcome to UniPay. Your Username : {' . $alpha_num_uid . '} And Password : {' . $password . '} Join Our Telegram Channel for All Updates and Notification about Unipay https://t.me/unipayofficial UNIPAY DIGITAL PRIVATE LIMITED';
         }
 
+
+        $array =  array(
+            'SenderId' => $sender,
+            'DataCoding' => 0,
+            'Message' => $message,
+            'MobileNumbers' => $number,
+            'PrincipleEntityId' => '1701162399894104548',
+            'TemplateId' => '1707164276251574457',
+            'ApiKey' => $apiKey,
+            'ClientId' => '498ca7fa-ab4e-44ad-a568-1615c0d673c4'
+        );
+       
         $curl = curl_init();
         curl_setopt_array($curl, array(
             CURLOPT_URL => 'http://103.110.127.128/api/v2/SendSMS?',
@@ -33,15 +45,7 @@ class SmsService
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'GET',
-            CURLOPT_POSTFIELDS => array(
-                'SenderId' => $sender, 'DataCoding' => 0,
-                'Message' => $message,
-                'MobileNumbers' => $number,
-                'PrincipleEntityId' => '1701162399894104548',
-                'TemplateId' => '1707164276251574457',
-                'ApiKey' => $apiKey,
-                'ClientId' => '498ca7fa-ab4e-44ad-a568-1615c0d673c4'
-            ),
+            CURLOPT_POSTFIELDS => $array,
             CURLOPT_HTTPHEADER => array(
                 'Cookie: SERVERID=webC1'
             ),

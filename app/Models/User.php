@@ -2,40 +2,47 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Mail\DemoMail;
+use App\Models\User_kyc;
+use App\Models\Wallet;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-// use Illuminate\Foundation\Auth\User as Authenticatable;
-use App\Observers\Timestamp;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Database\Eloquent\Model;
-// use App\Casts\ObjectIdCast;
-use Illuminate\Support\Facades\Auth;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use Mail;
 
 class User extends Authenticatable implements JWTSubject
 {
     use HasApiTokens, HasFactory, Notifiable;
 
     protected $table = 'users_lvl';
+    public $timestamps = false;
+
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    public function getJWTCustomClaims()
+    {
+        return [];
+    }
 
     protected $fillable = [
-        'ref_id',
-        'user_id',
-        'user_num',
-        'alpha_num_uid',
         'name',
         'email',
-        'mobile',
         'password',
-        'pwd',
-        'status',
     ];
 
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array<int, string>
+     */
     protected $hidden = [
         'password',
-        'pwd',
         'remember_token',
     ];
 
@@ -44,61 +51,108 @@ class User extends Authenticatable implements JWTSubject
      *
      * @var array<string, string>
      */
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+    ];
 
-
-    public function getJWTIdentifier()
+    public function Wallet()
     {
-        return $this->getKey();
+        return $this->hasOne(Wallet::class, 'userid', 'user_id');
     }
 
-    /**
-     * Return a key value array, containing any custom claims to be added to the JWT.
-     *
-     * @return array
-     */
-    public function getJWTCustomClaims()
+    public function UserKyc()
     {
-        return [];
+        return $this->hasOne(UserKyc::class, 'userId', 'user_id');
     }
 
-    protected static function boot()
+    public function Royalty()
     {
-        parent::boot();
-        // self::observe(Timestamp::class);
+        return $this->hasOne(Royalty::class, 'userid', 'user_id');
     }
 
-    public function dFormat($date)
+    function getParentId1($mid = '')
     {
-        if (empty($date))
-            return false;
-
-        return date('d M,Y', $date);
+        $count = Binary_data::where('userid', $mid)->get()->count();
+        // echo $this->db->last_query();
+        if ($count == 1) {
+            $posid = Binary_data::where('userid', $mid)->first();
+            return $posid->posid;
+        } else {
+            return 0;
+        }
     }
 
-    public function Account()
+    function getPositionParent1($mid = '')
     {
-        return $this->hasOne(AccountSetting::class, 'user_id', '_id');
+        $count = Binary_data::where('userid', $mid)->get()->count();
+
+        if ($count == 1) {
+            $position = Binary_data::where('userid', $mid)->first();
+            return $position->position;
+        } else {
+            return 0;
+        }
     }
 
-    public function merchant()
+    function getTreeChildId1($parentid = '', $position = '')
     {
-        return $this->hasOne(Merchant::class, '_id', 'merchant_id');
+        $count = binary_data::where('posid', $parentid)->where('position', $position)->get()->count();
+        if ($count == 1) {
+            $res = binary_data::where('posid', $parentid)->where('position', $position)->first();
+            return $cid = $res->userid;
+        } else {
+            return -1;
+        }
     }
 
-    public function kyc()
+    function getLastChildOfLR1($refid = '', $position = '')
     {
-        return $this->hasOne(UserKyc::class, 'user_id', '_id');
+        $parentid = $refid;
+        $childid = self::getTreeChildId1($parentid, $position);
+        if ($childid != '-1') {
+            $mid = $childid;
+        } else {
+            $mid = $parentid;
+        }
+        $flag = 0;
+        while ($mid != '' || $mid != '0') {
+            $count = Binary_data::where('userid', $mid)->get()->count();
+            if ($count == 1) {
+                $nextchildid = self::getTreeChildId1($mid, $position);
+                if ($nextchildid == '-1') {
+                    $flag = 1;
+                    break;
+                } else {
+                    $mid = $nextchildid;
+                }
+            }  // if
+            else
+                break;
+        }  // while
+        return $mid;
     }
 
-    public function roleTable()
+    function add_wallet($key, $uid, $payout)
     {
-        return $this->hasOne(Role::class, '_id', 'role_id');
-    }
-    public function hasPermissionTo($permission)
-    {
-        if(Auth::user()->role=='supperadmin')
-        return true;
-
-        return in_array($permission, $this->roleTable->permissions ?? []);
+        $res = Wallet::where('userid', $uid)->first();
+        if (!empty($res)) {
+            if ($key == 1) {
+                $save = Wallet::where('userid', $uid)->update(array('earning' => $res->earning + $payout));
+            } elseif ($key == 2) {
+                $save = Wallet::where('userid', $uid)->update(array('sp' => $res->sp + $payout));
+            } elseif ($key == 3) {
+                $save = Wallet::where('userid', $uid)->update(array('bp' => $res->bp + $payout));
+            } elseif ($key == 4) {
+                $save = Wallet::where('userid', $uid)->update(array('unicash' => $res->unicash + $payout));
+            } elseif ($key == 5) {
+                $save = Wallet::where('userid', $uid)->update(array('amount' => $res->amount + $payout));
+            }
+            if ($save) {
+                $msg = true;
+            } else {
+                $msg = $save->save();
+            }
+            return $msg;
+        }
     }
 }

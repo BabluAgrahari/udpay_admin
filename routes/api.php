@@ -63,17 +63,19 @@ Route::controller(AuthController::class)->group(function () {
 });
 
 
-Route::controller(RegisterController::class)->group(function () {
-    Route::post('register', 'store');
-    Route::post('user-availability', 'userAvailability');
-    Route::post('verify-otp', 'verifyOtp');
-    Route::post('resend-otp', 'resendOtp');
-    Route::post('test-1', 'test1');
-});
+// Route::controller(RegisterController::class)->group(function () {
+//     Route::post('register', 'store');
+//     Route::post('user-availability', 'userAvailability');
+//     Route::post('verify-otp', 'verifyOtp');
+//     Route::post('resend-otp', 'resendOtp');
+//     Route::post('test-1', 'test1');
+// });
 
 Route::get('appPopup', [AppPopupController::class, 'getList']);
 
 Route::group(['middleware' => ['jwt.verify']], function () {
+
+    Route::get('profile', [AuthController::class, 'getProfile']);
 
     //wallet
     Route::get('wallet', [WalletController::class, 'index']);
@@ -96,7 +98,6 @@ Route::group(['middleware' => ['jwt.verify']], function () {
     Route::post('get-reset-epin-otp', [UpinController::class, 'get_reset_epin_otp']);
     Route::post('verify-reset-epin-otp', [UpinController::class, 'verify_reset_epin_otp']);
 
-    Route::get('user-current-data', [AuthController::class, 'currentData']);
 
     Route::post('send-money', [SendMoneyController::class, 'sendMoney']);
 

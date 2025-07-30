@@ -8,7 +8,7 @@ use App\Observers\Timestamp;
 
 class UserWallet extends BaseModel
 {
-    protected $collection = 'user_wallet';
+    protected $table = 'user_wallet';
     
     protected $fillable = [
         'user_id',

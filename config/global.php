@@ -17,5 +17,6 @@ return [
         'transfer_history',
         'pickup_address',
         'slider'
-    ]
+    ],
+    'otpExpired' => 10
 ];
