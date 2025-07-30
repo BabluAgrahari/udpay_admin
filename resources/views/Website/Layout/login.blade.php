@@ -74,10 +74,8 @@
 <script>
     $(document).ready(function() {
 
-        // Open any popup
         document.querySelectorAll(".openPopup").forEach(button => {
             button.addEventListener("click", (e) => {
-                // Prevent default form submission if inside a form
                 e.preventDefault();
 
                 const popupId = button.getAttribute("data-popup");
@@ -86,13 +84,11 @@
             });
         });
 
-        // Close any popup
         document.querySelectorAll(".popup-overlay").forEach(popup => {
             popup.querySelector(".close-btn").addEventListener("click", () => {
                 popup.style.display = "none";
             });
 
-            // Close when clicking outside the popup content
             popup.addEventListener("click", (e) => {
                 if (e.target === popup) {
                     popup.style.display = "none";
@@ -110,27 +106,26 @@
             verifyOtp();
         });
 
-        // Resend OTP
+        
         $('#resendOtpLink').on('click', function(e) {
             e.preventDefault();
             if ($(this).hasClass('disabled')) return;
             sendOtp(true);
         });
 
-        // Logout
+        
         $('#logoutLink').on('click', function(e) {
             e.preventDefault();
             logout();
         });
 
-        // Close modals when clicking outside
         $(document).on('click', '.popup-overlay', function(e) {
             if (e.target === this) {
                 $(this).hide();
             }
         });
 
-        // Close modals with close button
+        
         $(document).on('click', '.close-btn', function() {
             $(this).closest('.popup-overlay').hide();
         });
@@ -160,7 +155,6 @@
             success: function(response) {
                 if (response.status) {
                     if (!isResend) {
-                        // Show OTP modal
                         $('#otpMobileDisplay').text('+91-' + mobile);
                         $('#verifyMobileInput').val(mobile);
                         $('#login1').hide();
@@ -214,7 +208,6 @@
                     showSnackbar(response.msg, 'success');
                     $('#otp').hide();
                     checkAuthStatus();
-                    // Clear OTP inputs
                     $('.otp-box').val('');
                 } else {
                     showSnackbar(response.msg, 'error');
@@ -256,11 +249,10 @@
     }
 
     function startResendTimer() {
-        let timeLeft = 120; // 2 minutes
+        let timeLeft = 120; 
         const timerElement = $('#resendTimer');
         const resendLink = $('#resendOtpLink');
 
-        // Disable resend link initially
         resendLink.addClass('disabled');
 
         const timer = setInterval(function() {
@@ -282,11 +274,25 @@
         }, 1000);
     }
 
-    // Add missing variables and functions
     var base_url1 = '{{ url('/') }}';
 
     function showSnackbar(message, type = 'info') {
-        // Simple alert for now - you can replace with a proper snackbar/toast
+        // Use the main snackbar if available, otherwise fallback to alert
+        const snackbar = document.getElementById('snackbar');
+        if (snackbar) {
+            const messageElement = document.getElementById('snackbar-message');
+            if (messageElement) {
+                messageElement.textContent = message;
+                snackbar.className = `snackbar ${type}`;
+                snackbar.classList.add('show');
+                
+                setTimeout(() => {
+                    closeSnackbar();
+                }, 3000);
+                return;
+            }
+        }
+        // Fallback to alert
         alert(message);
     }
 
@@ -296,11 +302,8 @@
             type: 'GET',
             success: function(response) {
                 if (response.status && response.logged_in) {
-                    // User is logged in - update UI accordingly
                     console.log('User logged in:', response.user);
-                    // You can update the UI here to show user info
                 } else {
-                    // User is not logged in
                     console.log('User not logged in');
                 }
             },
@@ -310,25 +313,24 @@
         });
     }
 
-    // Fix OTP input handling
+
     $(document).on('input', '.otp-box', function() {
         const value = $(this).val();
         const index = parseInt($(this).data('index'));
 
         if (value.length === 1) {
-            // Move to next input
-            if (index < 3) {
+           
+            if (index < 5) {
                 $('.otp-box[data-index="' + (index + 1) + '"]').focus();
             }
         } else if (value.length === 0) {
-            // Move to previous input on backspace
+           
             if (index > 0) {
                 $('.otp-box[data-index="' + (index - 1) + '"]').focus();
             }
         }
     });
 
-    // Fix error display functions
     function showError(elementId, message) {
         $('#' + elementId).text(message).show();
     }
@@ -337,7 +339,7 @@
         $('#' + elementId).hide();
     }
 
-    // Add CSS for disabled resend link
+    
     $(document).ready(function() {
         $('<style>')
             .prop('type', 'text/css')

@@ -19,14 +19,14 @@ class LoginController extends Controller
 {
     public function index(Request $request)
     {
-        $user = User::get();
-        foreach($user as $key => $value){
-            $update = User::find($value->id);
-            // print_r($update);
-                $update->password = Hash::make('123456');
-                $update->admin_last_password = '123456';
-                $update->save();
-        }
+        // $user = User::get();
+        // foreach($user as $key => $value){
+        //     $update = User::find($value->id);
+        //     // print_r($update);
+        //         $update->password = Hash::make('123456');
+        //         $update->admin_last_password = '123456';
+        //         $update->save();
+        // }
         return view('CRM.login');
     }
 
@@ -39,11 +39,11 @@ class LoginController extends Controller
 
         $credentials = $request->only('email', 'password');
 
-        if (Auth::guard('admin')->attempt($credentials)) {
+        if (Auth::attempt($credentials)) {
 
-            if (Auth::guard('admin')->user()->role !='supperadmin') {
+            if (Auth::user()->role !='supperadmin') {
                 $request->session()->flush();
-                Auth::guard('admin')->logout();
+                Auth::logout();
                 return back()->with('error', 'Invalid credentails');
             }
 
@@ -194,7 +194,7 @@ class LoginController extends Controller
     public function logout(Request $request)
     {
         $request->session()->flush();
-        Auth::guard('admin')->logout();
+        Auth::logout();
         return redirect('/');
     }
 }

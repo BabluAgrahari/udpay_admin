@@ -118,9 +118,10 @@ class AuthController extends Controller
                 }
             }
 
-            Auth::guard('web')->login($user);
-
+            Auth::login($user);
             Session::forget(['otp', 'mobile', 'otp_expiry', 'otp_sent_time', 'otp_attempts']);
+
+           
 
             return $this->successMsg('Login successful!', ['user' => $user]);
         } catch (\Exception $e) {

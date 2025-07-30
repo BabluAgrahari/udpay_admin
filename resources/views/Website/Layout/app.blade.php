@@ -100,6 +100,45 @@
             align-items: center;
         }
 
+        .cart-loading.show {
+            display: flex;
+        }
+
+        .cart-loading .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #006038;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Button loading state */
+        .cart-btn.loading {
+            position: relative;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .cart-btn.loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 16px;
+            height: 16px;
+            margin: -8px 0 0 -8px;
+            border: 2px solid transparent;
+            border-top: 2px solid #ffffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
         /* Additional styles for static pages */
         .page-header {
             background: linear-gradient(135deg, #006038 0%, #008a4f 100%);
@@ -269,12 +308,16 @@
                             <li class="menu-item"><a href="contact-us.html">Contact Us</a></li>
                         </ul>
                         <div class="header-right">
+                            @if(!auth()->check())
                             <a href="#" data-popup="login1" class="openPopup thm-btn">Login/Sign</a>
+                            @endif
+
+                            @if(auth()->check())
                             <div class="profile-main">
-                                <a href="#" class="profile-icon">Abcd <i class="fa-solid fa-chevron-down"></i></a>
+                                <a href="#" class="profile-icon">{{ auth()->user()->name }} <i class="fa-solid fa-chevron-down"></i></a>
                                 <div class="profile-dropdown">
                                     <ul class="user-list-header">
-                                        <li><a href="dashboard.html"><i class="fa-solid fa-user"></i> My Account</a></li>
+                                        <li><a href="{{ url('profile') }}"><i class="fa-solid fa-user"></i> My Account</a></li>
                                         <!-- <li><a href="#"><i class="fa-solid fa-box"></i> Order History</a></li>
                                         <li><a href="#"><i class="fa-solid fa-book-bookmark"></i> Address Book</a></li> -->
                                         <li><a href="wishlist.html"><i class="fa-solid fa-heart"></i> My Wishlist</a></li>
@@ -282,6 +325,7 @@
                                     </ul>
                                 </div>
                             </div>
+                            @endif
                             <div class="header-profile">
                                 <div class="position-relative">
                                     <button id="searchToggle" class="profile-icon"><i class="fa-solid fa-magnifying-glass"></i></button>
@@ -382,32 +426,62 @@
    
    @include('Website.Layout.login')
    <script>
-     //for cart functio nality
+     //for cart functionality
      $(function () {
-    $(document).on("click", ".cart-btn", function () {
-        showCartLoading();
-        let product_id = $(this).data("id");
-        $.ajax({
-            type: "POST",
-            url: base_url + "/add-to-cart",
-            data: { product_id: product_id, '_token': '{{ csrf_token() }}' },
-            beforeSend: function () {},
-            dataType: "json",
-            success: function (response) {
-                showSnackbar(response.msg, 'success');
-                if(response.status){
-                    $(".total-cart-count").text(response.record.cartCount);
-                }
-            },
-            error: function (xhr, status, error) {
-                showSnackbar(xhr.responseJSON.msg, 'error');
-            },
-            complete: function () {
-                hideCartLoading();
-            },
+        $(document).on("click", ".cart-btn", function () {
+            const $btn = $(this);
+            const product_id = $btn.data("id");
+            
+            // Prevent multiple clicks
+            if ($btn.hasClass('loading')) {
+                return;
+            }
+            
+            // Add loading state to button
+            $btn.addClass('loading');
+            showCartLoading();
+            
+            $.ajax({
+                type: "POST",
+                url: base_url + "/add-to-cart",
+                data: { 
+                    product_id: product_id, 
+                    '_token': '{{ csrf_token() }}' 
+                },
+                beforeSend: function () {
+                    // Show loading state
+                    $btn.prop('disabled', true);
+                },
+                dataType: "json",
+                success: function (response) {
+                    if (response.status) {
+                        showSnackbar(response.msg || 'Product added to cart successfully!', 'success');
+                        if (response.record && response.record.cartCount) {
+                            $(".total-cart-count").text(response.record.cartCount);
+                        }
+                    } else {
+                        showSnackbar(response.msg || 'Failed to add product to cart', 'error');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    let errorMsg = 'Something went wrong. Please try again.';
+                    if (xhr.responseJSON && xhr.responseJSON.msg) {
+                        errorMsg = xhr.responseJSON.msg;
+                    } else if (xhr.status === 401) {
+                        errorMsg = 'Please login to add items to cart';
+                    } else if (xhr.status === 422) {
+                        errorMsg = 'Invalid product data';
+                    }
+                    showSnackbar(errorMsg, 'error');
+                },
+                complete: function () {
+                    // Remove loading states
+                    hideCartLoading();
+                    $btn.removeClass('loading').prop('disabled', false);
+                },
+            });
         });
     });
-});
 
 function showToast() {
     var toast = new bootstrap.Toast(document.getElementById("myToast"));
@@ -424,10 +498,16 @@ function showToast() {
          const snackbar = document.getElementById('snackbar');
          const messageElement = document.getElementById('snackbar-message');
          
+         if (!snackbar || !messageElement) {
+             console.error('Snackbar elements not found');
+             return;
+         }
+         
          messageElement.textContent = message;
          snackbar.className = `snackbar ${type}`;
          snackbar.classList.add('show');
          
+         // Auto-hide after duration
          setTimeout(() => {
              closeSnackbar();
          }, duration);
@@ -435,13 +515,20 @@ function showToast() {
 
      function closeSnackbar() {
          const snackbar = document.getElementById('snackbar');
-         snackbar.classList.remove('show');
+         if (snackbar) {
+             snackbar.classList.remove('show');
+         }
      }
 
      function showCartLoading() {
          const loading = document.querySelector('.cart-loading');
          if (loading) {
              loading.classList.add('show');
+             // Prevent body scroll when loading is shown
+             document.body.style.overflow = 'hidden';
+             console.log('Cart loading shown');
+         } else {
+             console.error('Cart loading element not found');
          }
      }
 
@@ -449,6 +536,11 @@ function showToast() {
          const loading = document.querySelector('.cart-loading');
          if (loading) {
              loading.classList.remove('show');
+             // Restore body scroll
+             document.body.style.overflow = '';
+             console.log('Cart loading hidden');
+         } else {
+             console.error('Cart loading element not found');
          }
      }
     

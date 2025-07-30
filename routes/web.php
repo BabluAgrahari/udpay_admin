@@ -30,13 +30,13 @@ Route::group(['middleware' => 'guest'], function () {
     Route::get('register', [LoginController::class, 'register']);
     Route::post('register', [LoginController::class, 'saveRegister']);
 
-    Route::get('/crm', function () {
-        return redirect('login');
-    });
+    // Route::get('/crm', function () {
+    //     return redirect('login');
+    // });
 });
 
 // Route::get('dashboard', [DashboardController::class, 'index']);
-Route::group(['prefix' => 'crm', 'middleware' => 'auth:admin'], function () {
+Route::group(['prefix' => 'crm', 'middleware' => 'auth'], function () {
 
    Route::get('dashboard', [DashboardController::class, 'index']);
 

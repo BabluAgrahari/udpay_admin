@@ -7,6 +7,7 @@ use App\Http\Controllers\Website\CartController;
 use App\Http\Controllers\Website\CheckoutController;
 use App\Http\Controllers\Website\StaticPageController;
 use App\Http\Controllers\Website\AuthController;
+use App\Http\Controllers\Website\AddressController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -24,6 +25,13 @@ Route::post('/clear-cart', [CartController::class, 'clearCart']);
 Route::get('/cart-summary', [CartController::class, 'getCartSummary']);
 Route::post('/checkout', [CheckoutController::class, 'checkout']);
 Route::get('/checkout', [CheckoutController::class, 'index']);
+
+// Address Routes
+Route::prefix('address')->group(function () {
+    Route::post('/', [AddressController::class, 'store']);
+    Route::put('/{id}', [AddressController::class, 'update']);
+    Route::post('/{id}/set-default', [AddressController::class, 'setDefault']);
+});
 
 // Static Pages Routes
 Route::get('/about-us', [StaticPageController::class, 'about'])->name('about');

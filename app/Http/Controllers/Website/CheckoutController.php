@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\UserAddress;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class CheckoutController extends Controller
 {
@@ -17,11 +18,15 @@ class CheckoutController extends Controller
     {
         $user = Auth::user();
 
-        $data['addresses'] = UserAddress::limit(5)->get();
-        // ->where('user_id', $user->id)
+        $data['addresses'] = UserAddress::where('user_id', $user->id)
+            ->where('add_status', 1)
+            ->orderBy('created_at', 'desc')->limit(5)
+            ->get();
+        $data['address'] = $data['addresses']->first();
+
         $data['user'] = $user;
 
-        $cartItems =  Cart::with('product')->get();
+        $cartItems = Cart::with('product')->get();
 
         $subtotal = $cartItems->sum(function ($item) {
             return $item->product ? $item->product->product_sale_price * $item->quantity : 0;
@@ -40,24 +45,99 @@ class CheckoutController extends Controller
         return view('Website.checkout', $data);
     }
 
-
-    public function saveAddress(Request $request)
+    public function checkout(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'address_id' => 'required|exists:user_address,id',
+            'payment_method' => 'required|in:cod,online',
+        ]);
+
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
+        }
+
         try {
+            DB::beginTransaction();
+
             $user = Auth::user();
-            $address = new UserAddress();
-            $address->user_id = $user->id;
-            $address->user_add_name = $request->user_add_name;
-            $address->user_add_mobile = $request->user_add_mobile;
-            $address->user_add_1 = $request->user_add_1;
-            $address->user_city = $request->user_city;
-            $address->user_state = $request->user_state;
-            $address->user_zip_code = $request->user_zip_code;
-            $address->address_type = $request->address_type;
-            $address->save();
-            return $this->successMsg('Address saved successfully',);
+
+            // Verify the address belongs to the user
+            $address = UserAddress::where('id', $request->address_id)
+                ->where('user_id', $user->id)
+                ->where('add_status', 1)
+                ->first();
+
+            if (!$address) {
+                return back()->with('error', 'Invalid address selected');
+            }
+
+            $cartItems = Cart::with('product')->get();
+
+            if ($cartItems->isEmpty()) {
+                return back()->with('error', 'Your cart is empty');
+            }
+
+            $subtotal = $cartItems->sum(function ($item) {
+                return $item->product ? $item->product->product_sale_price * $item->quantity : 0;
+            });
+
+            // Create order
+            $order = new Order();
+            $order->user_id = $user->id;
+            $order->order_number = 'ORD-' . time() . '-' . $user->id;
+            $order->order_date = now();
+            $order->total_amount = $subtotal;
+            $order->final_amount = $subtotal;
+            $order->payment_method = $request->payment_method;
+            $order->payment_status = $request->payment_method === 'cod' ? 'pending' : 'pending';
+            $order->order_status = $request->payment_method === 'cod' ? 'pending' : 'pending';
+            $order->status = 1;
+
+            // Store address information in delivery_address field
+            $deliveryAddress = [
+                'name' => $address->user_add_name,
+                'mobile' => $address->user_add_mobile,
+                'address' => $address->full_address,
+                'city' => $address->user_city,
+                'state' => $address->user_state,
+                'zip' => $address->user_zip_code,
+                'country' => $address->user_country,
+                'landmark' => $address->land_mark,
+            ];
+            $order->delivery_address = json_encode($deliveryAddress);
+
+            $order->save();
+
+            // Store products information
+            $products = [];
+            foreach ($cartItems as $cartItem) {
+                if ($cartItem->product) {
+                    $products[] = [
+                        'product_id' => $cartItem->product_id,
+                        'quantity' => $cartItem->quantity,
+                        'price' => $cartItem->product->product_sale_price,
+                        'total' => $cartItem->product->product_sale_price * $cartItem->quantity,
+                        'product_name' => $cartItem->product->product_name ?? '',
+                    ];
+                }
+            }
+            $order->products = json_encode($products);
+
+            // Clear cart
+            Cart::where('user_id', $user->id)->delete();
+
+            DB::commit();
+
+            if ($request->payment_method === 'cod') {
+                return redirect()->route('order.success', $order->id)
+                    ->with('success', 'Order placed successfully!');
+            } else {
+                // Redirect to payment gateway
+                return redirect()->route('payment.process', $order->id);
+            }
         } catch (\Exception $e) {
-            abort(500, $e->getMessage());
+            DB::rollback();
+            return back()->with('error', 'Failed to process order: ' . $e->getMessage());
         }
     }
 }

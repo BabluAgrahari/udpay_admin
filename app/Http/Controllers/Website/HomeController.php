@@ -6,12 +6,16 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Category;
 use App\Models\Product;
+use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
     public function index()
     {
         try {
+
+            // $user = Auth::guard('web')->user();
+
 
             $data['categories'] = Category::status()->where('parent_id', '0')->get();
             $category = Category::status()->where('parent_id', '0')->where('pro_section', 'primary')->get();
