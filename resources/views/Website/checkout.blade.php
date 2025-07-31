@@ -89,13 +89,13 @@
                             <div class="address-header">
                                 <h6 class="mb-2">{{ $address->user_add_name }}</h6>
                                 <div class="address-actions">
-                                    <button class="btn btn-sm btn-outline-primary edit-address" data-address-id="{{ $address->id }}" title="Edit Address">
+                                    <button class="btn btn-sm btn-outline-primary edit-address" style="margin-right: 15px;" data-address-id="{{ $address->id }}" title="Edit Address">
                                         <i class="fas fa-edit"></i>
                                     </button>
                                     <div class="default-checkbox-wrapper">
                                         <label class="default-checkbox-label">
-                                            <input type="checkbox" class="set-default-checkbox" data-address-id="{{ $address->id }}" {{ $address->is_default ? 'checked' : '' }}>
-                                            <span class="default-text">Default</span>
+                                            {{-- <input type="checkbox" class="set-default-checkbox" data-address-id="{{ $address->id }}" {{ $address->is_default ? 'checked' : '' }}>
+                                            <span class="default-text">Default</span> --}}
                                         </label>
                                     </div>
                                 </div>
@@ -110,7 +110,7 @@
                                     <button type="submit" class="thm-btn btn-small">Deliver Here</button>
                                 </form>
                                 <label class="select-add">
-                                    <input type="radio" name="address_id" value="{{ $address->id }}"> {{ ucfirst($address->address_type) }}
+                                    {{ ucfirst($address->address_for??'') }}
                                 </label>
                             </div>
                         </div>
@@ -166,12 +166,12 @@
 }
 
 .address-card:hover {
-    border-color: #007bff;
+    border-color: #006038;
     box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
 }
 
 .address-card.selected {
-    border-color: #007bff;
+    border-color: #006038;
     background-color: #f8f9ff;
     box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
 }
@@ -196,8 +196,8 @@
 }
 
 .edit-address {
-    background-color: #007bff;
-    border-color: #007bff;
+    background-color: #F1624B;
+    border-color: #F1624B;
     color: white;
     width: 32px;
     height: 32px;
@@ -210,8 +210,8 @@
 }
 
 .edit-address:hover {
-    background-color: #0056b3;
-    border-color: #0056b3;
+    background-color: #F1624B;
+    border-color: #F1624B;
     transform: scale(1.1);
 }
 

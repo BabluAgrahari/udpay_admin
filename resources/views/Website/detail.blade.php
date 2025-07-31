@@ -1,56 +1,427 @@
 <!-- banner-section start -->
 @extends('Website.Layout.app')
 @section('content')
+<style>
+    .product-details-image {
+        position: relative;
+        overflow: hidden;
+        border-radius: 8px;
+        background: #f8f9fa;
+    }
+    
+    .product-details-image img {
+        width: 100%;
+        height: 400px;
+        object-fit: cover;
+        transition: opacity 0.3s ease;
+        cursor: zoom-in;
+    }
+    
+    .product-details-image img.error {
+        opacity: 0.7;
+        filter: grayscale(20%);
+    }
+
+    /* Main Image Container */
+    .main-image-container {
+        margin-bottom: 15px;
+    }
+
+    .main-image-container .zoom-gallery {
+        width: 100%;
+        height: 400px;
+        border-radius: 8px;
+        overflow: hidden;
+        position: relative;
+        background: #f8f9fa;
+    }
+
+    .main-image-container .main-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+        cursor: zoom-in;
+    }
+
+    .main-image-container .zoom-gallery:hover .main-image {
+        transform: scale(1.05);
+    }
+
+    /* Thumbnail Gallery */
+    .thumbnail-gallery {
+        margin-top: 15px;
+    }
+
+    .thumb-container {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+
+    .thumb-item {
+        width: 80px;
+        height: 80px;
+        border-radius: 8px;
+        overflow: hidden;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .thumb-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .thumb-item.active {
+        border-color: #007bff;
+        box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+    }
+
+    .thumb-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: opacity 0.3s ease;
+    }
+
+    .thumb-item:hover img {
+        opacity: 0.8;
+    }
+
+    .thumb-item.active img {
+        opacity: 1;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .main-image-container .zoom-gallery {
+            height: 300px;
+        }
+
+        .thumb-container {
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .thumb-item {
+            width: 70px;
+            height: 70px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .main-image-container .zoom-gallery {
+            height: 250px;
+        }
+
+        .thumb-container {
+            gap: 6px;
+        }
+
+        .thumb-item {
+            width: 60px;
+            height: 60px;
+        }
+
+        .zoom-overlay img {
+            max-width: 95%;
+            max-height: 80%;
+        }
+
+        .zoom-nav {
+            padding: 10px 8px;
+            font-size: 18px;
+        }
+
+        .zoom-close {
+            width: 35px;
+            height: 35px;
+            font-size: 25px;
+        }
+    }
+    
+    .thumb-slider .swiper-slide img {
+        width: 100%;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: opacity 0.3s ease;
+    }
+    
+    .thumb-slider .swiper-slide img:hover {
+        opacity: 0.8;
+    }
+    
+    .thumb-slider .swiper-slide img.error {
+        opacity: 0.7;
+        filter: grayscale(20%);
+    }
+    
+    .swiper-slide-thumb-active img {
+        border: 2px solid #007bff;
+    }
+    
+    /* Loading state */
+    .image-loading {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+    }
+    
+    @keyframes loading {
+        0% {
+            background-position: 200% 0;
+        }
+        100% {
+            background-position: -200% 0;
+        }
+    }
+
+    /* Zoom Gallery Styles */
+    .zoom-gallery {
+        position: relative;
+        overflow: hidden;
+        border-radius: 8px;
+        background: #f8f9fa;
+    }
+
+    .zoom-gallery img {
+        width: 100%;
+        height: 400px;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+        cursor: zoom-in;
+    }
+
+    .zoom-gallery:hover img {
+        transform: scale(1.05);
+    }
+
+    .zoom-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        z-index: 9999;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        cursor: zoom-out;
+        transition: opacity 0.3s ease;
+    }
+
+    .zoom-overlay img {
+        max-width: 90%;
+        max-height: 90%;
+        object-fit: contain;
+        border-radius: 8px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        transition: opacity 0.3s ease;
+    }
+
+    .zoom-close {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        color: white;
+        font-size: 30px;
+        cursor: pointer;
+        z-index: 10000;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.3s ease;
+    }
+
+    .zoom-close:hover {
+        background: rgba(0, 0, 0, 0.8);
+    }
+
+    .zoom-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(0, 0, 0, 0.5);
+        color: white;
+        border: none;
+        padding: 15px 10px;
+        cursor: pointer;
+        font-size: 20px;
+        border-radius: 4px;
+        transition: background 0.3s ease;
+    }
+
+    .zoom-nav:hover {
+        background: rgba(0, 0, 0, 0.8);
+    }
+
+    .zoom-prev {
+        left: 20px;
+    }
+
+    .zoom-next {
+        right: 20px;
+    }
+
+    .zoom-counter {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: white;
+        background: rgba(0, 0, 0, 0.5);
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+    }
+
+    /* Enhanced thumbnail styles */
+    .thumb-slider {
+        margin-top: 15px;
+    }
+
+    .thumb-slider .swiper-slide {
+        opacity: 0.6;
+        transition: opacity 0.3s ease;
+    }
+
+    .thumb-slider .swiper-slide-thumb-active {
+        opacity: 1;
+    }
+
+    .thumb-slider .swiper-slide img {
+        border: 2px solid transparent;
+        transition: border-color 0.3s ease;
+    }
+
+    .thumb-slider .swiper-slide-thumb-active img {
+        border-color: #007bff;
+    }
+
+    /* Image zoom indicator */
+    .zoom-indicator {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 15px;
+        font-size: 12px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .zoom-gallery:hover .zoom-indicator {
+        opacity: 1;
+    }
+
+    /* Loading spinner for zoom images */
+    .zoom-loading {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 40px;
+        height: 40px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-top: 3px solid #fff;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        z-index: 10001;
+    }
+
+    @keyframes spin {
+        0% { transform: translate(-50%, -50%) rotate(0deg); }
+        100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    /* Enhanced zoom gallery hover effects */
+    .zoom-gallery {
+        position: relative;
+        overflow: hidden;
+        border-radius: 8px;
+        background: #f8f9fa;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .zoom-gallery:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .zoom-gallery img {
+        width: 100%;
+        height: 400px;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+        cursor: zoom-in;
+    }
+
+    .zoom-gallery:hover img {
+        transform: scale(1.05);
+    }
+</style>
 <section class="section-padding pt-5" >
     <div class="container">
         <div class="row">
             <div class="col-lg-5">
                 <div class="product-slider-wrapper">
-                    <!-- Main Image Slider -->
-                    <div class="swiper main-slider">
-                        <div class="swiper-wrapper">
-                            <div class="swiper-slide">
-                                <div class="product-details-image">
-                                    <img src="{{ asset('front_assets') }}/images/product-details/bg1.png" class="main-image" />
-                                    <!-- <span class="prod-wish"><i class="fa-regular fa-heart"></i></span> -->
-                                </div>
-                            </div>
-                            <div class="swiper-slide">
-                                <div class="product-details-image">
-                                    <img src="{{ asset('front_assets') }}/images/product-details/bg1.png" class="main-image" />
-                                     <!-- <span class="prod-wish"><i class="fa-regular fa-heart"></i></span> -->
-                                </div>
-                            </div>
-                            <div class="swiper-slide">
-                                <div class="product-details-image">
-                                    <img src="{{ asset('front_assets') }}/images/product-details/bg1.png" class="main-image" />
-                                     <!-- <span class="prod-wish"><i class="fa-regular fa-heart"></i></span> -->
-                                </div>
-                            </div>
-                            <div class="swiper-slide">
-                                <div class="product-details-image">
-                                    <img src="{{ asset('front_assets') }}/images/product-details/bg1.png" class="main-image" />
-                                     <!-- <span class="prod-wish"><i class="fa-regular fa-heart"></i></span> -->
-                                </div>
-                            </div>
-                            <div class="swiper-slide">
-                                <div class="product-details-image">
-                                    <img src="{{ asset('front_assets') }}/images/product-details/bg1.png" class="main-image" />
-                                     <!-- <span class="prod-wish"><i class="fa-regular fa-heart"></i></span> -->
-                                </div>
-                            </div>
+                    <!-- Single Main Image Display -->
+                    <div class="main-image-container">
+                        <div class="zoom-gallery" id="mainImageContainer">
+                            @if($product->product_image)
+                                <img src="{{ getImageWithFallback($product->product_image) }}" class="main-image zoom-image" alt="{{ $product->product_name }}" data-index="0" />
+                            @elseif($product->images->count() > 0)
+                                <img src="{{ getImageWithFallback($product->images->first()->image) }}" class="main-image zoom-image" alt="{{ $product->product_name }}" data-index="0" />
+                            @else
+                                <img src="{{ asset('front_assets/images/no-image.svg') }}" class="main-image" alt="No image available" />
+                            @endif
+                            <div class="zoom-indicator">Click to zoom</div>
                         </div>
                     </div>
-                    <!-- Thumbnail Slider -->
-                    <div class="swiper thumb-slider">
-                        <div class="swiper-wrapper">
-                            <div class="swiper-slide"><img src="{{ asset('front_assets') }}/images/product-details/sm1.png" class="thumb" /></div>
-                            <div class="swiper-slide"><img src="{{ asset('front_assets') }}/images/product-details/sm2.png" class="thumb" /></div>
-                            <div class="swiper-slide"><img src="{{ asset('front_assets') }}/images/product-details/sm3.png" class="thumb" /></div>
-                            <div class="swiper-slide"><img src="{{ asset('front_assets') }}/images/product-details/sm4.png" class="thumb" /></div>
-                            <div class="swiper-slide"><img src="{{ asset('front_assets') }}/images/product-details/sm3.png" class="thumb" /></div>
+                    
+                    <!-- Thumbnail Gallery -->
+                    <div class="thumbnail-gallery">
+                        <div class="thumb-container">
+                            @if($product->product_image)
+                                <div class="thumb-item active" data-src="{{ getImageWithFallback($product->product_image) }}" data-index="0">
+                                    <img src="{{ getImageWithFallback($product->product_image) }}" class="thumb" alt="{{ $product->product_name }}" />
+                                </div>
+                            @endif
+                            @foreach($product->images as $index => $image)
+                                <div class="thumb-item {{ !$product->product_image && $index == 0 ? 'active' : '' }}" data-src="{{ getImageWithFallback($image->image) }}" data-index="{{ $product->product_image ? $index + 1 : $index }}">
+                                    <img src="{{ getImageWithFallback($image->image) }}" class="thumb" alt="{{ $product->product_name }}" />
+                                </div>
+                            @endforeach
+                            @if(!$product->product_image && $product->images->count() == 0)
+                                <div class="thumb-item active" data-src="{{ asset('front_assets/images/no-image.svg') }}" data-index="0">
+                                    <img src="{{ asset('front_assets/images/no-image.svg') }}" class="thumb" alt="No image available" />
+                                </div>
+                            @endif
                         </div>
                     </div>
+                </div>
+
+                <!-- Zoom Overlay -->
+                <div class="zoom-overlay" id="zoomOverlay">
+                    <div class="zoom-close" id="zoomClose">&times;</div>
+                    <button class="zoom-nav zoom-prev" id="zoomPrev">‹</button>
+                    <button class="zoom-nav zoom-next" id="zoomNext">›</button>
+                    <div class="zoom-counter" id="zoomCounter">1 / 1</div>
+                    <div class="zoom-loading" id="zoomLoading"></div>
+                    <img id="zoomImage" src="" alt="Zoomed Image" />
                 </div>
                 <div class="text-center py-3">
                     <img src="{{ asset('front_assets') }}/images/product-details/ayurveda.png" class="" alt="img" />
@@ -60,8 +431,8 @@
             <div class="col-lg-7">
                 <div class="product-details-right">
                     <div class="product-details">
-                        <span class="color-one border-bottom">Detox</span>
-                        <h1 class="title">Nutraoshadhi d-tox green tea with vitamin-c and lemon flavor 60-tablet</h1>                        
+                        <span class="color-one border-bottom">{{ $product->category->name ?? 'Category' }}</span>
+                        <h1 class="title">{{ $product->product_name }}</h1>                        
                         <div class="rating ">
                             <div>
                                 <i class="fa fa-star"></i>
@@ -72,14 +443,22 @@
                             </div> 4<span>(39 Reviews)</span>
                         </div>
                         <div class="box-color">
-                            <p class="color-one mb-0">Reduced Blood Sugar by 30% in 3 Months* as per an ICMR-compliant clinical study on subjects with T2DM. Can consume with Allopathic Medicines also.</p>
+                            <p class="color-one mb-0">{{ $product->product_short_description ?? 'Product description not available.' }}</p>
                         </div>
                         <div class="price-box">
-                            <span class="current-price">Price: ₹5,149</span>
-                            <span class="old-price">Price: ₹199</span>
+                            <span class="current-price">Price: ₹{{ number_format($product->product_sale_price, 2) }}</span>
+                            <span class="old-price">Price: ₹{{ number_format($product->mrp, 2) }}</span>
                         </div>
                         <div class="price-box mt-0">
-                            <span class="discount color-two">6% OFF</span>
+                            @php
+                                $discount = 0;
+                                if($product->mrp > 0) {
+                                    $discount = round((($product->mrp - $product->product_sale_price) / $product->mrp) * 100);
+                                }
+                            @endphp
+                            @if($discount > 0)
+                                <span class="discount color-two">{{ $discount }}% OFF</span>
+                            @endif
                             <span class="tax-info color-two">Inclusive of all taxes</span>
                         </div>
                         <div class="qty-cart">
@@ -95,7 +474,7 @@
                             </div>
                         </div>
                         <div class="details-add-btn">
-                            <a href="cart.html" class="thm-btn add-to-cart">Add to cart</a>
+                            <a href="javascript:void(0)" data-id="{{ $product->id }}" class="thm-btn add-to-cart">Add to cart</a>
                             <a href="#" class="thm-btn buy-now">Quick Buy</a>
                             <a href="#" class="thm-btn bg-light w-100">Add to wishlist</a>
                         </div>
@@ -114,9 +493,11 @@
                         <div class="box-color">
                             <p class="mb-0 text-black">Product Details</p>
                             <ul class="delivery-service-list">
-                                <li>Natural Detox Formula: Infused with Green Tea & Grape Seed Extract, these tablets help cleanse your system and support healthy digestion naturally.</li>
-                                <li>Rich in Antioxidants: Packed with the goodness of Tulsi, Ginger, Lemon, Black Pepper, and Cinnamon to boost immunity and fight oxidative stress.</li>
-                                <li>Convenient Wellness: Comes in a 60-tablet bottle—an easy, no-brew way to enjoy the benefits of detox tea daily.</li>
+                                @if($product->product_description)
+                                    {!! nl2br(e($product->product_description)) !!}
+                                @else
+                                    <li>Product description not available.</li>
+                                @endif
                             </ul>
                         </div>
                     </div>
@@ -752,6 +1133,7 @@
 
  @push('scripts')
 
+
  <script>
     // Open any popup
     document.querySelectorAll(".openPopup").forEach(button => {
@@ -780,23 +1162,235 @@
     });
   </script>
   <script>
-    const thumbSwiper = new Swiper(".thumb-slider", {
-      slidesPerView: 4,
-      spaceBetween: 10,
-      watchSlidesProgress: true,
-      loop: true,
-    });
-  
-    const mainSwiper = new Swiper(".main-slider", {
-      spaceBetween: 10,
-      loop: true,
-      thumbs: {
-        swiper: thumbSwiper,
-      },
-    });
-  </script>
-  <script>
   document.addEventListener('DOMContentLoaded', function () {
+    // Handle image loading errors
+    const images = document.querySelectorAll('.product-details-image img, .thumb-item img, .zoom-gallery img');
+    images.forEach(img => {
+      img.addEventListener('error', function() {
+        this.src = '{{ asset("front_assets/images/no-image.svg") }}';
+        this.classList.add('error');
+      });
+      
+      img.addEventListener('load', function() {
+        this.classList.remove('error');
+      });
+    });
+
+    // Thumbnail Gallery Functionality
+    const mainImage = document.querySelector('.main-image-container .main-image');
+    const thumbItems = document.querySelectorAll('.thumb-item');
+    const zoomImages = document.querySelectorAll('.zoom-image');
+    
+    // Handle thumbnail clicks
+    thumbItems.forEach(item => {
+      item.addEventListener('click', function() {
+        const imageSrc = this.getAttribute('data-src');
+        const imageIndex = this.getAttribute('data-index');
+        
+        // Update main image
+        if (mainImage) {
+          mainImage.src = imageSrc;
+          mainImage.setAttribute('data-index', imageIndex);
+        }
+        
+        // Update active thumbnail
+        thumbItems.forEach(thumb => thumb.classList.remove('active'));
+        this.classList.add('active');
+        
+        // Update current zoom index
+        currentZoomIndex = parseInt(imageIndex);
+      });
+    });
+
+    // Zoom Gallery Functionality
+    const zoomOverlay = document.getElementById('zoomOverlay');
+    const zoomImage = document.getElementById('zoomImage');
+    const zoomClose = document.getElementById('zoomClose');
+    const zoomPrev = document.getElementById('zoomPrev');
+    const zoomNext = document.getElementById('zoomNext');
+    const zoomCounter = document.getElementById('zoomCounter');
+    const zoomLoading = document.getElementById('zoomLoading');
+    
+    let currentZoomIndex = 0;
+    let totalImages = thumbItems.length;
+    let startX = 0;
+    let startY = 0;
+
+    // Preload images for better performance
+    function preloadImages() {
+      thumbItems.forEach(item => {
+        const imgSrc = item.getAttribute('data-src');
+        const preloadImg = new Image();
+        preloadImg.src = imgSrc;
+      });
+    }
+
+    // Touch/swipe support
+    function handleTouchStart(e) {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    }
+
+    function handleTouchEnd(e) {
+      if (!startX || !startY) return;
+
+      const endX = e.changedTouches[0].clientX;
+      const endY = e.changedTouches[0].clientY;
+      const diffX = startX - endX;
+      const diffY = startY - endY;
+
+      // Check if it's a horizontal swipe
+      if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+        if (diffX > 0) {
+          navigateZoom(1); // Swipe left - next
+        } else {
+          navigateZoom(-1); // Swipe right - previous
+        }
+      }
+
+      startX = 0;
+      startY = 0;
+    }
+
+    // Add touch event listeners
+    zoomOverlay.addEventListener('touchstart', handleTouchStart, { passive: true });
+    zoomOverlay.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+    // Open zoom overlay
+    if (mainImage) {
+      mainImage.addEventListener('click', function() {
+        currentZoomIndex = parseInt(this.getAttribute('data-index') || 0);
+        openZoomOverlay();
+      });
+    }
+
+    // Close zoom overlay
+    zoomClose.addEventListener('click', closeZoomOverlay);
+    zoomOverlay.addEventListener('click', function(e) {
+      if (e.target === zoomOverlay) {
+        closeZoomOverlay();
+      }
+    });
+
+    // Navigation
+    zoomPrev.addEventListener('click', function(e) {
+      e.stopPropagation();
+      navigateZoom(-1);
+    });
+
+    zoomNext.addEventListener('click', function(e) {
+      e.stopPropagation();
+      navigateZoom(1);
+    });
+
+    // Keyboard navigation
+    document.addEventListener('keydown', function(e) {
+      if (zoomOverlay.style.display === 'flex') {
+        switch(e.key) {
+          case 'Escape':
+            closeZoomOverlay();
+            break;
+          case 'ArrowLeft':
+            navigateZoom(-1);
+            break;
+          case 'ArrowRight':
+            navigateZoom(1);
+            break;
+        }
+      }
+    });
+
+    function openZoomOverlay() {
+      if (totalImages === 0) return;
+      
+      zoomOverlay.style.display = 'flex';
+      updateZoomImage();
+      updateZoomCounter();
+      document.body.style.overflow = 'hidden';
+      
+      // Add fade-in effect
+      zoomOverlay.style.opacity = '0';
+      setTimeout(() => {
+        zoomOverlay.style.opacity = '1';
+      }, 10);
+    }
+
+    function closeZoomOverlay() {
+      zoomOverlay.style.opacity = '0';
+      setTimeout(() => {
+        zoomOverlay.style.display = 'none';
+        document.body.style.overflow = 'auto';
+      }, 300);
+    }
+
+    function navigateZoom(direction) {
+      currentZoomIndex += direction;
+      
+      if (currentZoomIndex < 0) {
+        currentZoomIndex = totalImages - 1;
+      } else if (currentZoomIndex >= totalImages) {
+        currentZoomIndex = 0;
+      }
+      
+      // Update main image and thumbnail
+      const targetThumb = document.querySelector(`[data-index="${currentZoomIndex}"]`);
+      if (targetThumb) {
+        const imageSrc = targetThumb.getAttribute('data-src');
+        
+        // Update main image
+        if (mainImage) {
+          mainImage.src = imageSrc;
+          mainImage.setAttribute('data-index', currentZoomIndex);
+        }
+        
+        // Update active thumbnail
+        thumbItems.forEach(thumb => thumb.classList.remove('active'));
+        targetThumb.classList.add('active');
+      }
+      
+      updateZoomImage();
+      updateZoomCounter();
+    }
+
+    function updateZoomImage() {
+      const currentThumb = document.querySelector(`[data-index="${currentZoomIndex}"]`);
+      if (currentThumb) {
+        const imageSrc = currentThumb.getAttribute('data-src');
+        
+        // Show loading spinner
+        zoomLoading.style.display = 'block';
+        zoomImage.style.opacity = '0';
+        
+        // Create a new image to check if it's already loaded
+        const tempImg = new Image();
+        tempImg.onload = function() {
+          zoomImage.src = imageSrc;
+          zoomImage.alt = currentThumb.querySelector('img').alt;
+          zoomImage.style.opacity = '1';
+          zoomLoading.style.display = 'none';
+        };
+        tempImg.onerror = function() {
+          zoomImage.src = '{{ asset("front_assets/images/no-image.svg") }}';
+          zoomImage.alt = 'Image not available';
+          zoomImage.style.opacity = '1';
+          zoomLoading.style.display = 'none';
+        };
+        tempImg.src = imageSrc;
+      }
+    }
+
+    function updateZoomCounter() {
+      zoomCounter.textContent = `${currentZoomIndex + 1} / ${totalImages}`;
+      
+      // Show/hide navigation buttons
+      zoomPrev.style.display = totalImages > 1 ? 'block' : 'none';
+      zoomNext.style.display = totalImages > 1 ? 'block' : 'none';
+      zoomCounter.style.display = totalImages > 1 ? 'block' : 'none';
+    }
+
+    // Initialize preloading
+    preloadImages();
+
     const quantityControls = document.querySelectorAll('.quantity');
   
     quantityControls.forEach(control => {
@@ -814,6 +1408,51 @@
       plusBtn.addEventListener('click', () => {
         let currentValue = parseInt(input.value);
         input.value = currentValue + 1;
+      });
+    });
+
+    // Add to cart functionality
+    document.querySelectorAll('.add-to-cart').forEach(button => {
+      button.addEventListener('click', function() {
+        const productId = this.getAttribute('data-id');
+        const quantityInput = document.querySelector('.quantity input');
+        const quantity = quantityInput ? parseInt(quantityInput.value) : 1;
+        
+        // Show loading state
+        this.textContent = 'Adding...';
+        this.disabled = true;
+        
+        fetch('/add-to-cart', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+          },
+          body: JSON.stringify({
+            product_id: productId,
+            quantity: quantity
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Show success message
+            alert('Product added to cart successfully!');
+            // Reset button
+            this.textContent = 'Add to cart';
+            this.disabled = false;
+          } else {
+            alert(data.message || 'Failed to add product to cart');
+            this.textContent = 'Add to cart';
+            this.disabled = false;
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('An error occurred while adding to cart');
+          this.textContent = 'Add to cart';
+          this.disabled = false;
+        });
       });
     });
   });

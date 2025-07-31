@@ -9,9 +9,17 @@ use App\Http\Controllers\Controller;
 
 class ProductDetailController extends Controller
 {
-    public function index($id)
+    public function index($slug)
     {
-        $product = Product::find($id);
-        return view('Website.product_detail', compact('product'));
+        $product = Product::with(['images', 'category', 'brand', 'unit'])
+            ->where('slug_url', $slug)
+            ->where('status', '1')
+            ->first();
+        
+        if (!$product) {
+            abort(404, 'Product not found');
+        }
+        
+        return view('Website.detail', compact('product'));
     }
 }
