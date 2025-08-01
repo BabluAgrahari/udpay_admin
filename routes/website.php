@@ -21,6 +21,8 @@ Route::post('/signup/resend-otp', [SignupController::class, 'resendOtp']);
 Route::post('/signup/complete', [SignupController::class, 'completeRegistration']);
 
 
+
+
 Route::get('/sitemap.xml', function () {
     return response()->view('sitemap')->header('Content-Type', 'text/xml');
 });
