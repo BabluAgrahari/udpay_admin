@@ -209,6 +209,7 @@
                     $('#otp').hide();
                     checkAuthStatus();
                     $('.otp-box').val('');
+                    location.reload();
                 } else {
                     showSnackbar(response.msg, 'error');
                 }

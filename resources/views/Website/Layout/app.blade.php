@@ -321,7 +321,7 @@
                                         <!-- <li><a href="#"><i class="fa-solid fa-box"></i> Order History</a></li>
                                         <li><a href="#"><i class="fa-solid fa-book-bookmark"></i> Address Book</a></li> -->
                                         <li><a href="{{ url('wishlist') }}"><i class="fa-solid fa-heart"></i> My Wishlist</a></li>
-                                        <li><a href="#"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a></li>
+                                            <li><a href="{{ url('logout') }}"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a></li>
                                     </ul>
                                 </div>
                             </div>

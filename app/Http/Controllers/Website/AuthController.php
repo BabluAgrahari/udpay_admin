@@ -47,11 +47,11 @@ class AuthController extends Controller
 
             $expiryTime = now()->addMinutes(5);
 
-            // $smsService = new SmsService();
-            // $res = $smsService->sendOtp($mobile, $otp);
-            // if ($res['status'] == false) {
-            //     return $this->failMsg($res['msg']);
-            // }
+            $smsService = new SmsService();
+            $res = $smsService->sendMessage('send_otp', $mobile, $otp);
+            if ($res['status'] == false) {
+                return $this->failMsg($res['msg']);
+            }
 
             Session::put('otp', $otp);
             Session::put('mobile', $mobile);
@@ -61,7 +61,7 @@ class AuthController extends Controller
 
             return $this->successMsg('OTP sent successfully to +91-' . $mobile, ['otp' => $otp, 'mobile' => $mobile]);
         } catch (\Exception $e) {
-            return $this->failMsg('Something went wrong. Please try again.');
+            return $this->failMsg($e->getMessage());
         }
     }
 
@@ -121,53 +121,28 @@ class AuthController extends Controller
             Auth::login($user);
             Session::forget(['otp', 'mobile', 'otp_expiry', 'otp_sent_time', 'otp_attempts']);
 
-           
-
             return $this->successMsg('Login successful!', ['user' => $user]);
         } catch (\Exception $e) {
-            return $this->failMsg('Something went wrong. Please try again.');
+            return $this->failMsg($e->getMessage());
         }
     }
 
     public function logout(Request $request)
     {
         try {
-            $user = Auth::guard('web')->user();
-
-            Auth::guard('web')->logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-
-            if ($user) {
-                Log::info('User logged out', [
-                    'user_id' => $user->_id,
-                    'mobile' => $user->mobile,
-                    'ip' => $request->ip()
-                ]);
-            }
-
-            return response()->json([
-                'status' => true,
-                'msg' => 'Logged out successfully'
-            ]);
+            Auth::logout();
+            Session::flush();
+            return redirect()->route('home');
         } catch (\Exception $e) {
-            Log::error('Error during logout', [
-                'error' => $e->getMessage(),
-                'ip' => $request->ip()
-            ]);
-
-            return response()->json([
-                'status' => false,
-                'msg' => 'Something went wrong during logout.'
-            ], 500);
+            return redirect()->route('home');
         }
     }
 
     public function checkAuth()
     {
         try {
-            if (Auth::guard('web')->check()) {
-                $user = Auth::guard('web')->user();
+            if (Auth::check()) {    
+                $user = Auth::user();
                 return response()->json([
                     'status' => true,
                     'logged_in' => true,
@@ -204,9 +179,10 @@ class AuthController extends Controller
 
         $customer = new Customer();
         $customer->mobile = $mobile;
-        $customer->usre_id = $user_id;
+        $customer->user_id = $user_id;
         $customer->user_num = $user_nm;
-        $customer->alpha_num_uid = 'UNI'.$user_nm;
+        $customer->alpha_num_uid = 'UNI' . $user_nm;
+        $customer->role = 'customer';
         $customer->isactive = 1;
         return $customer->save() ? $customer : null;
     }

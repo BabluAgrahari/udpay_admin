@@ -59,7 +59,7 @@ Route::get('/compliance-documents', [StaticPageController::class, 'complianceDoc
 // Auth Routes
 Route::post('/send-otp', [AuthController::class, 'sendOtp']);
 Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
-Route::post('/logout', [AuthController::class, 'logout']);
+Route::get('/logout', [AuthController::class, 'logout']);
 Route::get('/check-auth', [AuthController::class, 'checkAuth']);
 
 Route::get('/sitemap.xml', function () {
