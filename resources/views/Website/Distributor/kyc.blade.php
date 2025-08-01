@@ -8,6 +8,10 @@
         cursor: pointer;
     }
 
+    .form-label {
+        margin-bottom: .1rem !important;
+    }
+
     .step-indicator.active {
         background-color: rgba(1, 96, 56, 0.1);
         color: var(--brand-green);
@@ -124,24 +128,24 @@
     .form-navigation .btn {
         min-width: 140px;
     }
-    
+
     /* Validation Styles */
     .is-invalid {
         border-color: #dc3545 !important;
         box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
     }
-    
+
     .error-message {
         color: #dc3545;
         font-size: 0.875rem;
         margin-top: 0.25rem;
     }
-    
+
     .form-control.is-invalid:focus {
         border-color: #dc3545;
         box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
     }
-    
+
     .form-select.is-invalid:focus {
         border-color: #dc3545;
         box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
@@ -182,81 +186,105 @@
             </div>
 
             <!-- Form Steps -->
-           
-                <!-- Message Container -->
-                <div id="messageError" style="display: none;"></div>
-                <!-- Step 1: Personal Information -->
-                <div class="form-step active" id="step1">
-                    <h6 class="text-brand-green mb-3"><i class="fa-solid fa-user me-2"></i>Personal Information</h6>
-                    <form id="personalInfoForm" enctype="multipart/form-data">
+
+            <!-- Message Container -->
+            <div id="messageError" style="display: none;"></div>
+            <!-- Step 1: Personal Information -->
+            <div class="form-step active" id="step1">
+                <h6 class="text-brand-green mb-3"><i class="fa-solid fa-user me-2"></i>Personal Information</h6>
+                <form id="personalInfoForm" enctype="multipart/form-data" action="{{ url('distributor/kyc/personal-details') }}" method="post">
+                    @csrf
                     <div class="row">
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6 mb-2">
                             <label class="form-label">User ID <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" value="{{ $user->user_id }}" readonly required>
+                            <span class="text-danger error" id="user_id_error"></span>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6 mb-2">
                             <label class="form-label">Referral ID <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" value="{{ $user->ref_id??'' }}" readonly required>
+                            <input type="text" class="form-control" value="{{ $user->ref_id ?? '' }}" readonly
+                                required>
+                            <span class="text-danger error" id="ref_id_error"></span>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6 mb-2">
                             <label class="form-label">Full Name <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="name" value="{{ $kyc->name??'' }}" required>
+                            <input type="text" class="form-control" name="name" value="{{ $kyc->name ?? '' }}"
+                                required>
+                            <span class="text-danger error" id="name_error"></span>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6 mb-2">
                             <label class="form-label">Email Address <span class="text-danger">*</span></label>
-                            <input type="email" class="form-control" name="email" required value="{{ $user->email??'' }}">
+                            <input type="email" class="form-control" name="email" required
+                                value="{{ $user->email ?? '' }}">
+                            <span class="text-danger error" id="email_error"></span>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6 mb-2">
                             <label class="form-label">PIN Code <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="pincode" required value="{{ $kyc->pincode??'' }}">
+                            <input type="text" class="form-control" name="pincode" required
+                                value="{{ $kyc->pincode ?? '' }}">
+                            <span class="text-danger error" id="pincode_error"></span>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6 mb-2">
                             <label class="form-label">Locality <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="locality" required value="{{ $kyc->locality??'' }}">
+                            <input type="text" class="form-control" name="locality" required
+                                value="{{ $kyc->locality ?? '' }}">
+                            <span class="text-danger error" id="locality_error"></span>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6 mb-2">
                             <label class="form-label">City <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="district" required value="{{ $kyc->district??'' }}">
+                            <input type="text" class="form-control" name="district" required
+                                value="{{ $kyc->district ?? '' }}">
+                            <span class="text-danger error" id="district_error"></span>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6 mb-2">
                             <label class="form-label">State <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="state" required value="{{ $kyc->state??'' }}">
+                            <input type="text" class="form-control" name="state" required
+                                value="{{ $kyc->state ?? '' }}">
+                            <span class="text-danger error" id="state_error"></span>
                         </div>
-                        <div class="col-12 mb-3">
+                        <div class="col-12 mb-2">
                             <label class="form-label">Address</label>
-                            <textarea class="form-control" name="address" rows="3" >{{ $kyc->address??'' }}</textarea>
+                            <textarea class="form-control" name="address" rows="3">{{ $kyc->address ?? '' }}</textarea>
+                            <span class="text-danger error" id="address_error"></span>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6 mb-2">
                             <label class="form-label">Mobile Number <span class="text-danger">*</span></label>
-                            <input type="tel" class="form-control" name="mobile" required value="{{ $kyc->mobile??'' }}">
+                            <input type="tel" class="form-control" name="mobile" required
+                                value="{{ $kyc->mobile ?? '' }}">
+                            <span class="text-danger error" id="mobile_error"></span>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6 mb-2">
                             <label class="form-label">Occupation <span class="text-danger">*</span></label>
                             <select class="form-select" name="occupation" required>
                                 <option value="">Select Occupation....</option>
-                            <option value="teacher" @selected(!empty($kyc->work) && $kyc->work == 'teacher')>Teacher</option>
-                            <option value="govt_job" @selected(!empty($kyc->work) && $kyc->work == 'govt_job')>Govt. Job</option>
-                            <option value="electrician" @selected(!empty($kyc->work) && $kyc->work == 'electrician')>Electrician</option>
-                            <option value="plumber" @selected(!empty($kyc->work) && $kyc->work == 'plumber')>Plumber</option>
-                            <option value="labour" @selected(!empty($kyc->work) && $kyc->work == 'labour')>Labour</option>
-                            <option value="carpenter" @selected(!empty($kyc->work) && $kyc->work == 'carpenter')>Carpenter</option>
-                            <option value="penter" @selected(!empty($kyc->work) && $kyc->work == 'penter')>Penter</option>
-                            <option value="advocate" @selected(!empty($kyc->work) && $kyc->work == 'advocate')>Advocate</option>
-                            <option value="doctor" @selected(!empty($kyc->work) && $kyc->work == 'doctor')>Doctor</option>
-                            <option value="farmer" @selected(!empty($kyc->work) && $kyc->work == 'farmer')>Farmer</option>
-                            <option value="pest_control" @selected(!empty($kyc->work) && $kyc->work == 'pest_control')>Pest Control</option>
-                            <option value="other" @selected(!empty($kyc->work) && $kyc->work == 'other')>Other</option>
+                                <option value="teacher" @selected(!empty($kyc->work) && $kyc->work == 'teacher')>Teacher</option>
+                                <option value="govt_job" @selected(!empty($kyc->work) && $kyc->work == 'govt_job')>Govt. Job</option>
+                                <option value="electrician" @selected(!empty($kyc->work) && $kyc->work == 'electrician')>Electrician</option>
+                                <option value="plumber" @selected(!empty($kyc->work) && $kyc->work == 'plumber')>Plumber</option>
+                                <option value="labour" @selected(!empty($kyc->work) && $kyc->work == 'labour')>Labour</option>
+                                <option value="carpenter" @selected(!empty($kyc->work) && $kyc->work == 'carpenter')>Carpenter</option>
+                                <option value="penter" @selected(!empty($kyc->work) && $kyc->work == 'penter')>Penter</option>
+                                <option value="advocate" @selected(!empty($kyc->work) && $kyc->work == 'advocate')>Advocate</option>
+                                <option value="doctor" @selected(!empty($kyc->work) && $kyc->work == 'doctor')>Doctor</option>
+                                <option value="farmer" @selected(!empty($kyc->work) && $kyc->work == 'farmer')>Farmer</option>
+                                <option value="pest_control" @selected(!empty($kyc->work) && $kyc->work == 'pest_control')>Pest Control</option>
+                                <option value="other" @selected(!empty($kyc->work) && $kyc->work == 'other')>Other</option>
                             </select>
+                            <span class="text-danger error" id="occupation_error"></span>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6 mb-2">
                             <label class="form-label">Date of Birth <span class="text-danger">*</span></label>
-                            <input type="date" class="form-control" name="dob" required value="{{ $kyc->dob??'' }}">
+                            <input type="date" class="form-control" name="dob" required
+                                value="{{ $kyc->dob ?? '' }}" max="{{ date('Y-m-d') }}" min="{{ date('Y-m-d', strtotime('-100 years')) }}">
+                            <span class="text-danger error" id="dob_error"></span>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6 mb-2">
                             <label class="form-label">Nominee <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="nominee" required value="{{ $kyc->nominee??'' }}">
+                            <input type="text" class="form-control" name="nominee" required
+                                value="{{ $kyc->nominee ?? '' }}">
+                            <span class="text-danger error" id="nominee_error"></span>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6 mb-2">
                             <label class="form-label">Relation <span class="text-danger">*</span></label>
                             <select class="form-select" name="relation" required>
                                 <option value="">Select Relation</option>
@@ -269,8 +297,9 @@
                                 <option value="sister" @selected(!empty($kyc->relation) && $kyc->relation == 'sister')>Sister</option>
                                 <option value="other" @selected(!empty($kyc->relation) && $kyc->relation == 'other')>Other</option>
                             </select>
+                            <span class="text-danger error" id="relation_error"></span>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6 mb-2">
                             <label class="form-label">Gender <span class="text-danger">*</span></label>
                             <select class="form-select" name="gender" required>
                                 <option value="">Select Gender</option>
@@ -278,47 +307,60 @@
                                 <option value="female" @selected(!empty($kyc->gender) && $kyc->gender == 'female')>Female</option>
                                 <option value="other" @selected(!empty($kyc->gender) && $kyc->gender == 'other')>Other</option>
                             </select>
+                            <span class="text-danger error" id="gender_error"></span>
                         </div>
                     </div>
                     <div class="form-navigation mt-4">
-                        <div></div>
+
                         <button type="submit" class="btn btn-brand-green" form="personalInfoForm">
                             Save & Continue<i class="fa-solid fa-arrow-right ms-2"></i>
                         </button>
                     </div>
-                    </form>
-                </div>
+                </form>
+            </div>
 
-                <!-- Step 2: Bank Details -->
-                <div class="form-step" id="step2">
-                    <h6 class="text-brand-green mb-3"><i class="fa-solid fa-university me-2"></i>Bank Details</h6>
-                    <form id="bankInfoForm" enctype="multipart/form-data">
+            <!-- Step 2: Bank Details -->
+            <div class="form-step" id="step2">
+                <h6 class="text-brand-green mb-3"><i class="fa-solid fa-university me-2"></i>Bank Details</h6>
+                <form id="bankInfoForm" enctype="multipart/form-data">
+                    @csrf
                     <div class="row">
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6 mb-2">
                             <label class="form-label">Account Holder Name <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="holder_name" required value="{{ $kyc->holder_name??'' }}">
+                            <input type="text" class="form-control" name="holder_name" required
+                                value="{{ $kyc->holder_name ?? '' }}">
+                            <span class="text-danger error" id="holder_name_error"></span>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6 mb-2">
                             <label class="form-label">Account Number <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="account_no" required value="{{ $kyc->ac_number??'' }}">
+                            <input type="text" class="form-control" name="account_no" required
+                                value="{{ $kyc->ac_number ?? '' }}">
+                            <span class="text-danger error" id="account_no_error"></span>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6 mb-2">
                             <label class="form-label">Confirm Account Number <span
                                     class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="confirm_account_no" required value="{{ $kyc->ac_number??'' }}">
+                            <input type="text" class="form-control" name="confirm_account_no" required
+                                value="{{ $kyc->ac_number ?? '' }}">
+                            <span class="text-danger error" id="confirm_account_no_error"></span>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6 mb-2">
                             <label class="form-label">IFSC Code <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" name="ifsc_code" placeholder="ABCD0001234"
-                                required value="{{ $kyc->ifsc_code??'' }}">
+                                required value="{{ $kyc->ifsc_code ?? '' }}">
+                            <span class="text-danger error" id="ifsc_code_error"></span>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6 mb-2">
                             <label class="form-label">Branch <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="branch" required value="{{ $kyc->branch??'' }}">
+                            <input type="text" class="form-control" name="branch" required
+                                value="{{ $kyc->branch ?? '' }}">
+                            <span class="text-danger error" id="branch_error"></span>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6 mb-2">
                             <label class="form-label">Bank Name <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="bank" required value="{{ $kyc->bank??'' }}">
+                            <input type="text" class="form-control" name="bank" required
+                                value="{{ $kyc->bank ?? '' }}">
+                            <span class="text-danger error" id="bank_error"></span>
                         </div>
                     </div>
                     <div class="form-navigation mt-4">
@@ -327,21 +369,23 @@
                             Save & Continue<i class="fa-solid fa-arrow-right ms-2"></i>
                         </button>
                     </div>
-                    </form>
-                </div>
+                </form>
+            </div>
 
-                <!-- Step 3: Upload KYC Documents -->
-                <div class="form-step" id="step3">
-                    <h6 class="text-brand-green mb-3"><i class="fa-solid fa-file-upload me-2"></i>Upload KYC Documents
-                    </h6>
-                    <form id="kycDocsForm" enctype="multipart/form-data">
+            <!-- Step 3: Upload KYC Documents -->
+            <div class="form-step" id="step3">
+                <h6 class="text-brand-green mb-3"><i class="fa-solid fa-file-upload me-2"></i>Upload KYC Documents
+                </h6>
+                <form id="kycDocsForm" enctype="multipart/form-data">
+                    @csrf
                     <div class="row">
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6 mb-2">
                             <label class="form-label">PAN Number <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="pan_numer" value="{{ $kyc->pan_number??'' }}" placeholder="ABCDE1234F"
-                                required>
+                            <input type="text" class="form-control" name="pan_numer"
+                                value="{{ $kyc->pan_number ?? '' }}" placeholder="ABCDE1234F" required>
+                            <span class="text-danger error" id="pan_no_error"></span>
                         </div>
-                        <div class="col-md-6 mb-4">
+                        <div class="col-md-6 mb-2">
                             <div class="upload-card">
                                 <div class="upload-icon">
                                     <i class="fa-solid fa-id-card fa-3x text-brand-green"></i>
@@ -352,13 +396,15 @@
                                     required>
                                 <div class="upload-preview mt-2" id="panDocsPreview"></div>
                             </div>
+                            <span class="text-danger error" id="pan_docs_error"></span>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6 mb-2">
                             <label class="form-label">Aadhaar Number <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" name="aadhar_no" placeholder="1234 5678 9012"
-                                required>
+                                value="{{ $kyc->aadhaar_no ?? '' }}" required>
+                            <span class="text-danger error" id="aadhar_no_error"></span>
                         </div>
-                        <div class="col-md-6 mb-4">
+                        <div class="col-md-6 mb-2">
                             <div class="upload-card">
                                 <div class="upload-icon">
                                     <i class="fa-solid fa-address-card fa-3x text-brand-orange"></i>
@@ -369,8 +415,9 @@
                                     required>
                                 <div class="upload-preview mt-2" id="aadharDocsPreview"></div>
                             </div>
+                            <span class="text-danger error" id="aadhar_docs_error"></span>
                         </div>
-                        <div class="col-md-6 mb-4">
+                        <div class="col-md-6 mb-2">
                             <div class="upload-card">
                                 <div class="upload-icon">
                                     <i class="fa-solid fa-camera fa-3x text-brand-green"></i>
@@ -380,6 +427,7 @@
                                 <input type="file" class="form-control" name="selfi" accept="image/*" required>
                                 <div class="upload-preview mt-2" id="selfiPreview"></div>
                             </div>
+                            <span class="text-danger error" id="selfi_error"></span>
                         </div>
                     </div>
                     <div class="form-navigation mt-4">
@@ -388,18 +436,15 @@
                             <i class="fa-solid fa-paper-plane me-2"></i>Submit KYC
                         </button>
                     </div>
-                    </form>
-                </div>
-
-
-
-                <!-- Step Navigation Buttons -->
-                <div class="form-navigation mt-4">
-                    <button type="button" class="btn btn-outline-brand-green" id="prevBtn">
-                        <i class="fa-solid fa-arrow-left me-2"></i>Previous
-                    </button>
-                    <div></div>
-                </div>
+                </form>
+            </div>
+            <!-- Step Navigation Buttons -->
+            <div class="form-navigation mt-4">
+                <button type="button" class="btn btn-outline-brand-green" id="prevBtn">
+                    <i class="fa-solid fa-arrow-left me-2"></i>Previous
+                </button>
+                <div></div>
+            </div>
             </form>
         </div>
     </div>
@@ -415,9 +460,6 @@
             // Initialize form
             updateStepIndicators();
             updateProgressBar();
-
-
-
             // Previous button functionality
             $('#prevBtn').on('click', function() {
                 if (currentStep > 1) {
@@ -425,29 +467,6 @@
                     updateForm();
                 }
             });
-
-            // Submit forms separately
-            $('#personalInfoForm').on('submit', function(e) {
-                e.preventDefault();
-                if (validateCurrentStep()) {
-                    submitPersonalInfo();
-                }
-            });
-
-            $('#bankInfoForm').on('submit', function(e) {
-                e.preventDefault();
-                if (validateCurrentStep()) {
-                    submitBankInfo();
-                }
-            });
-
-            $('#kycDocsForm').on('submit', function(e) {
-                e.preventDefault();
-                if (validateCurrentStep()) {
-                    submitKYCDocs();
-                }
-            });
-
             // Account number confirmation validation
             $('input[name="confirm_account_no"]').on('input', function() {
                 const accountNo = $('input[name="account_no"]').val();
@@ -466,13 +485,8 @@
             setupFileUploads();
 
             function updateForm() {
-                // Hide all steps
                 $('.form-step').removeClass('active');
-
-                // Show current step
                 $('#step' + currentStep).addClass('active');
-
-                // Update previous button visibility
                 const $prevBtn = $('#prevBtn');
                 if (currentStep === 1) {
                     $prevBtn.hide();
@@ -502,24 +516,6 @@
                 $('#kycProgress').css('width', progress + '%');
             }
 
-            function validateCurrentStep() {
-                const $currentStepElement = $('#step' + currentStep);
-                const $requiredFields = $currentStepElement.find('[required]');
-                let isValid = true;
-
-                $requiredFields.each(function() {
-                    if (!$(this).val().trim()) {
-                        $(this).addClass('is-invalid');
-                        isValid = false;
-                    } else {
-                        $(this).removeClass('is-invalid');
-                    }
-                });
-
-                return isValid;
-            }
-
-
 
             function setupFileUploads() {
                 $('input[type="file"]').on('change', function() {
@@ -542,21 +538,27 @@
                 const $field = $(this);
                 if ($field.attr('required') && !$field.val().trim()) {
                     $field.addClass('is-invalid');
-                    if (!$field.next('.error-message').length) {
-                        $field.after('<div class="error-message text-danger small mt-1">This field is required</div>');
-                    }
+                    $('#' + $field.attr('name') + '_error').text('This field is required');
                 } else {
                     $field.removeClass('is-invalid');
-                    $field.next('.error-message').remove();
+                    $('#' + $field.attr('name') + '_error').text('');
                 }
             });
-
             // Clear validation errors on input
             $('input, select, textarea').on('input change', function() {
                 const $field = $(this);
                 if ($field.hasClass('is-invalid') && $field.val().trim()) {
                     $field.removeClass('is-invalid');
-                    $field.next('.error-message').remove();
+                    $('#' + $field.attr('name') + '_error').text('');
+                }
+            });
+
+            // Clear file validation errors
+            $('input[type="file"]').on('change', function() {
+                const $field = $(this);
+                if ($field.hasClass('is-invalid')) {
+                    $field.removeClass('is-invalid');
+                    $('#' + $field.attr('name') + '_error').text('');
                 }
             });
 
@@ -576,35 +578,38 @@
                 $(this).attr('title', `Step ${stepNumber}: ${stepTitle}`);
             });
 
-            function submitPersonalInfo() {
+
+            $('form#personalInfoForm').on('submit', function(e) {
+                e.preventDefault();
                 const formData = new FormData($('#personalInfoForm')[0]);
                 const $submitBtn = $('button[form="personalInfoForm"]');
                 const originalText = $submitBtn.html();
-                $submitBtn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i>Saving...').prop('disabled', true);
-                
+                $submitBtn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i>Saving...').prop(
+                    'disabled', true);
+
+                // Clear previous errors
+                $('.error').text('');
+
                 $.ajax({
-                    url: '{{ url("distributor/kyc/personal-details") }}',
+                    url: '{{ url('distributor/kyc/personal-details') }}',
                     type: 'POST',
                     data: formData,
                     processData: false,
                     contentType: false,
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
                     success: function(response) {
+                        console.log('Success response:', response);
                         if (response.status) {
-                            alertMsg(true, response.message);
                             currentStep = 2;
                             updateForm();
-                        } else {
-                            alertMsg(false, response.message);
                         }
+                        alertMsg(response.status, response.msg);
                     },
                     error: function(xhr) {
                         if (xhr.status === 422) {
-                            const errors = xhr.responseJSON.errors;
-                            displayValidationErrors(errors);
-                            alertMsg(false, 'Please correct the errors below.');
+                            const errors = xhr.responseJSON.validation;
+                            $.each(errors, function(field, messages) {
+                                $('#' + field + '_error').text(messages[0]);
+                            });
                         } else {
                             alertMsg(false, 'Something went wrong! Please try again.');
                         }
@@ -613,37 +618,38 @@
                         $submitBtn.html(originalText).prop('disabled', false);
                     }
                 });
-            }
+            });
 
-            function submitBankInfo() {
+            $('form#bankInfoForm').on('submit', function(e) {
+                e.preventDefault();
                 const formData = new FormData($('#bankInfoForm')[0]);
                 const $submitBtn = $('button[form="bankInfoForm"]');
                 const originalText = $submitBtn.html();
-                $submitBtn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i>Saving...').prop('disabled', true);
-                
+                $submitBtn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i>Saving...').prop(
+                    'disabled', true);
+
+                // Clear previous errors
+                $('.error').text('');
+
                 $.ajax({
-                    url: '{{ url("distributor/kyc/bank-details") }}',
+                    url: '{{ url('distributor/kyc/bank-details') }}',
                     type: 'POST',
                     data: formData,
                     processData: false,
                     contentType: false,
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
                     success: function(response) {
                         if (response.status) {
-                            alertMsg(true, response.message);
                             currentStep = 3;
                             updateForm();
-                        } else {
-                            alertMsg(false, response.message);
                         }
+                        alertMsg(response.status, response.msg);
                     },
                     error: function(xhr) {
                         if (xhr.status === 422) {
-                            const errors = xhr.responseJSON.errors;
-                            displayValidationErrors(errors);
-                            alertMsg(false, 'Please correct the errors below.');
+                            const errors = xhr.responseJSON.validation;
+                            $.each(errors, function(field, messages) {
+                                $('#' + field + '_error').text(messages[0]);
+                            });
                         } else {
                             alertMsg(false, 'Something went wrong! Please try again.');
                         }
@@ -652,36 +658,39 @@
                         $submitBtn.html(originalText).prop('disabled', false);
                     }
                 });
-            }
+            });
 
-            function submitKYCDocs() {
+            $('form#kycDocsForm').on('submit', function(e) {
+                e.preventDefault();
                 const formData = new FormData($('#kycDocsForm')[0]);
                 const $submitBtn = $('button[form="kycDocsForm"]');
                 const originalText = $submitBtn.html();
-                $submitBtn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i>Submitting...').prop('disabled', true);
-                
+                $submitBtn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i>Submitting...').prop(
+                    'disabled',
+                    true);
+
+                // Clear previous errors
+                $('.error').text('');
+
                 $.ajax({
-                    url: '{{ url("distributor/kyc/documents") }}',
+                    url: '{{ url('distributor/kyc/documents') }}',
                     type: 'POST',
                     data: formData,
                     processData: false,
                     contentType: false,
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
                     success: function(response) {
+                        alertMsg(response.status, response.msg);
                         if (response.status) {
-                            alertMsg(true, response.message);
                             showSuccessMessage();
-                        } else {
-                            alertMsg(false, response.message);
+                            $('#kycDocsForm')[0].reset();
                         }
                     },
                     error: function(xhr) {
                         if (xhr.status === 422) {
-                            const errors = xhr.responseJSON.errors;
-                            displayValidationErrors(errors);
-                            alertMsg(false, 'Please correct the errors below.');
+                            const errors = xhr.responseJSON.validation;
+                            $.each(errors, function(field, messages) {
+                                $('#' + field + '_error').text(messages[0]);
+                            });
                         } else {
                             alertMsg(false, 'Something went wrong! Please try again.');
                         }
@@ -690,24 +699,9 @@
                         $submitBtn.html(originalText).prop('disabled', false);
                     }
                 });
-            }
-            
-            function displayValidationErrors(errors) {
-                // Clear previous error messages
-                $('.error-message').remove();
-                $('.is-invalid').removeClass('is-invalid');
-                
-                // Display new error messages
-                $.each(errors, function(field, messages) {
-                    const $input = $(`[name="${field}"]`);
-                    $input.addClass('is-invalid');
-                    
-                    // Add error message below the field
-                    const errorHtml = `<div class="error-message text-danger small mt-1">${messages[0]}</div>`;
-                    $input.after(errorHtml);
-                });
-            }
-            
+            });
+
+
             function showSuccessMessage() {
                 const successHtml = `
                     <div class="text-center py-5">

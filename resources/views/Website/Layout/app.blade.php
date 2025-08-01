@@ -294,6 +294,7 @@
     </script>
 
     @stack('script')
+    @stack('scripts')
 
 </body>
 

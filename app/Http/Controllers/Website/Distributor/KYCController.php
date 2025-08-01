@@ -3,17 +3,14 @@
 namespace App\Http\Controllers\Website\Distributor;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Auth;
-use App\Models\UserKyc;
 use App\Models\User;
+use App\Models\UserKyc;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class KYCController extends Controller
 {
-    /**
-     * Update Personal Details
-     */
     public function updatePersonalDetails(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -51,59 +48,41 @@ class KYCController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Validation failed',
-                'errors' => $validator->errors()
-            ], 422);
+            return $this->validationMsg($validator->errors());
         }
 
         try {
             $user = Auth::user();
-            
-            // Update or create KYC record
-            $kyc = UserKyc::updateOrCreate(
-                ['user_id' => $user->id],
-                [
-                    'name' => $request->name,
-                    'pincode' => $request->pincode,
-                    'locality' => $request->locality,
-                    'district' => $request->district,
-                    'state' => $request->state,
-                    'address' => $request->address,
-                    'mobile' => $request->mobile,
-                    'work' => $request->occupation,
-                    'dob' => $request->dob,
-                    'nominee' => $request->nominee,
-                    'relation' => $request->relation,
-                    'gender' => $request->gender,
-                ]
-            );
 
-            // Update user email if changed
-            if ($user->email !== $request->email) {
-                $user->email = $request->email;
-                $user->save();
+            $kyc = UserKyc::where('userId', $user->user_id)->first();
+            if (empty($kyc)) {
+                $kyc = new UserKyc();
             }
 
-            return response()->json([
-                'status' => true,
-                'message' => 'Personal details updated successfully!',
-                'data' => $kyc
-            ]);
+            $kyc->userId = $user->user_id;
+            $kyc->name = $request->name;
+            $kyc->pincode = $request->pincode;
+            $kyc->locality = $request->locality;
+            $kyc->district = $request->district;
+            $kyc->state = $request->state;
+            $kyc->address = $request->address;
+            $kyc->mobile = $request->mobile;
+            $kyc->work = $request->occupation;
+            $kyc->dob = $request->dob;
+            $kyc->nominee = $request->nominee;
+            $kyc->relation = $request->relation;
+            $kyc->gender = $request->gender;
+            $kyc->personal_flag = 1;
+            if ($kyc->save()) {
+                return $this->successMsg('Personal details updated successfully!');
+            }
 
+            return $this->failMsg('Personal details updated failed!');
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Something went wrong! Please try again.',
-                'error' => $e->getMessage()
-            ], 500);
+            return $this->failMsg($e->getMessage());
         }
     }
 
-    /**
-     * Update Bank Details
-     */
     public function updateBankDetails(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -124,46 +103,34 @@ class KYCController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Validation failed',
-                'errors' => $validator->errors()
-            ], 422);
+            return $this->validationMsg($validator->errors());
         }
 
         try {
             $user = Auth::user();
-            
-            // Update or create KYC record
-            $kyc = UserKyc::updateOrCreate(
-                ['user_id' => $user->id],
-                [
-                    'holder_name' => $request->holder_name,
-                    'ac_number' => $request->account_no,
-                    'ifsc_code' => $request->ifsc_code,
-                    'branch' => $request->branch,
-                    'bank' => $request->bank,
-                ]
-            );
 
-            return response()->json([
-                'status' => true,
-                'message' => 'Bank details updated successfully!',
-                'data' => $kyc
-            ]);
+            $kyc = UserKyc::where('userId', $user->user_id)->first();
+            if (empty($kyc)) {
+                $kyc = new UserKyc();
+            }
 
+            $kyc->userId = $user->user_id;
+            $kyc->holder_name = $request->holder_name;
+            $kyc->ac_number = $request->account_no;
+            $kyc->ifsc_code = $request->ifsc_code;
+            $kyc->branch = $request->branch;
+            $kyc->bank = $request->bank;
+            $kyc->bank_flag = 1;
+            if ($kyc->save()) {
+                return $this->successMsg('Bank details updated successfully!');
+            }
+
+            return $this->failMsg('Bank details updated failed!');
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Something went wrong! Please try again.',
-                'error' => $e->getMessage()
-            ], 500);
+            return $this->failMsg($e->getMessage());
         }
     }
 
-    /**
-     * Update KYC Documents
-     */
     public function updateKYCDocuments(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -190,81 +157,59 @@ class KYCController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Validation failed',
-                'errors' => $validator->errors()
-            ], 422);
+            return $this->validationMsg($validator->errors());
         }
 
         try {
             $user = Auth::user();
-            
-            // Handle file uploads
+
             $panDocPath = null;
             $aadharDocPath = null;
             $selfiePath = null;
 
             if ($request->hasFile('pan_docs')) {
-                $panDocPath = $request->file('pan_docs')->store('kyc/pan', 'public');
+                $panDocPath = singleFile($request->file('pan_docs'), 'kyc/pan');
             }
 
             if ($request->hasFile('aadhar_docs')) {
-                $aadharDocPath = $request->file('aadhar_docs')->store('kyc/aadhaar', 'public');
+                $aadharDocPath = singleFile($request->file('aadhar_docs'), 'kyc/aadhaar');
             }
 
             if ($request->hasFile('selfi')) {
-                $selfiePath = $request->file('selfi')->store('kyc/selfie', 'public');
+                $selfiePath = singleFile($request->file('selfi'), 'kyc/selfie');
             }
 
-            // Update or create KYC record
-            $kyc = UserKyc::updateOrCreate(
-                ['user_id' => $user->id],
-                [
-                    'pan_number' => $request->pan_numer,
-                    'pan_document' => $panDocPath,
-                    'aadhaar_number' => $request->aadhar_no,
-                    'aadhaar_document' => $aadharDocPath,
-                    'selfie' => $selfiePath,
-                    'status' => 'pending', // Set status to pending for review
-                ]
-            );
+            $kyc = UserKyc::where('userId', $user->user_id)->first();
+            if (empty($kyc)) {
+                $kyc = new UserKyc();
+            }
 
-            return response()->json([
-                'status' => true,
-                'message' => 'KYC documents uploaded successfully! Your application is under review.',
-                'data' => $kyc
-            ]);
-
+            $kyc->userId = $user->user_id;
+            $kyc->pan_number = $request->pan_numer;
+            $kyc->pan = $panDocPath;
+            $kyc->aadhar1 = $request->aadhar_no;
+            $kyc->aadhar2 = $aadharDocPath;
+            $kyc->self = $selfiePath;
+            $kyc->status = 0;
+            $kyc->kyc_flag = 1;
+            if ($kyc->save()) {
+                return $this->successMsg('KYC documents uploaded successfully! Your application is under review.');
+            }
+            return $this->failMsg('KYC documents uploaded failed!');
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Something went wrong! Please try again.',
-                'error' => $e->getMessage()
-            ], 500);
+            return $this->failMsg($e->getMessage());
         }
     }
 
-    /**
-     * Get KYC Status
-     */
     public function getKYCStatus()
     {
         try {
             $user = Auth::user();
-            $kyc = UserKyc::where('user_id', $user->id)->first();
+            $kyc = UserKyc::where('userId', $user->user_id)->first();
 
-            return response()->json([
-                'status' => true,
-                'data' => $kyc
-            ]);
-
+            return $this->successMsg('KYC status retrieved successfully!', $kyc);
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Something went wrong!',
-                'error' => $e->getMessage()
-            ], 500);
+            return $this->failMsg($e->getMessage());
         }
     }
 }
