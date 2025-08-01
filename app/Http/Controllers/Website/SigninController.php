@@ -52,7 +52,7 @@ class SigninController extends Controller
             }
             Auth::login($user);
             if (Auth::check()) {
-                return $this->successMsg('Login successful!', ['redirect' => url('/dashboard')]);
+                return $this->successMsg('Login successful!', ['redirect' => url('/distributor/dashboard')]);
             } else {
                 return $this->failMsg('Something went wrong. Please try again.');
             }

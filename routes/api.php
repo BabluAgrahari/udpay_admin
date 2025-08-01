@@ -27,6 +27,7 @@ use App\Http\Controllers\Api\EducationCoursesController;
 use App\Http\Controllers\Api\InrController;
 use App\Http\Controllers\Api\UniPostController;
 use App\Http\Controllers\Api\CardServiceController;
+use App\Http\Controllers\Api\CategoryController;
 
 
 /*
@@ -76,6 +77,10 @@ Route::get('appPopup', [AppPopupController::class, 'getList']);
 Route::group(['middleware' => ['jwt.verify']], function () {
 
     Route::get('profile', [AuthController::class, 'getProfile']);
+
+    //category
+    Route::get('category-list', [CategoryController::class, 'index']);
+    Route::get('category/{id}', [CategoryController::class, 'show']);
 
     //wallet
     Route::get('wallet', [WalletController::class, 'index']);
