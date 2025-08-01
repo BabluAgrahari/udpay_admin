@@ -475,8 +475,18 @@
                         </div>
                         <div class="details-add-btn">
                             <a href="javascript:void(0)" data-id="{{ $product->id }}" class="thm-btn cart-btn">Add to cart</a>
-                            <a href="#" class="thm-btn buy-now">Quick Buy</a>
+
+                            @if(Auth::check() && Gate::allows('isCustomer'))
+                            <a href="{{ url('buy/'.$product->slug_url) }}" class="thm-btn buy-now">Quick Buy</a>
+                            @else
+                            <a href="#" data-popup="login1" class="openPopup thm-btn buy-now">Quick Buy</a>
+                            @endif
+
+                            @if(Auth::check() && Gate::allows('isCustomer'))
                             <a href="javascript:void(0)" class="thm-btn bg-light w-100 add-to-wishlist" data-id="{{ $product->id }}">Add to wishlist</a>
+                            @else
+                            <a href="#" data-popup="login1" class="openPopup thm-btn bg-light w-100 add-to-wishlist">Add to wishlist</a>
+                            @endif
                         </div>
                         <div class="box-color">
                             <p class="color-one mb-2">Available Offers (2 offers)</p>
@@ -719,7 +729,11 @@
                 <div class="product-image">
                     <a href="{{ url('product/'.$product->slug_url) }}"><img src="{{ getImageWithFallback($product->product_image) }}" alt="img" class=""></a>
                      <p class="product-review"><i class="fa fa-star"></i> 3.25 (12 Reviews)</p>
+                    @if(Auth::check() && Gate::allows('isCustomer'))
                     <span class="prod-wish"><i class="fa-regular fa-heart add-to-wishlist" data-id="{{ $product->id }}"></i></span>
+                    @else
+                    <span class="prod-wish"><i class="fa-regular fa-heart add-to-wishlist" data-popup="login1" class="openPopup"></i></span>
+                    @endif
                 </div>
                 <div class="product-perra">
                     <div class="prduct-perra-top">
@@ -1044,17 +1058,7 @@
         updateCartQuantity(productId, quantity);
     });
     
-    $('.buy-now').on('click', function(e) {
-      e.preventDefault();
-      
-      var $btn = $(this);
-      var productId = $btn.closest('.product-details').find('.cart-btn').data('id');
-      var $quantityInput = $btn.closest('.product-details').find('.quantity input');
-      var quantity = parseInt($quantityInput.val()) || 1;
-      
-      var checkoutUrl = '/checkout?product_id=' + productId + '&quantity=' + quantity;
-      window.location.href = checkoutUrl;
-    });
+    
   });
   </script>
  @endpush

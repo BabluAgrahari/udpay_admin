@@ -33,8 +33,8 @@ class AppServiceProvider extends ServiceProvider
             return $user->role == 'supperadmin';
         });
 
-        Gate::define('isMerchant', function (User $user) {
-            return $user->role == 'merchant';
+        Gate::define('isCustomer', function (User $user) {
+            return $user->role == 'customer';
         });
 
         Paginator::defaultView('Pagination');

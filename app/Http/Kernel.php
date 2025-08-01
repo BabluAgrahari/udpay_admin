@@ -70,5 +70,6 @@ class Kernel extends HttpKernel
         'verify.ip' => \App\Http\Middleware\IPValidateMiddleware::class,
         'client.verify' => \App\Http\Middleware\ClientMiddleware::class,
         'permission' => \App\Http\Middleware\CheckPermission::class,
+        'customer.auth' => \App\Http\Middleware\CustomerAuth::class,
     ];
 }

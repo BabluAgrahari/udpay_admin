@@ -53,7 +53,11 @@
                                     <a href="{{ url('detail') }}/{{ $product->slug_url }}"><img src="{{ isValidImageUrl($product->product_image) ? $product->product_image : asset('front_assets') . '/images/no_image.jpeg' }}" alt="img"
                                             class=""></a>
                                     <p class="product-review"><i class="fa fa-star"></i> 3.25 (12 Reviews)</p>
+                                    @if(Auth::check() && Gate::allows('isCustomer'))
                                     <span class="prod-wish"><i class="fa-regular fa-heart add-to-wishlist" data-id="{{ $product->id }}"></i></span>
+                                    @else
+                                    <span class="prod-wish"><i class="fa-regular fa-heart add-to-wishlist" data-popup="login1" class="openPopup"></i></span>
+                                    @endif
                                 </div>
                                 <div class="product-perra">
                                     <div class="prduct-perra-top">
@@ -81,38 +85,43 @@
 
     @if (!empty($products))
         <?php $key = 0; ?>
-        @foreach ($products as $category => $productSection)
+        @foreach ($products as $productSection)
             <section class="section-padding {{ (int) $key % 2 == 0 ? 'productSectionBg' : '' }}">
                 <div class="container">
                     <div class="section-heading">
                         <div class="w-100 text-left">
-                            <h2>{{ ucwords(str_replace('_',' ',$category)) }}</h2>
-                            <p class="mb-0">Explore our best rated herbal products</p>
+                            <h2>{{ ucwords(str_replace('_',' ',$productSection['category'])) }}</h2>
+                            <p class="mb-0">{{ $productSection['category_description']??'' }}</p>
                         </div>
-                        <a href="{{url('product')}}" class="veiw-btn">View More >></a>
+                        <a href="{{url('product/'.$productSection['category_slug'])}}" class="veiw-btn">View More >></a>
                     </div>
                     <div class="row product-slider">
-                        @foreach ($productSection as $product)
+                        @foreach ($productSection['products'] as $product)
+                     
                             <div class="col-lg-3 col-md-6"> 
                                 <div class="product-card">
                                     <div class="product-image">
-                                        <a href="{{url('detail')}}/{{$product->id}}"><img src="{{ isValidImageUrl($product->product_image) ? $product->product_image : asset('front_assets') . '/images/no_image.jpeg' }}"
+                                        <a href="{{url('detail')}}/{{$product->slug_url??''}}"><img src="{{ isValidImageUrl($product->product_image??'') ? $product->product_image : asset('front_assets') . '/images/no_image.jpeg' }}"
                                                 alt="img" class=""></a>
                                         <p class="product-review"><i class="fa fa-star"></i> 3.25 (12 Reviews)</p>
+                                        @if(Auth::check() && Gate::allows('isCustomer'))
                                         <span class="prod-wish"><i class="fa-regular fa-heart add-to-wishlist" data-id="{{ $product->id }}"></i></span>
+                                        @else
+                                        <span class="prod-wish"><i class="fa-regular fa-heart" data-popup="login1" class="openPopup"></i></span>
+                                        @endif
                                     </div>
                                     <div class="product-perra">
                                         <div class="prduct-perra-top">
-                                            <a href="{{url('detail')}}/{{$product->id}}">
-                                                <h3>{{ $product->product_name }}</h3>
+                                            <a href="{{url('detail')}}/{{$product->slug_url??''}}">
+                                                <h3>{{ $product->product_name??'' }}</h3>
                                             </a>
                                         </div>
                                         <div class="d-flex justify-content-between">
                                             <div class="price-mian">
-                                                <span class="price-throuth">₹{{ $product->mrp }}</span><span
-                                                    class="price-bg">₹{{ $product->product_sale_price }}</span>
+                                                <span class="price-throuth">₹{{ $product->mrp??0 }}</span><span
+                                                    class="price-bg">₹{{ $product->product_sale_price??0 }}</span>
                                             </div>
-                                            <a href="javascript:void(0)" data-id="{{$product->id}}" class="thm-btn cart-btn">+</a>
+                                            <a href="javascript:void(0)" data-id="{{$product->id??0}}" class="thm-btn cart-btn">+</a>
                                         </div>
                                     </div>
                                 </div>

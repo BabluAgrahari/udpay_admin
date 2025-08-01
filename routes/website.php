@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Route;
 
 
 
-Route::get('/', [HomeController::class, 'index']);
+Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/product/{category?}', [FrontController::class, 'productList']);
 Route::get('/detail/{slug}', [ProductDetailController::class, 'index']);
 
@@ -26,11 +26,15 @@ Route::post('/clear-cart', [CartController::class, 'clearCart']);
 Route::get('/cart-summary', [CartController::class, 'getCartSummary']);
 Route::post('/checkout', [CheckoutController::class, 'checkout']);
 Route::get('/checkout', [CheckoutController::class, 'index']);
+Route::get('buy/{slug}', [CheckoutController::class, 'buyProduct']);
 
+
+Route::group(['middleware' => ['customer.auth']], function () {
 // Wishlist Routes
 Route::get('/wishlist', [WishlistController::class, 'index']);
 Route::post('/wishlist/add', [WishlistController::class, 'addToWishlist']);
 Route::post('/wishlist/remove/{id}', [WishlistController::class, 'removeWishlist']);
+});
 
 // Address Routes
 Route::prefix('address')->group(function () {

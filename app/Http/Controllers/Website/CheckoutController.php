@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\UserAddress;
+use App\Models\Product;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -18,16 +19,13 @@ class CheckoutController extends Controller
     {
         $user = Auth::user();
 
-        $data['addresses'] = UserAddress::where('user_id', $user->id)
-            ->where('add_status', 1)
-            ->orderBy('created_at', 'desc')->limit(5)
+        $data['addresses'] = UserAddress::where('user_id', $user->id)->where('add_status', 1)
+            ->orderBy('created_at', 'desc')
             ->get();
-        $data['address'] = $data['addresses']->first();
 
         $data['user'] = $user;
 
         $cartItems = Cart::with('product')->get();
-
         $subtotal = $cartItems->sum(function ($item) {
             return $item->product ? $item->product->product_sale_price * $item->quantity : 0;
         });
@@ -42,6 +40,25 @@ class CheckoutController extends Controller
         $data['total_saving'] = $total_saving;
         $data['total_items'] = $total_items;
 
+        return view('Website.checkout', $data);
+    }
+
+
+    public function buyProduct($slug)
+    {
+        $product = Product::where('slug_url', $slug)->first();
+        $subtotal = $product->product_sale_price;
+        $total_mrp = $product->mrp;
+        $total_saving = $total_mrp - $subtotal;
+        $total_items = 1;
+
+        $data['addresses'] = UserAddress::where('user_id',Auth::user()->id)->where('add_status', 1)->orderBy('created_at', 'desc')->get();
+        $data['user'] = Auth::user();
+
+        $data['subtotal'] = $subtotal;
+        $data['total_mrp'] = $total_mrp;
+        $data['total_saving'] = $total_saving;
+        $data['total_items'] = $total_items;
         return view('Website.checkout', $data);
     }
 
