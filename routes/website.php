@@ -8,6 +8,7 @@ use App\Http\Controllers\Website\CheckoutController;
 use App\Http\Controllers\Website\StaticPageController;
 use App\Http\Controllers\Website\AuthController;
 use App\Http\Controllers\Website\AddressController;
+use App\Http\Controllers\Website\WishlistController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -25,6 +26,11 @@ Route::post('/clear-cart', [CartController::class, 'clearCart']);
 Route::get('/cart-summary', [CartController::class, 'getCartSummary']);
 Route::post('/checkout', [CheckoutController::class, 'checkout']);
 Route::get('/checkout', [CheckoutController::class, 'index']);
+
+// Wishlist Routes
+Route::get('/wishlist', [WishlistController::class, 'index']);
+Route::post('/wishlist/add', [WishlistController::class, 'addToWishlist']);
+Route::post('/wishlist/remove/{id}', [WishlistController::class, 'removeWishlist']);
 
 // Address Routes
 Route::prefix('address')->group(function () {

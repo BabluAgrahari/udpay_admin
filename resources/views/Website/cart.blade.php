@@ -64,7 +64,6 @@
                 </div>
                 	@endforeach
 
-                
             </div>
         </div>
         <div class="col-lg-4">
@@ -216,43 +215,6 @@ $(document).ready(function() {
         }
     };
 
-    function updateCartQuantity(productId, quantity) {
-        showCartLoading();
-        
-        $.ajax({
-            url: '{{ url("update-cart-quantity") }}',
-            type: 'POST',
-            data: {
-                product_id: productId,
-                quantity: quantity,
-                _token: '{{ csrf_token() }}'
-            },
-            success: function(response) {
-                hideCartLoading();
-                if (response.status) {
-                    updateCartSummary(response.record.cart_data);
-                    showSnackbar(response.msg, 'success');
-                } else {
-                    showSnackbar(response.msg, 'error');
-                    var input = $('input[data-product-id="' + productId + '"]');
-                    var currentQty = parseInt(input.val());
-                    if (quantity > currentQty) {
-                        input.val(currentQty - 1);
-                    } else {
-                        input.val(currentQty + 1);
-                    }
-                }
-            },
-            error: function(xhr) {
-                hideCartLoading();
-                var errorMsg = 'Error updating quantity';
-                if (xhr.responseJSON && xhr.responseJSON.errors) {
-                    errorMsg = Object.values(xhr.responseJSON.errors)[0][0];
-                }
-                showSnackbar(errorMsg, 'error');
-            }
-        });
-    }
 
     function removeFromCart(productId) {
         showCartLoading();

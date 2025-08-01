@@ -303,9 +303,9 @@
                         <ul class="main-menu">
                             <li class="menu-item"><a href="{{url('/')}}" class="">Home</a></li>
                             <li class="menu-item"><a href="{{url('product')}}">Products</a></li>
-                            <li class="menu-item"><a href="download.html">Downloads</a></li>
-                            <li class="menu-item"><a href="about-us.html">About Us</a></li>
-                            <li class="menu-item"><a href="contact-us.html">Contact Us</a></li>
+                            <li class="menu-item"><a href="{{ url('downloads') }}">Downloads</a></li>
+                            <li class="menu-item"><a href="{{ url('about-us') }}">About Us</a></li>
+                            <li class="menu-item"><a href="{{ url('contact-us') }}">Contact Us</a></li>
                         </ul>
                         <div class="header-right">
                             @if(!auth()->check())
@@ -320,7 +320,7 @@
                                         <li><a href="{{ url('profile') }}"><i class="fa-solid fa-user"></i> My Account</a></li>
                                         <!-- <li><a href="#"><i class="fa-solid fa-box"></i> Order History</a></li>
                                         <li><a href="#"><i class="fa-solid fa-book-bookmark"></i> Address Book</a></li> -->
-                                        <li><a href="wishlist.html"><i class="fa-solid fa-heart"></i> My Wishlist</a></li>
+                                        <li><a href="{{ url('wishlist') }}"><i class="fa-solid fa-heart"></i> My Wishlist</a></li>
                                         <li><a href="#"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a></li>
                                     </ul>
                                 </div>
@@ -432,12 +432,9 @@
             const $btn = $(this);
             const product_id = $btn.data("id");
             
-            // Prevent multiple clicks
             if ($btn.hasClass('loading')) {
                 return;
             }
-            
-            // Add loading state to button
             $btn.addClass('loading');
             showCartLoading();
             
@@ -449,7 +446,6 @@
                     '_token': '{{ csrf_token() }}' 
                 },
                 beforeSend: function () {
-                    // Show loading state
                     $btn.prop('disabled', true);
                 },
                 dataType: "json",
@@ -475,7 +471,6 @@
                     showSnackbar(errorMsg, 'error');
                 },
                 complete: function () {
-                    // Remove loading states
                     hideCartLoading();
                     $btn.removeClass('loading').prop('disabled', false);
                 },
@@ -490,8 +485,6 @@ function showToast() {
         toast.hide();
     }, 3000);
 }
-
-
 
      // Snackbar Functions
      function showSnackbar(message, type = 'success', duration = 3000) {
@@ -547,7 +540,79 @@ function showToast() {
    </script>
 
    @stack('scripts')
-   
+
+
+   <script>
+    function updateCartQuantity(productId, quantity) {
+        showCartLoading();
+        
+        $.ajax({
+            url: '{{ url("update-cart-quantity") }}',
+            type: 'POST',
+            data: {
+                product_id: productId,
+                quantity: quantity,
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(response) {
+                hideCartLoading();
+                if (response.status) {
+                    updateCartSummary(response.record.cart_data);
+                    showSnackbar(response.msg, 'success');
+                } else {
+                    showSnackbar(response.msg, 'error');
+                    var input = $('input[data-product-id="' + productId + '"]');
+                    var currentQty = parseInt(input.val());
+                    if (quantity > currentQty) {
+                        input.val(currentQty - 1);
+                    } else {
+                        input.val(currentQty + 1);
+                    }
+                }
+            },
+            error: function(xhr) {
+                hideCartLoading();
+                var errorMsg = 'Error updating quantity';
+                if (xhr.responseJSON && xhr.responseJSON.errors) {
+                    errorMsg = Object.values(xhr.responseJSON.errors)[0][0];
+                }
+                showSnackbar(errorMsg, 'error');
+            }
+        });
+    }
+   </script>
+
+   <script>
+    $(document).ready(function(){
+        $('.add-to-wishlist').click(function(){
+            var product_id = $(this).data('id');
+            var url = "{{ url('wishlist/add') }}";
+            showCartLoading();
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: {
+                    product_id: product_id,
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response){
+                    if(response.status){
+                        showSnackbar(response.msg, 'success');
+                    }else{
+                        showSnackbar(response.msg, 'error');
+                    }
+                },
+                error: function(xhr){
+                    hideCartLoading();
+                    showSnackbar(xhr.responseJSON.msg, 'error');
+                },
+                complete: function(){
+                    hideCartLoading();
+                }
+            });
+        });
+    });
+   </script>
    </body>
    </html>
 

@@ -463,20 +463,20 @@
                         </div>
                         <div class="qty-cart">
                             <div class="quantity">
-                                <button class="qty-btn">-</button>
-                                <input type="text" value="1">
-                                <button class="qty-btn border-raduis">+</button>
+                                <button class="qty-btn cart-decrement">-</button>
+                                <input type="text" value="1" class="quantity-input" data-product-id="{{ $product->id }}">
+                                <button class="qty-btn border-raduis cart-increment">+</button>
                             </div>
                             <div class="options">
-                                <button class="option active">100 G</button>
-                                <button class="option">200 G</button>
-                                <button class="option">50 G</button>
+                                @foreach($product->variants as $variant)
+                                    <button class="option {{ $variant->id == $product->variant_id ? 'active' : '' }}">{{ $variant->variant_name }}</button>
+                                @endforeach
                             </div>
                         </div>
                         <div class="details-add-btn">
-                            <a href="javascript:void(0)" data-id="{{ $product->id }}" class="thm-btn add-to-cart">Add to cart</a>
+                            <a href="javascript:void(0)" data-id="{{ $product->id }}" class="thm-btn cart-btn">Add to cart</a>
                             <a href="#" class="thm-btn buy-now">Quick Buy</a>
-                            <a href="#" class="thm-btn bg-light w-100">Add to wishlist</a>
+                            <a href="javascript:void(0)" class="thm-btn bg-light w-100 add-to-wishlist" data-id="{{ $product->id }}">Add to wishlist</a>
                         </div>
                         <div class="box-color">
                             <p class="color-one mb-2">Available Offers (2 offers)</p>
@@ -516,75 +516,38 @@
         </div>
     </div>
     <div class="row">
+        <?php $totalPrice = 0; ?>
+        @foreach($frequentlyBoughtTogether as $product)
         <div class="col-lg-3 col-md-6">
             <div class="product-card mx-0">
                 <div class="product-image">
-                    <a href="product-details.html"><img src="{{ asset('front_assets') }}/images/product/16.jpg" alt="img" class=""></a>
+                    <a href="{{ url('product/'.$product->slug_url) }}"><img src="{{ getImageWithFallback($product->product_image) }}" alt="img" class=""></a>
                      <p class="product-review"><i class="fa fa-star"></i> 3.25 (12 Reviews)</p>
-                    <!-- <span class="discount-prod">10% OFF</span>
-                    <span class="prod-wish"><i class="fa-regular fa-heart"></i></span> -->
                 </div>
                 <div class="product-perra">
                     <div class="prduct-perra-top">
-                        <a href="product-details.html"><h3>Wellness Beat Beauty Vitamins Capsules | Immunity Booster and Antioxidant | Dietary Supplement for Healthy Skin | Supplement for Glowing Skin and Stronger Hair (60 Capsules)</h3></a>
+                        <a href="{{ url('product/'.$product->slug_url) }}"><h3>{{ $product->product_name }}</h3></a>
                     </div>
                     <div class="d-flex justify-content-between">
                         <div class="price-mian">
-                            <span class="price-throuth">₹1,299</span><span class="price-bg">₹1,199</span>
+                            <span class="price-throuth">₹{{ number_format($product->product_sale_price, 2) }}</span><span class="price-bg">₹{{ number_format($product->mrp, 2) }}</span>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="product-card mx-0">
-                <div class="product-image">
-                    <a href="product-details.html"><img src="{{ asset('front_assets') }}/images/product/17.jpg" alt="img" class=""></a>
-                     <p class="product-review"><i class="fa fa-star"></i> 3.25 (12 Reviews)</p>
-                    <!-- <span class="discount-prod">10% OFF</span>
-                    <span class="prod-wish"><i class="fa-regular fa-heart"></i></span> -->
-                </div>
-                <div class="product-perra">
-                    <div class="prduct-perra-top">
-                        <a href="product-details.html"><h3>Wax Powder 10 Minutes Herbal Hair Removal Wax Easy to use at home, No chemicals - No Irritation, No Skin rashes for Women and Girls (100g)</h3></a>
-                    </div>
-                    <div class="d-flex justify-content-between">
-                        <div class="price-mian">
-                            <span class="price-throuth">₹1,299</span><span class="price-bg">₹1,199</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="product-card mx-0">
-                <div class="product-image">
-                    <a href="product-details.html"><img src="{{ asset('front_assets') }}/images/product/12.jpg" alt="img" class=""></a>
-                     <p class="product-review"><i class="fa fa-star"></i> 3.25 (12 Reviews)</p>
-                    <!-- <span class="discount-prod">10% OFF</span>
-                    <span class="prod-wish"><i class="fa-regular fa-heart"></i></span> -->
-                </div>
-                <div class="product-perra">
-                    <div class="prduct-perra-top">
-                        <a href="product-details.html"><h3>Turmeric Facial Wax Powder, 5 min Painless Natural Face Hair Removal Waxing Powder, Easy to use at home, No chemicals - No Irritation, No Skin rashes (100g)</h3></a>
-                    </div>
-                    <div class="d-flex justify-content-between">
-                        <div class="price-mian">
-                            <span class="price-throuth">₹1,299</span><span class="price-bg">₹1,199</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        </div>  
+        <?php $totalPrice += $product->product_sale_price; ?>
+        @endforeach
         <div class="col-lg-3 col-md-6 d-flex align-items-center justify-content-center text-center">
             <div class="product-card-detail-price">
-                <p class="mb-2">Total price: <span class="text-black">₹2,039</span> </p>
-                <a href="cart.html" class="thm-btn w-100">Add all 3 to Cart</a>
+                <p class="mb-2">Total price: <span class="text-black">₹{{ number_format($totalPrice, 2) }}</span> </p>
+                <a href="javascript:void(0)" class="thm-btn w-100 cart-btn" data-id="{{ $frequentlyBoughtTogether->pluck('id')->implode(',') }}">Add all 3 to Cart</a>
             </div>
         </div>
     </div>
   </div>
 </section>
+
 <!-- frequently -->
  <div class="marquee">
   <div class="marquee-content">
@@ -747,114 +710,31 @@
              <h2>People also bought</h2>
             <p class="mb-0">Explore our best rated products</p>
         </div>
-       <a href="#" class="veiw-btn">View More >></a>
+       <a href="#" class="veiw-btn">View More >></a>    
     </div>
     <div class="row product-slider">
+        @foreach($similarProducts as $product)
         <div class="col-lg-3 col-md-6">
             <div class="product-card">
                 <div class="product-image">
-                    <a href="product-details.html"><img src="{{ asset('front_assets') }}/images/product/9.jpg" alt="img" class=""></a>
+                    <a href="{{ url('product/'.$product->slug_url) }}"><img src="{{ getImageWithFallback($product->product_image) }}" alt="img" class=""></a>
                      <p class="product-review"><i class="fa fa-star"></i> 3.25 (12 Reviews)</p>
-                    <!-- <span class="discount-prod">10% OFF</span>
-                    <span class="prod-wish"><i class="fa-regular fa-heart"></i></span> -->
+                    <span class="prod-wish"><i class="fa-regular fa-heart add-to-wishlist" data-id="{{ $product->id }}"></i></span>
                 </div>
                 <div class="product-perra">
                     <div class="prduct-perra-top">
-                        <a href="product-details.html"><h3>MuscleBlaze High Protein Oats, 2 kg, Dark Chocolate</h3></a>
+                        <a href="{{ url('product/'.$product->slug_url) }}"><h3>{{ $product->product_name }}</h3></a>
                     </div>
                     <div class="d-flex justify-content-between">
                         <div class="price-mian">
-                            <span class="price-throuth">₹1,299</span><span class="price-bg">₹1,199</span>
+                            <span class="price-throuth">₹{{ number_format($product->product_sale_price, 2) }}</span><span class="price-bg">₹{{ number_format($product->mrp, 2) }}</span>
                         </div>
-                        <a href="cart.html" class="thm-btn">+</a>
+                        <a href="javascript:void(0)" class="thm-btn cart-btn" data-id="{{ $product->id }}">+</a>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="product-card">
-                <div class="product-image">
-                    <a href="product-details.html"><img src="{{ asset('front_assets') }}/images/product/10.jpg" alt="img" class=""></a>
-                     <p class="product-review"><i class="fa fa-star"></i> 3.25 (12 Reviews)</p>
-                    <!-- <span class="discount-prod">10% OFF</span>
-                    <span class="prod-wish"><i class="fa-regular fa-heart"></i></span> -->
-                </div>
-                <div class="product-perra">
-                    <div class="prduct-perra-top">
-                        <a href="product-details.html"><h3>MuscleBlaze High Protein Oats, 2 kg, Dark Chocolate</h3></a>
-                    </div>
-                    <div class="d-flex justify-content-between">
-                        <div class="price-mian">
-                            <span class="price-throuth">₹1,299</span><span class="price-bg">₹1,199</span>
-                        </div>
-                        <a href="cart.html" class="thm-btn">+</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="product-card">
-                <div class="product-image">
-                    <a href="product-details.html"><img src="{{ asset('front_assets') }}/images/product/11.jpg" alt="img" class=""></a>
-                     <p class="product-review"><i class="fa fa-star"></i> 3.25 (12 Reviews)</p>
-                    <!-- <span class="discount-prod">10% OFF</span>
-                    <span class="prod-wish"><i class="fa-regular fa-heart"></i></span> -->
-                </div>
-                <div class="product-perra">
-                    <div class="prduct-perra-top">
-                        <a href="product-details.html"><h3>MuscleBlaze High Protein Oats, 2 kg, Dark Chocolate</h3></a>
-                    </div>
-                    <div class="d-flex justify-content-between">
-                        <div class="price-mian">
-                            <span class="price-throuth">₹1,299</span><span class="price-bg">₹1,199</span>
-                        </div>
-                        <a href="cart.html" class="thm-btn">+</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="product-card">
-                <div class="product-image">
-                    <a href="product-details.html"><img src="{{ asset('front_assets') }}/images/product/12.jpg" alt="img" class=""></a>
-                     <p class="product-review"><i class="fa fa-star"></i> 3.25 (12 Reviews)</p>
-                    <!-- <span class="discount-prod">10% OFF</span>
-                    <span class="prod-wish"><i class="fa-regular fa-heart"></i></span> -->
-                </div>
-                <div class="product-perra">
-                    <div class="prduct-perra-top">
-                        <a href="product-details.html"><h3>MuscleBlaze High Protein Oats, 2 kg, Dark Chocolate</h3></a>
-                    </div>
-                    <div class="d-flex justify-content-between">
-                        <div class="price-mian">
-                            <span class="price-throuth">₹1,299</span><span class="price-bg">₹1,199</span>
-                        </div>
-                        <a href="cart.html" class="thm-btn">+</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="product-card">
-                <div class="product-image">
-                    <a href="product-details.html"><img src="{{ asset('front_assets') }}/images/product/10.jpg" alt="img" class=""></a>
-                     <p class="product-review"><i class="fa fa-star"></i> 3.25 (12 Reviews)</p>
-                    <!-- <span class="discount-prod">10% OFF</span>
-                    <span class="prod-wish"><i class="fa-regular fa-heart"></i></span> -->
-                </div>
-                <div class="product-perra">
-                    <div class="prduct-perra-top">
-                        <a href="product-details.html"><h3>MuscleBlaze High Protein Oats, 2 kg, Dark Chocolate</h3></a>
-                    </div>
-                    <div class="d-flex justify-content-between">
-                        <div class="price-mian">
-                            <span class="price-throuth">₹1,299</span><span class="price-bg">₹1,199</span>
-                        </div>
-                        <a href="cart.html" class="thm-btn">+</a>
-                    </div>
-                </div>
-            </div>
-        </div>
+        @endforeach
     </div>
   </div>
 </section>
@@ -1132,328 +1012,48 @@
 
 
  @push('scripts')
+<script src="{{ asset('front_assets') }}/js/zoomProductGallery.js"></script>
 
-
- <script>
-    // Open any popup
-    document.querySelectorAll(".openPopup").forEach(button => {
-      button.addEventListener("click", (e) => {
-        // Prevent default form submission if inside a form
-        e.preventDefault();
-  
-        const popupId = button.getAttribute("data-popup");
-        const popup = document.getElementById(popupId);
-        if (popup) popup.style.display = "flex";
-      });
-    });
-  
-    // Close any popup
-    document.querySelectorAll(".popup-overlay").forEach(popup => {
-      popup.querySelector(".close-btn").addEventListener("click", () => {
-        popup.style.display = "none";
-      });
-  
-      // Close when clicking outside the popup content
-      popup.addEventListener("click", (e) => {
-        if (e.target === popup) {
-          popup.style.display = "none";
-        }
-      });
-    });
-  </script>
   <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    // Handle image loading errors
-    const images = document.querySelectorAll('.product-details-image img, .thumb-item img, .zoom-gallery img');
-    images.forEach(img => {
-      img.addEventListener('error', function() {
-        this.src = '{{ asset("front_assets/images/no-image.svg") }}';
-        this.classList.add('error');
-      });
-      
-      img.addEventListener('load', function() {
-        this.classList.remove('error');
-      });
+  $(document).ready(function() {
+    $('.cart-increment').on('click', function() {
+        var productId = $(this).data('product-id');
+        var input = $('input[data-product-id="' + productId + '"]');
+        var currentQty = parseInt(input.val());
+        input.val(currentQty + 1);
+        updateCartQuantity(productId, currentQty + 1);
     });
 
-    // Thumbnail Gallery Functionality
-    const mainImage = document.querySelector('.main-image-container .main-image');
-    const thumbItems = document.querySelectorAll('.thumb-item');
-    const zoomImages = document.querySelectorAll('.zoom-image');
+    $('.cart-decrement').on('click', function() {
+        var productId = $(this).data('product-id');
+        var input = $('input[data-product-id="' + productId + '"]');
+        var currentQty = parseInt(input.val());
+        if (currentQty > 1) {
+            input.val(currentQty - 1);
+            updateCartQuantity(productId, currentQty - 1);
+        }
+    });
+
+    $('.quantity-input').on('change', function() {
+        var productId = $(this).data('product-id');
+        var quantity = parseInt($(this).val());
+        if (quantity < 1) {
+            $(this).val(1);
+            quantity = 1;
+        }
+        updateCartQuantity(productId, quantity);
+    });
     
-    // Handle thumbnail clicks
-    thumbItems.forEach(item => {
-      item.addEventListener('click', function() {
-        const imageSrc = this.getAttribute('data-src');
-        const imageIndex = this.getAttribute('data-index');
-        
-        // Update main image
-        if (mainImage) {
-          mainImage.src = imageSrc;
-          mainImage.setAttribute('data-index', imageIndex);
-        }
-        
-        // Update active thumbnail
-        thumbItems.forEach(thumb => thumb.classList.remove('active'));
-        this.classList.add('active');
-        
-        // Update current zoom index
-        currentZoomIndex = parseInt(imageIndex);
-      });
-    });
-
-    // Zoom Gallery Functionality
-    const zoomOverlay = document.getElementById('zoomOverlay');
-    const zoomImage = document.getElementById('zoomImage');
-    const zoomClose = document.getElementById('zoomClose');
-    const zoomPrev = document.getElementById('zoomPrev');
-    const zoomNext = document.getElementById('zoomNext');
-    const zoomCounter = document.getElementById('zoomCounter');
-    const zoomLoading = document.getElementById('zoomLoading');
-    
-    let currentZoomIndex = 0;
-    let totalImages = thumbItems.length;
-    let startX = 0;
-    let startY = 0;
-
-    // Preload images for better performance
-    function preloadImages() {
-      thumbItems.forEach(item => {
-        const imgSrc = item.getAttribute('data-src');
-        const preloadImg = new Image();
-        preloadImg.src = imgSrc;
-      });
-    }
-
-    // Touch/swipe support
-    function handleTouchStart(e) {
-      startX = e.touches[0].clientX;
-      startY = e.touches[0].clientY;
-    }
-
-    function handleTouchEnd(e) {
-      if (!startX || !startY) return;
-
-      const endX = e.changedTouches[0].clientX;
-      const endY = e.changedTouches[0].clientY;
-      const diffX = startX - endX;
-      const diffY = startY - endY;
-
-      // Check if it's a horizontal swipe
-      if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
-        if (diffX > 0) {
-          navigateZoom(1); // Swipe left - next
-        } else {
-          navigateZoom(-1); // Swipe right - previous
-        }
-      }
-
-      startX = 0;
-      startY = 0;
-    }
-
-    // Add touch event listeners
-    zoomOverlay.addEventListener('touchstart', handleTouchStart, { passive: true });
-    zoomOverlay.addEventListener('touchend', handleTouchEnd, { passive: true });
-
-    // Open zoom overlay
-    if (mainImage) {
-      mainImage.addEventListener('click', function() {
-        currentZoomIndex = parseInt(this.getAttribute('data-index') || 0);
-        openZoomOverlay();
-      });
-    }
-
-    // Close zoom overlay
-    zoomClose.addEventListener('click', closeZoomOverlay);
-    zoomOverlay.addEventListener('click', function(e) {
-      if (e.target === zoomOverlay) {
-        closeZoomOverlay();
-      }
-    });
-
-    // Navigation
-    zoomPrev.addEventListener('click', function(e) {
-      e.stopPropagation();
-      navigateZoom(-1);
-    });
-
-    zoomNext.addEventListener('click', function(e) {
-      e.stopPropagation();
-      navigateZoom(1);
-    });
-
-    // Keyboard navigation
-    document.addEventListener('keydown', function(e) {
-      if (zoomOverlay.style.display === 'flex') {
-        switch(e.key) {
-          case 'Escape':
-            closeZoomOverlay();
-            break;
-          case 'ArrowLeft':
-            navigateZoom(-1);
-            break;
-          case 'ArrowRight':
-            navigateZoom(1);
-            break;
-        }
-      }
-    });
-
-    function openZoomOverlay() {
-      if (totalImages === 0) return;
+    $('.buy-now').on('click', function(e) {
+      e.preventDefault();
       
-      zoomOverlay.style.display = 'flex';
-      updateZoomImage();
-      updateZoomCounter();
-      document.body.style.overflow = 'hidden';
+      var $btn = $(this);
+      var productId = $btn.closest('.product-details').find('.cart-btn').data('id');
+      var $quantityInput = $btn.closest('.product-details').find('.quantity input');
+      var quantity = parseInt($quantityInput.val()) || 1;
       
-      // Add fade-in effect
-      zoomOverlay.style.opacity = '0';
-      setTimeout(() => {
-        zoomOverlay.style.opacity = '1';
-      }, 10);
-    }
-
-    function closeZoomOverlay() {
-      zoomOverlay.style.opacity = '0';
-      setTimeout(() => {
-        zoomOverlay.style.display = 'none';
-        document.body.style.overflow = 'auto';
-      }, 300);
-    }
-
-    function navigateZoom(direction) {
-      currentZoomIndex += direction;
-      
-      if (currentZoomIndex < 0) {
-        currentZoomIndex = totalImages - 1;
-      } else if (currentZoomIndex >= totalImages) {
-        currentZoomIndex = 0;
-      }
-      
-      // Update main image and thumbnail
-      const targetThumb = document.querySelector(`[data-index="${currentZoomIndex}"]`);
-      if (targetThumb) {
-        const imageSrc = targetThumb.getAttribute('data-src');
-        
-        // Update main image
-        if (mainImage) {
-          mainImage.src = imageSrc;
-          mainImage.setAttribute('data-index', currentZoomIndex);
-        }
-        
-        // Update active thumbnail
-        thumbItems.forEach(thumb => thumb.classList.remove('active'));
-        targetThumb.classList.add('active');
-      }
-      
-      updateZoomImage();
-      updateZoomCounter();
-    }
-
-    function updateZoomImage() {
-      const currentThumb = document.querySelector(`[data-index="${currentZoomIndex}"]`);
-      if (currentThumb) {
-        const imageSrc = currentThumb.getAttribute('data-src');
-        
-        // Show loading spinner
-        zoomLoading.style.display = 'block';
-        zoomImage.style.opacity = '0';
-        
-        // Create a new image to check if it's already loaded
-        const tempImg = new Image();
-        tempImg.onload = function() {
-          zoomImage.src = imageSrc;
-          zoomImage.alt = currentThumb.querySelector('img').alt;
-          zoomImage.style.opacity = '1';
-          zoomLoading.style.display = 'none';
-        };
-        tempImg.onerror = function() {
-          zoomImage.src = '{{ asset("front_assets/images/no-image.svg") }}';
-          zoomImage.alt = 'Image not available';
-          zoomImage.style.opacity = '1';
-          zoomLoading.style.display = 'none';
-        };
-        tempImg.src = imageSrc;
-      }
-    }
-
-    function updateZoomCounter() {
-      zoomCounter.textContent = `${currentZoomIndex + 1} / ${totalImages}`;
-      
-      // Show/hide navigation buttons
-      zoomPrev.style.display = totalImages > 1 ? 'block' : 'none';
-      zoomNext.style.display = totalImages > 1 ? 'block' : 'none';
-      zoomCounter.style.display = totalImages > 1 ? 'block' : 'none';
-    }
-
-    // Initialize preloading
-    preloadImages();
-
-    const quantityControls = document.querySelectorAll('.quantity');
-  
-    quantityControls.forEach(control => {
-      const minusBtn = control.querySelector('button:first-child');
-      const plusBtn = control.querySelector('button:last-child');
-      const input = control.querySelector('input');
-  
-      minusBtn.addEventListener('click', () => {
-        let currentValue = parseInt(input.value);
-        if (currentValue > 1) {
-          input.value = currentValue - 1;
-        }
-      });
-  
-      plusBtn.addEventListener('click', () => {
-        let currentValue = parseInt(input.value);
-        input.value = currentValue + 1;
-      });
-    });
-
-    // Add to cart functionality
-    document.querySelectorAll('.add-to-cart').forEach(button => {
-      button.addEventListener('click', function() {
-        const productId = this.getAttribute('data-id');
-        const quantityInput = document.querySelector('.quantity input');
-        const quantity = quantityInput ? parseInt(quantityInput.value) : 1;
-        
-        // Show loading state
-        this.textContent = 'Adding...';
-        this.disabled = true;
-        
-        fetch('/add-to-cart', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-          },
-          body: JSON.stringify({
-            product_id: productId,
-            quantity: quantity
-          })
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            // Show success message
-            alert('Product added to cart successfully!');
-            // Reset button
-            this.textContent = 'Add to cart';
-            this.disabled = false;
-          } else {
-            alert(data.message || 'Failed to add product to cart');
-            this.textContent = 'Add to cart';
-            this.disabled = false;
-          }
-        })
-        .catch(error => {
-          console.error('Error:', error);
-          alert('An error occurred while adding to cart');
-          this.textContent = 'Add to cart';
-          this.disabled = false;
-        });
-      });
+      var checkoutUrl = '/checkout?product_id=' + productId + '&quantity=' + quantity;
+      window.location.href = checkoutUrl;
     });
   });
   </script>

@@ -11,15 +11,32 @@ class ProductDetailController extends Controller
 {
     public function index($slug)
     {
-        $product = Product::with(['images', 'category', 'brand', 'unit'])
-            ->where('slug_url', $slug)
-            ->where('status', '1')
-            ->first();
-        
-        if (!$product) {
+        try {
+            $data['product'] = Product::with(['images', 'category', 'brand', 'unit', 'variants'])
+                ->where('slug_url', $slug)
+                ->where('status', '1')
+                ->first();
+            if (!$data['product']) {
+                abort(404, 'Product not found');
+            }
+
+            $data['frequentlyBoughtTogether'] = Product::with(['images', 'category', 'brand', 'unit', 'variants'])
+                ->where('status', '1')
+                ->where('id', '!=', $data['product']->id)
+                ->inRandomOrder()
+                ->limit(3)
+                ->get();
+
+            $data['similarProducts'] = Product::with(['images', 'category', 'brand', 'unit', 'variants'])
+                ->where('status', '1')
+                ->where('id', '!=', $data['product']->id)
+                ->inRandomOrder()
+                ->limit(10)
+                ->get();
+
+            return view('Website.detail', $data);
+        } catch (\Exception $e) {
             abort(404, 'Product not found');
         }
-        
-        return view('Website.detail', compact('product'));
     }
 }

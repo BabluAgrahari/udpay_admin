@@ -29,8 +29,7 @@
                 <div class="product-image">
                     <a href="{{url('detail')}}/{{$product->slug_url}}"><img src="{{ getImageWithFallback($product->product_image) }}" alt="img" class="" onerror="this.src='{{ asset('front_assets/images/no-image.svg') }}'"></a>
                      <p class="product-review"><i class="fa fa-star"></i> 3.25 (12 Reviews)</p>
-                    <!-- <span class="discount-prod">10% OFF</span>
-                    <span class="prod-wish"><i class="fa-regular fa-heart"></i></span> -->
+                    <span class="prod-wish"><i class="fa-regular fa-heart add-to-wishlist" data-id="{{ $product->id }}"></i></span>
                 </div>
                 <div class="product-perra">
                     <div class="prduct-perra-top">
