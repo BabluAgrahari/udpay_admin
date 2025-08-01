@@ -69,7 +69,7 @@
                                     <a href="#" class="profile-icon">{{ Auth::user()->name ??''}}<i class="fa-solid fa-chevron-down"></i></a>
                                     <div class="profile-dropdown">
                                         <ul class="user-list-header">
-                                            <li><a href="{{ url('profile') }}"><i class="fa-solid fa-user"></i> My Account</a>
+                                            <li><a href="{{ url('distributor/dashboard') }}"><i class="fa-solid fa-user"></i> My Account</a>
                                             </li>
                                             <!-- <li><a href="#"><i class="fa-solid fa-box"></i> Order History</a></li>
                                         <li><a href="#"><i class="fa-solid fa-book-bookmark"></i> Address Book</a></li> -->
