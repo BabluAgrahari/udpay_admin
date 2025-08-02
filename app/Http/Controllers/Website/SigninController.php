@@ -66,7 +66,6 @@ class SigninController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-
-        return redirect()->route('signin')->with('success', 'You have been logged out successfully.');
+        return redirect()->to('signin')->with('success', 'You have been logged out successfully.');
     }
 }

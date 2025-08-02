@@ -13,6 +13,7 @@ Route::get('/signup', [SignupController::class, 'index']);
 // Signin routes
 Route::get('/signin', [SigninController::class, 'index']);
 Route::post('/signin', [SigninController::class, 'login']);
+Route::get('/logout', [SigninController::class, 'logout']);
 
 // Signup process routes
 Route::post('/signup/verify-phone', [SignupController::class, 'verifyPhone']);

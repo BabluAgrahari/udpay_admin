@@ -14,9 +14,9 @@
                 <thead class="table-light">
                     <tr>
                         <th>Level</th>
-                        <th>Total Count</th>
-                        <th>Total Green</th>
-                        <th>Total Red</th>
+                        <th>Total Team</th>
+                        <th>Month SV</th>
+                        <th>Total SV</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -34,3 +34,4 @@
 
     </div>
 </div>
+

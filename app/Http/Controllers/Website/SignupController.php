@@ -11,6 +11,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
+use App\Jobs\RegisterJob;
+use App\Models\Wallet;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class SignupController extends Controller
@@ -46,7 +50,7 @@ class SignupController extends Controller
         //     return $this->failMsg($smsSent['msg']);
         // }
 
-        return $this->successMsg('OTP sent successfully to your phone number',['otp' => $otp]);
+        return $this->successMsg('OTP sent successfully to your phone number', ['otp' => $otp]);
     }
 
     public function verifyOtp(Request $request)
@@ -100,7 +104,7 @@ class SignupController extends Controller
         $otp = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
 
         Session::put('signup_otp', $otp);
-            Session::put('signup_mobile', $request->mobile);
+        Session::put('signup_mobile', $request->mobile);
         Session::put('otp_expires_at', now()->addMinutes(5));
 
         $smsService = new SmsService();
@@ -151,9 +155,18 @@ class SignupController extends Controller
                 return $this->failMsg('Referral ID is not valid');
             }
 
-            $user = User::select('id','user_id')->orderBy('id', 'DESC')->first();
+            DB::beginTransaction();
+            $user = User::select('id', 'user_id')->orderBy('id', 'DESC')->first();
             $user_id = !empty($user->id) ? $user->user_id + 1 : 1;
             $user_num = uniqCode(8);
+
+            if(User::where('user_id', $user_id)->exists()){
+                return $this->failMsg('User ID Already Exists, Please try again.');
+            }
+
+            if(User::where('user_num', $user_num)->exists()){
+                return $this->failMsg('User Num ID Already Exists, Please try again.');
+            }
 
             $customer = new User();
             $customer->ref_id = $request->referral_id;
@@ -166,15 +179,75 @@ class SignupController extends Controller
             $customer->password = Hash::make($request->password);
             $customer->pwd = $request->password;
             if ($customer->save()) {
-                // $smsService = new SmsService();
-                // $smsService->sendMessage('reg_msg', $request->phone, $request->password, $request->full_name);
-                return $this->successMsg('Account created successfully!');
+               
+                $res = $this->saveUserDetail($customer->ref_id, $customer->user_num, $user_id,
+                    $customer->alpha_num_uid, $customer->pwd, $customer->email, $customer->name, $customer->mobile);
+                if (!$res['status']) {
+                    DB::rollBack();
+                    return $this->failRes($res['msg'] ?? '');
+                }
+                DB::commit();
+                return $this->successMsg('Account created successfully!', [
+                    'alpha_num_id' => $customer->alpha_num_uid,
+                    'username' => $customer->name
+                ]);
             }
             Session::forget(['signup_otp', 'signup_mobile', 'otp_expires_at', 'phone_verified', 'verified_phone']);
 
             return $this->failMsg('Something went wrong. Please try again.');
         } catch (\Exception $e) {
+            DB::rollBack();
             return $this->failMsg('Something went wrong. Please try again.');
         }
+    }
+
+    private function saveUserDetail($refered_by, $user_num, $user_id, $userName, $password, $email, $name, $mobile)
+    {
+        $wallet = $this->createWallet($user_id, $user_num);
+        if (!$wallet)
+            return ['status' => false, 'msg' => 'Something went wrong, Not insert in User Wallet'];
+
+        $user = User::where('user_id', $user_id)->first();
+        $user->uflag = 4;
+        $user->save();
+
+        $payload = ['user_id' => $user_id, 'unm' => $user_num, 'refered_by' => $refered_by, 'org' => ''];
+        dispatch(new RegisterJob($payload));  // here run job queue  here
+
+        $walletUpdate = Wallet::where('unm', $refered_by)->first();
+        $existbp = $walletUpdate->bp ?? 0;
+        $walletUpdate->bp = $existbp + 100;
+
+        if ($walletUpdate->save()) {
+            // $sms = new SmsService;
+            // $msgSend = $sms->sendMessage('reg_msg', $mobile, '', 'UNI' . $user_nm, $password);
+            // if (!$msgSend)
+            //     Log::warning('Something went wrong, SMS not sent - UserId', [$user_nm]);
+
+            // // for send mail by job queue
+            // dispatch(new MailJob(['email' => $email, 'user_name' => 'UNI' . $user_nm, 'password' => $password, 'full_name' => $fname], 'sign_up'));
+
+            return ['status' => true, 'msg' => 'Wallet Amount Updated Successfully!'];
+        } else {
+            Log::warning('Something went wrong, Wallet Amount not updated - UserId', [$user_num]);
+            return ['status' => true, 'msg' => 'Something went wrong, Wallet Amount not updated'];
+        }
+    }
+
+    private function createWallet($id, $unm)
+    {
+        $save = new Wallet();
+        $save->userid = $id;
+        $save->unm = $unm;
+        $save->bp = 100;
+        $save->amount = 0;
+        $save->earning = 0;
+        $save->sp = 0;
+        $save->unicash = 0;
+        $save->sec_val = 0;
+        if ($save->save())
+            return true;
+
+        return false;
     }
 }

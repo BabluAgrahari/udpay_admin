@@ -71,11 +71,11 @@
                     @elseif($type == 'settings')
                         @include('Website.Distributor.settings')
                     @elseif($type == 'my-direct-referral')
-                        @include('Website.Distributor.my-direct-referral')
+                        @include('Website.Distributor.my_direct_referal')
                     @elseif($type == 'team-generation')
                         @include('Website.Distributor.team_generations')
                     @elseif($type == 'my-acheivements')
-                        @include('Website.Distributor.my-acheivements')
+                        @include('Website.Distributor.my_acheivements')
                     @endif
 
 

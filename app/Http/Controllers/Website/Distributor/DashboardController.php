@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\LevelCount;
 use App\Models\Product;
+use App\Models\Royalty;
 use App\Models\User;
 use App\Models\UserKyc;
 use Illuminate\Http\Request;
@@ -22,7 +23,7 @@ class DashboardController extends Controller
             $data['kyc'] = UserKyc::where('userId', auth()->user()->user_id)->first();
         }
         if ($type == 'my-direct-referral') {
-            $data['user'] = User::where('referral_id', auth()->user()->user_id)->get();
+            $data['referrals'] = User::where('ref_id', auth()->user()->user_id)->get();
         }
         if ($type == 'team-generation') {
             $data['team_generation'] = DB::table('level_count')
@@ -38,7 +39,7 @@ class DashboardController extends Controller
                 ->get();
         }
         if ($type == 'my-acheivements') {
-            $data['user'] = User::where('referral_id', auth()->user()->user_id)->get();
+            $data['achievement'] = Royalty::where('userId', auth()->user()->user_id)->first();
         }
 
         // Add level count statistics for dashboard
@@ -46,5 +47,26 @@ class DashboardController extends Controller
         }
 
         return view('Website.Distributor.dashboard', $data);
+    }
+
+
+    public function userLeavelList(Request $request){
+
+        $data['records'] = DB::table('level_count')
+            ->select('level_count.level as lvl', 
+            'level_count.child_id as child', 
+            'level_count.is_active', 
+            'users_lvl.name', 
+            'users_lvl.upgrade_date',
+            'users_lvl.user_nm',
+            'users_lvl.user_id',
+            'users_lvl.mobile',
+            'users_lvl.email')
+            ->join('users_lvl', 'level_count.child_id', '=', 'users_lvl.user_nm')
+            ->where('level_count.parent_id', auth()->user()->user_id)
+            ->where('level_count.level', $request->lvl)
+            ->orderBy('users_lvl.upgrade_date', 'desc')
+            ->get();
+        return view('Website.Distributor.user_level_list', $data);
     }
 }

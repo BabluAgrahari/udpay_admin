@@ -2,15 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\BaseModel;
 
-class Wallet extends Model
+class Wallet extends BaseModel
 {
-    use HasFactory;
     protected $table = "wallet";
-    public $timestamps = false;
-
 
     public function Transaction()
     {

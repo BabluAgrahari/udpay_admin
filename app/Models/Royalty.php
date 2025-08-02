@@ -2,14 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\BaseModel;
 
-class Royalty extends Model
+class Royalty extends BaseModel
 {
     protected $table = 'royalty';
-    public $timestamps=false;
-    use HasFactory;
+
+    
 }
 
 
