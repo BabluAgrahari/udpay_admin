@@ -135,9 +135,9 @@
                     <p class="total text-black">Payable Amount <span>₹{{ $subtotal }}</span></p>
                 </div>
             </div>
-            <div class="cart-items p-3">
+            <div class="cart-items mt-2 p-3">
                 <h6 class="mb-2">Payment Method</h6>
-                <form method="POST" action="{{ url('checkout') }}">
+                <form method="get" action="{{ url('payment-process') }}">
                     @csrf
                     <input type="hidden" name="address_id" value="">
                     <select name="payment_method" class="form-control mb-2">

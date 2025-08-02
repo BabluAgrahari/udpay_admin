@@ -34,7 +34,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Gate::define('isCustomer', function (User $user) {
-            return $user->role == 'customer';
+            return $user->role == 'customer' || $user->role == '';
         });
 
         Paginator::defaultView('Pagination');

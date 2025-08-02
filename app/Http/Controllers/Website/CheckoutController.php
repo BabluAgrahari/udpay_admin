@@ -11,6 +11,7 @@ use App\Models\Product;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use App\Services\PaymentGatway\CashFree;
 
 class CheckoutController extends Controller
 {
@@ -157,4 +158,15 @@ class CheckoutController extends Controller
             return back()->with('error', 'Failed to process order: ' . $e->getMessage());
         }
     }
+
+    public function paymentProcess()
+    {
+        
+        $payment = new CashFree();
+       $res = $payment->createOrder(100, 'INR', ['customer_id' => '1234567890', 'customer_name' => 'John Doe', 'customer_email' => 'john.doe@example.com', 'customer_phone' => '+919876543210']);
+
+        print_r($res);
+        die;
+    }
+
 }

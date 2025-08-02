@@ -27,7 +27,8 @@ Route::get('/cart-summary', [CartController::class, 'getCartSummary']);
 Route::post('/checkout', [CheckoutController::class, 'checkout']);
 Route::get('/checkout', [CheckoutController::class, 'index']);
 Route::get('buy/{slug}', [CheckoutController::class, 'buyProduct']);
-
+Route::post('/payment-gatway', [CheckoutController::class, 'paymentGatway']);
+Route::get('/payment-process', [CheckoutController::class, 'paymentProcess']);
 
 Route::group(['middleware' => ['customer.auth']], function () {
 // Wishlist Routes
