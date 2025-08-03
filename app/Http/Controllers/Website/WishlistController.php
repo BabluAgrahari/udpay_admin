@@ -10,17 +10,6 @@ use App\Models\Wishlist;
 class WishlistController extends Controller
 {
 
-    public function index()
-    {
-        try {
-            $data['wishlist'] = Wishlist::with('product')->where('user_id', Auth::user()->id)->get();
-            return view('Website.wishlist', $data);
-        } catch (\Exception $e) {
-            abort(404, $e->getMessage());
-        }
-    }
-
-
     public function addToWishlist(Request $request)
     {
         try {

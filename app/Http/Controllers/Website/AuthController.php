@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Website;
 
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
+use App\Models\Cart;
 use App\Services\SmsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -12,6 +13,9 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+
+
+
 
 class AuthController extends Controller
 {
@@ -121,9 +125,21 @@ class AuthController extends Controller
             Auth::login($user);
             Session::forget(['otp', 'mobile', 'otp_expiry', 'otp_sent_time', 'otp_attempts']);
 
+            $this->cartItems();
             return $this->successMsg('Login successful!', ['user' => $user]);
         } catch (\Exception $e) {
             return $this->failMsg($e->getMessage());
+        }
+    }
+
+
+    private function cartItems()
+    {
+        $cartItems = Cart::where('cart_cookie_id', Session::get('cart_cookie_id'))->get();
+        foreach ($cartItems as $item) {
+            $cart = Cart::find($item->id);
+            $cart->user_id = Auth::user()->id;
+            $cart->save();
         }
     }
 

@@ -303,7 +303,7 @@
                         <ul class="main-menu">
                             <li class="menu-item"><a href="{{url('/')}}" class="">Home</a></li>
                             <li class="menu-item"><a href="{{url('product')}}">Products</a></li>
-                            <li class="menu-item"><a href="{{ url('downloads') }}">Downloads</a></li>
+                            <li class="menu-item"><a href="{{ url('download') }}">Downloads</a></li>
                             <li class="menu-item"><a href="{{ url('about-us') }}">About Us</a></li>
                             <li class="menu-item"><a href="{{ url('contact-us') }}">Contact Us</a></li>
                         </ul>
@@ -317,9 +317,9 @@
                                 <a href="#" class="profile-icon">{{ auth()->user()->name }} <i class="fa-solid fa-chevron-down"></i></a>
                                 <div class="profile-dropdown">
                                     <ul class="user-list-header">
-                                        <li><a href="{{ url('profile') }}"><i class="fa-solid fa-user"></i> My Account</a></li>
-                                        <!-- <li><a href="#"><i class="fa-solid fa-box"></i> Order History</a></li>
-                                        <li><a href="#"><i class="fa-solid fa-book-bookmark"></i> Address Book</a></li> -->
+                                        <li><a href="{{ url('my-account') }}"><i class="fa-solid fa-user"></i> My Account</a></li>
+                                        <li><a href="{{ url('order-history') }}"><i class="fa-solid fa-box"></i> Order History</a></li>
+                                        {{-- <li><a href="#"><i class="fa-solid fa-book-bookmark"></i> Address Book</a></li> --}}
                                         <li><a href="{{ url('wishlist') }}"><i class="fa-solid fa-heart"></i> My Wishlist</a></li>
                                             <li><a href="{{ url('logout') }}"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a></li>
                                     </ul>

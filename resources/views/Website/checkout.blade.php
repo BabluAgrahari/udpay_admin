@@ -137,12 +137,12 @@
             </div>
             <div class="cart-items mt-2 p-3">
                 <h6 class="mb-2">Payment Method</h6>
-                <form method="get" action="{{ url('payment-process') }}">
+                <form method="post" id="saveOrder" action="{{ url('checkout') }}">
                     @csrf
                     <input type="hidden" name="address_id" value="">
-                    <select name="payment_method" class="form-control mb-2">
-                        <option value="cod">Cash on Delivery</option>
-                        <option value="online">Online Payment</option>
+                    <select name="payment_gateway" class="form-control mb-2">
+                        <option value="cashfree">Cashfree</option>
+                        <option value="razorpay">Razorpay</option>
                     </select>
                     <button type="submit" class="thm-btn">Proceed to Pay</button>
                 </form>
@@ -154,189 +154,189 @@
 
 <style>
 
-.address-card {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 15px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    background: #fff;
-    position: relative;
-}
-
-.address-card:hover {
-    border-color: #006038;
-    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
-}
-
-.address-card.selected {
-    border-color: #006038;
-    background-color: #f8f9ff;
-    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
-}
-
-.address-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-.address-header h6 {
-    margin: 0;
-    font-weight: 600;
-    color: #333;
-}
-
-.address-actions {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.edit-address {
-    background-color: #F1624B;
-    border-color: #F1624B;
-    color: white;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    transition: all 0.3s ease;
-}
-
-.edit-address:hover {
-    background-color: #F1624B;
-    border-color: #F1624B;
-    transform: scale(1.1);
-}
-
-.edit-address i {
-    font-size: 12px;
-}
-
-.default-checkbox-wrapper {
-    display: flex;
-    align-items: center;
-}
-
-.default-checkbox-label {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    cursor: pointer;
-    font-size: 12px;
-    color: #666;
-    margin: 0;
-}
-
-.set-default-checkbox {
-    width: 16px;
-    height: 16px;
-    margin: 0;
-    cursor: pointer;
-}
-
-.default-text {
-    font-weight: 500;
-}
-
-.set-default-checkbox:checked + .default-text {
-    color: #28a745;
-    font-weight: 600;
-}
-
-.address-card p {
-    margin: 5px 0;
-    color: #666;
-    font-size: 14px;
-}
-
-.address-card .d-flex {
-    margin-top: 10px;
-}
-
-.btn-small {
-    padding: 5px 12px;
-    font-size: 12px;
-}
-
-.edit-form-box {
-    background: #f8f9fa;
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
-    padding: 20px;
-}
-
-
-.options {
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-}
-
-.options label {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    cursor: pointer;
-    font-weight: normal;
-}
-
-.options input[type="radio"] {
-    margin: 0;
-}
-
-@media (max-width: 768px) {
-    .address-card .d-flex {
-        flex-direction: column;
-        gap: 10px;
-    }
-    
-    .options {
-        flex-direction: column;
-        gap: 10px;
-    }
-    
-    .edit-form-box {
+    .address-card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
         padding: 15px;
+        margin-bottom: 15px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: #fff;
+        position: relative;
     }
-    
+
+    .address-card:hover {
+        border-color: #006038;
+        box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
+    }
+
+    .address-card.selected {
+        border-color: #006038;
+        background-color: #f8f9ff;
+        box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
+    }
+
+    .address-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .address-header h6 {
+        margin: 0;
+        font-weight: 600;
+        color: #333;
+    }
+
     .address-actions {
-        flex-direction: column;
-        gap: 5px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
-}
 
-.processing {
-    opacity: 0.6;
-    pointer-events: none;
-}
+    .edit-address {
+        background-color: #F1624B;
+        border-color: #F1624B;
+        color: white;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        transition: all 0.3s ease;
+    }
 
-#addAddressForm {
-    transition: all 0.3s ease;
-}
+    .edit-address:hover {
+        background-color: #F1624B;
+        border-color: #F1624B;
+        transform: scale(1.1);
+    }
 
-.address-card.selected::before {
-    content: "✓";
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: #007bff;
-    color: white;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: bold;
-}
+    .edit-address i {
+        font-size: 12px;
+    }
+
+    .default-checkbox-wrapper {
+        display: flex;
+        align-items: center;
+    }
+
+    .default-checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        cursor: pointer;
+        font-size: 12px;
+        color: #666;
+        margin: 0;
+    }
+
+    .set-default-checkbox {
+        width: 16px;
+        height: 16px;
+        margin: 0;
+        cursor: pointer;
+    }
+
+    .default-text {
+        font-weight: 500;
+    }
+
+    .set-default-checkbox:checked + .default-text {
+        color: #28a745;
+        font-weight: 600;
+    }
+
+    .address-card p {
+        margin: 5px 0;
+        color: #666;
+        font-size: 14px;
+    }
+
+    .address-card .d-flex {
+        margin-top: 10px;
+    }
+
+    .btn-small {
+        padding: 5px 12px;
+        font-size: 12px;
+    }
+
+    .edit-form-box {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
+    }
+
+
+    .options {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .options label {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        cursor: pointer;
+        font-weight: normal;
+    }
+
+    .options input[type="radio"] {
+        margin: 0;
+    }
+
+    @media (max-width: 768px) {
+        .address-card .d-flex {
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .options {
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .edit-form-box {
+            padding: 15px;
+        }
+        
+        .address-actions {
+            flex-direction: column;
+            gap: 5px;
+        }
+    }
+
+    .processing {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+
+    #addAddressForm {
+        transition: all 0.3s ease;
+    }
+
+    .address-card.selected::before {
+        content: "✓";
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #007bff;
+        color: white;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: bold;
+    }
 </style>
 
 @push('scripts')
@@ -347,6 +347,40 @@ $(document).ready(function() {
     let isEditMode = false;
     let currentAddressId = null;
     
+    $('form#saveOrder').on('submit', function(e) {
+        e.preventDefault();
+        const $form = $(this);
+        const $submitBtn = $form.find('.submit-btn');
+        const originalText = $submitBtn.text();
+
+        $submitBtn.prop('disabled', true).text('Processing...');
+        $('.error-message').remove();
+        $('.form-control').removeClass('is-invalid');
+        
+        $.ajax({
+            url: $form.attr('action'),
+            method: 'post',   
+            data: $form.serialize(),
+            beforeSend: function() {
+                showCartLoading();
+            },
+            dataType: 'json',
+            success: function(response) {
+                hideCartLoading();
+                showSnackbar(response.msg, response.status?'success':'error');
+                if(response.status){
+                    setTimeout(function() {
+                        location.reload();
+                    }, 1000);
+                }
+            },
+            error: function(xhr) {
+                hideCartLoading();
+                showSnackbar(xhr.responseJSON.msg,'error');
+            }
+        });
+    });
+
     // Toggle address form visibility
     $('.add-address').on('click', function() {
         const $form = $('#addAddressForm');
@@ -354,23 +388,11 @@ $(document).ready(function() {
         if ($form.is(':visible')) {
             $form.hide();
             $btn.text('+ Add New Address');
-            resetForm();
         } else {
             $form.show();
             $btn.text('Cancel');
         }
     });
-    
-    // Reset form to add mode
-    function resetForm() {
-        isEditMode = false;
-        currentAddressId = null;
-        $('#addressForm')[0].reset();
-        $('#addressForm').attr('action', '{{ url("address") }}');
-        $('#addressForm input[name="_method"]').remove();
-        $('.form-title').text('Add New Address');
-        $('.submit-btn').text('Save Address');
-    }
     
     // Edit address functionality
     $(document).on('click', '.edit-address', function(e) {
@@ -504,7 +526,6 @@ $(document).ready(function() {
     $(document).on('click', '.address-card', function() {
         $('.address-card').removeClass('selected');
         $(this).addClass('selected');
-        
         const addressId = $(this).find('input[name="address_id"]').val();
         $('input[name="address_id"][type="hidden"]').val(addressId);
     });

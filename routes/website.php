@@ -9,9 +9,9 @@ use App\Http\Controllers\Website\StaticPageController;
 use App\Http\Controllers\Website\AuthController;
 use App\Http\Controllers\Website\AddressController;
 use App\Http\Controllers\Website\WishlistController;
+use App\Http\Controllers\Website\OrderHistoryController;
+use App\Http\Controllers\Website\DashboardController;
 use Illuminate\Support\Facades\Route;
-
-
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/product/{category?}', [FrontController::class, 'productList']);
@@ -24,18 +24,12 @@ Route::post('/update-cart-quantity', [CartController::class, 'updateQuantity']);
 Route::post('/remove-from-cart', [CartController::class, 'removeFromCart']);
 Route::post('/clear-cart', [CartController::class, 'clearCart']);
 Route::get('/cart-summary', [CartController::class, 'getCartSummary']);
-Route::post('/checkout', [CheckoutController::class, 'checkout']);
-Route::get('/checkout', [CheckoutController::class, 'index']);
-Route::get('buy/{slug}', [CheckoutController::class, 'buyProduct']);
-Route::post('/payment-gatway', [CheckoutController::class, 'paymentGatway']);
-Route::get('/payment-process', [CheckoutController::class, 'paymentProcess']);
+
 
 Route::group(['middleware' => ['customer.auth']], function () {
 // Wishlist Routes
-Route::get('/wishlist', [WishlistController::class, 'index']);
 Route::post('/wishlist/add', [WishlistController::class, 'addToWishlist']);
 Route::post('/wishlist/remove/{id}', [WishlistController::class, 'removeWishlist']);
-});
 
 // Address Routes
 Route::prefix('address')->group(function () {
@@ -43,6 +37,25 @@ Route::prefix('address')->group(function () {
     Route::put('/{id}', [AddressController::class, 'update']);
     Route::post('/{id}/set-default', [AddressController::class, 'setDefault']);
 });
+
+Route::post('/checkout', [CheckoutController::class, 'checkout']);
+Route::get('/checkout', [CheckoutController::class, 'index']);
+Route::get('buy/{slug}', [CheckoutController::class, 'buyProduct']);
+Route::post('/payment-gatway', [CheckoutController::class, 'paymentGatway']);
+Route::get('/payment-process', [CheckoutController::class, 'paymentProcess']);
+// Route::get('/order-history', [OrderHistoryController::class, 'index']);
+Route::get('/order-detail/{id}', [OrderHistoryController::class, 'orderDetail']);
+
+
+Route::get('/my-account', [DashboardController::class, 'myAccount']);
+Route::post('/save-profile', [DashboardController::class, 'saveProfile']);
+Route::get('/order-history', [DashboardController::class, 'orderHistory']);
+Route::get('/address-book', [DashboardController::class, 'addressBook']);
+Route::get('/wishlist', [DashboardController::class, 'wishlist']);
+Route::get('/logout', [DashboardController::class, 'logout']);
+});
+
+
 
 // Static Pages Routes
 Route::get('/about-us', [StaticPageController::class, 'about'])->name('about');
@@ -56,6 +69,7 @@ Route::get('/faq', [StaticPageController::class, 'faq'])->name('faq');
 Route::get('/grievance-cell', [StaticPageController::class, 'grievanceCell'])->name('grievance.cell');
 Route::get('/track-order', [StaticPageController::class, 'trackOrder'])->name('track.order');
 Route::get('/compliance-documents', [StaticPageController::class, 'complianceDocuments'])->name('compliance.documents');
+Route::get('/download', [StaticPageController::class, 'download'])->name('download');
 
 // Auth Routes
 Route::post('/send-otp', [AuthController::class, 'sendOtp']);

@@ -61,4 +61,9 @@ class StaticPageController extends Controller
     {
         return view('Website.compliance_documents');
     }
+
+    public function download()
+    {
+        return view('Website.download');
+    }
 } 
