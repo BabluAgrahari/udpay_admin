@@ -1,0 +1,238 @@
+# UniPay Project Intelligence
+
+## Project Overview
+UniPay is a comprehensive financial services and e-commerce platform built with Laravel 10.x. It provides multi-platform services including mobile payments, wallet management, recharge services, and e-commerce functionality.
+
+## Critical Implementation Paths
+
+### Authentication Flow
+- JWT tokens for API authentication
+- Session-based authentication for web interface
+- OTP verification for sensitive operations
+- Multi-factor authentication through SMS
+
+### Response Patterns
+Always use the Response trait for API responses:
+```php
+// Success response
+return $this->successRes('Message', $data);
+
+// Error response  
+return $this->failRes('Error message');
+
+// Validation response
+return $this->validationRes($validator->messages());
+
+// Record response
+return $this->recordRes($data);
+```
+
+### File Upload Patterns
+Use helper functions for file uploads:
+```php
+// Single file upload
+$filePath = singleFile($request->file('image'), 'products');
+
+// Multiple file upload
+$filePaths = multiFile($request->file('images'), 'products');
+```
+
+### Database Patterns
+- Use BaseModel for common functionality
+- Implement soft deletes where appropriate
+- Use query scopes for common filters
+- Maintain proper relationships between models
+
+## User Preferences & Workflow
+
+### Code Organization
+- Keep controllers focused and under 300 lines
+- Use service classes for complex business logic
+- Implement traits for reusable functionality
+- Maintain clear separation between API and web controllers
+
+### Naming Conventions
+- Controllers: `{Feature}Controller.php`
+- Models: Singular, PascalCase
+- Services: `{Service}Service.php`
+- Traits: `{Feature}.php`
+- Helpers: Descriptive function names
+
+### File Structure
+- API controllers in `app/Http/Controllers/Api/`
+- Web controllers in `app/Http/Controllers/Website/`
+- Models in `app/Models/`
+- Services in `app/Services/`
+- Helpers in `app/Helper/Helper.php`
+
+## Project-Specific Patterns
+
+### Financial Transactions
+- Always use database transactions for financial operations
+- Implement proper error handling and rollback
+- Log all financial transactions
+- Validate amounts and user permissions
+
+### User Hierarchy
+- Multi-level user system with referral tracking
+- Commission calculation based on user levels
+- QR code generation for user identification
+- KYC verification workflow
+
+### E-commerce Features
+- Product variants and inventory tracking
+- Shopping cart with session management
+- Order processing with status tracking
+- Payment integration with Razorpay
+
+## Known Challenges
+
+### Performance Considerations
+- Large controllers need refactoring
+- Missing caching implementation
+- Database query optimization needed
+- File storage scalability concerns
+
+### Security Requirements
+- JWT token validation
+- IP validation for API requests
+- CSRF protection for web forms
+- Input validation and sanitization
+
+### Testing Gaps
+- No test files currently implemented
+- Need comprehensive test suite
+- API endpoint testing required
+- Integration testing for external services
+
+## Evolution of Project Decisions
+
+### Database Strategy
+- Uses MySQL exclusively for all data storage
+- MySQL provides excellent relational data support for financial transactions
+- MongoDB configuration exists in code but is completely unused
+
+### Authentication Approach
+- JWT for API provides stateless authentication
+- Session-based for web interface maintains user state
+- OTP verification adds security layer
+
+### File Management
+- Local storage chosen for simplicity
+- Organized folder structure for different file types
+- Helper functions standardize upload process
+
+## Tool Usage Patterns
+
+### Laravel Features
+- Eloquent ORM for database operations
+- Form Request validation for input validation
+- Middleware for request filtering
+- Queue system for background jobs
+
+### External Integrations
+- Razorpay for payment processing
+- Custom SMS service for notifications
+- iCarry for courier services
+- Simple QR code generation
+
+### Development Tools
+- Composer for dependency management
+- Vite for asset compilation
+- Artisan for command-line operations
+- Queue monitor for job tracking
+
+## Quality Standards
+
+### Code Quality
+- Follow PSR-12 coding standards
+- Maintain consistent indentation
+- Use meaningful variable and function names
+- Add inline documentation for complex logic
+
+### API Standards
+- RESTful endpoint design
+- Consistent response format
+- Proper HTTP status codes
+- Comprehensive error handling
+
+### Security Standards
+- Validate all user inputs
+- Implement proper authentication
+- Use HTTPS for all communications
+- Regular security audits
+
+## Common Patterns to Follow
+
+### Controller Structure
+```php
+class FeatureController extends Controller
+{
+    use Response; // Always include Response trait
+    
+    public function index(Request $request)
+    {
+        // Validation
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return $this->validationRes($validator->messages());
+        }
+        
+        // Business logic
+        try {
+            // Implementation
+            return $this->successRes('Success message', $data);
+        } catch (Exception $e) {
+            return $this->failRes($e->getMessage());
+        }
+    }
+}
+```
+
+### Model Relationships
+```php
+class User extends Authenticatable
+{
+    public function wallet()
+    {
+        return $this->hasOne(Wallet::class, 'userid', 'user_id');
+    }
+    
+    public function kyc()
+    {
+        return $this->hasOne(UserKyc::class, 'userId', 'user_id');
+    }
+}
+```
+
+### Service Class Pattern
+```php
+class FeatureService
+{
+    public function processData($data)
+    {
+        // Business logic implementation
+        return $result;
+    }
+}
+```
+
+## Future Considerations
+
+### Scalability
+- Plan for horizontal scaling
+- Implement caching strategies
+- Consider microservices architecture
+- Database optimization and indexing
+
+### Maintenance
+- Regular code reviews
+- Automated testing implementation
+- Performance monitoring
+- Security updates and patches
+
+### Feature Development
+- API versioning strategy
+- Mobile app development
+- Advanced analytics
+- Internationalization support 
