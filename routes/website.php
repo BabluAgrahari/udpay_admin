@@ -11,7 +11,7 @@ Route::get('/', [HomeController::class, 'index']);
 Route::get('/signup', [SignupController::class, 'index']);
 
 // Signin routes
-Route::get('/signin', [SigninController::class, 'index']);
+Route::get('/signin', [SigninController::class, 'index'])->name('signin');
 Route::post('/signin', [SigninController::class, 'login']);
 Route::get('/logout', [SigninController::class, 'logout']);
 

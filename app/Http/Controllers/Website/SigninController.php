@@ -36,7 +36,7 @@ class SigninController extends Controller
             if ($isEmail) {
                 $user = User::where('email', $request->login_id)->first();
             } else {
-                $user = User::where('user_id', $request->login_id)->first();
+                $user = User::where('user_num', $request->login_id)->first();
             }
 
             if (!$user) {

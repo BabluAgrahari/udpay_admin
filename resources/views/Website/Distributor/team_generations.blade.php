@@ -17,6 +17,8 @@
                         <th>Total Team</th>
                         <th>Month SV</th>
                         <th>Total SV</th>
+                        {{-- <th>Status</th> --}}
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -26,6 +28,10 @@
                             <td>{{ $item->Tcnt }}</td>
                             <td>{{ $item->Tgreen }}</td>
                             <td>{{ $item->Tred }}</td>
+                            {{-- <td>{{ $item->isactive > 0 ? 'Active' : 'Inactive' }}</td> --}}
+                            <td>
+                                <a href="{{ url('distributor/user-level-list/'.$item->lvl) }}" class="thm-btn">View</a>
+                            </td>
                         </tr>
                     @endforeach
                 </tbody>

@@ -32,11 +32,11 @@
                                     <i class="fa-solid fa-id-card me-3"></i>
                                     <span>KYC Verification</span>
                                 </a>
-                                <a href="{{ url('distributor/settings') }}" class="nav-link d-flex align-items-center {{ $type == 'settings' ? 'active' : '' }}"
+                                {{-- <a href="{{ url('distributor/settings') }}" class="nav-link d-flex align-items-center {{ $type == 'settings' ? 'active' : '' }}"
                                     id="v-pills-settings-tab">
                                     <i class="fa-solid fa-cog me-3"></i>
                                     <span>Settings</span>
-                                </a>
+                                </a> --}}
 
                                 <a href="{{ url('distributor/my-direct-referral') }}" class="nav-link d-flex align-items-center {{ $type == 'my-direct-referral' ? 'active' : '' }}"
                                     id="v-pills-my-direct-referral-tab">
@@ -46,7 +46,7 @@
 
                                 <a href="{{ url('distributor/team-generation') }}" class="nav-link d-flex align-items-center {{ $type == 'team-generation' ? 'active' : '' }}"
                                     id="v-pills-team-generation-tab">
-                                    <i class="fa-solid fa-tree-large me-3"></i>
+                                    <i class="fa-solid fa-tree me-3"></i>
                                     <span>Team Generation</span>
                                 </a>
 

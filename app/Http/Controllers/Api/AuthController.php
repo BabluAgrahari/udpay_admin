@@ -390,9 +390,12 @@ class AuthController extends Controller
         }
 
         $payload = ['user_id' => $user_id, 'unm' => $user_nm, 'refered_by' => $refered_by, 'org' => $org = ''];
-        dispatch(new RegisterJob($payload));  // here run job queue  hereeeee
+       // dispatch(new RegisterJob($payload));  // here run job queue  hereeeee
 
         $walletUpdate = Wallet::where('unm', $refered_by)->first();
+        if(empty($walletUpdate)){
+            return ['status' => true, 'msg' => 'Wallet Amount Updated Successfully!'];
+        }
         $existbp = $walletUpdate->bp ?? 0;
         $walletUpdate->bp = $existbp + 100;
 

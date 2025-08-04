@@ -23,7 +23,7 @@ class DashboardController extends Controller
             $data['kyc'] = UserKyc::where('userId', auth()->user()->user_id)->first();
         }
         if ($type == 'my-direct-referral') {
-            $data['referrals'] = User::where('ref_id', auth()->user()->user_id)->get();
+            $data['referrals'] = User::where('ref_id', auth()->user()->user_num)->get();
         }
         if ($type == 'team-generation') {
             $data['team_generation'] = DB::table('level_count')
@@ -33,13 +33,13 @@ class DashboardController extends Controller
                     DB::raw('sum(level_count.is_active) as Tgreen'),
                     DB::raw('count(level_count.child_id) - sum(level_count.is_active) as Tred')
                 )
-                ->where('level_count.parent_id', auth()->user()->user_id)
+                ->where('level_count.parent_id', auth()->user()->user_num)
                 ->groupBy('level_count.level')
                 ->limit(15)
                 ->get();
         }
         if ($type == 'my-acheivements') {
-            $data['achievement'] = Royalty::where('userId', auth()->user()->user_id)->first();
+            $data['achievement'] = Royalty::where('userId', auth()->user()->user_num)->first();
         }
 
         // Add level count statistics for dashboard
@@ -50,7 +50,7 @@ class DashboardController extends Controller
     }
 
 
-    public function userLeavelList(Request $request){
+    public function userLeavelList(Request $request,$level){
 
         $data['records'] = DB::table('level_count')
             ->select('level_count.level as lvl', 
@@ -58,15 +58,16 @@ class DashboardController extends Controller
             'level_count.is_active', 
             'users_lvl.name', 
             'users_lvl.upgrade_date',
-            'users_lvl.user_nm',
+            'users_lvl.user_num',
             'users_lvl.user_id',
             'users_lvl.mobile',
             'users_lvl.email')
-            ->join('users_lvl', 'level_count.child_id', '=', 'users_lvl.user_nm')
-            ->where('level_count.parent_id', auth()->user()->user_id)
-            ->where('level_count.level', $request->lvl)
+            ->join('users_lvl', 'level_count.child_id', '=', 'users_lvl.user_num')
+            ->where('level_count.parent_id', auth()->user()->user_num)
+            ->where('level_count.level', $level)
             ->orderBy('users_lvl.upgrade_date', 'desc')
             ->get();
+        $data['level'] = $level;
         return view('Website.Distributor.user_level_list', $data);
     }
 }

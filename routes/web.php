@@ -20,6 +20,7 @@ Route::group(['middleware' => 'guest'], function () {
 // Route::get('dashboard', [DashboardController::class, 'index']);
 Route::group(['prefix' => 'distributor', 'middleware' => 'auth'], function () {
     Route::get('/{type}', [DashboardController::class, 'index']);
+    Route::get('/user-level-list/{level}', [DashboardController::class, 'userLeavelList']);
     
     // KYC Routes
     Route::post('kyc/personal-details', [KYCController::class, 'updatePersonalDetails']);
@@ -58,6 +59,6 @@ Route::get('/dump', function () {
     ]);
 });
 
-Route::prefix('jobs')->group(function () {
-    Route::queueMonitor();
-});
+// Route::prefix('jobs')->group(function () {
+//     Route::queueMonitor();
+// });
