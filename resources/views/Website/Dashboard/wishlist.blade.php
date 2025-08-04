@@ -31,7 +31,7 @@
                                               <div class="prduct-perra-top">
                                                   <a href="{{ url('product/'.$item->product->slug_url) }}"><h3>{{ $item->product->product_name }}</h3></a>
                                               </div>
-                                              <h5 class="price-bg">₹{{ $item->product->product_sale_price }}</h5>
+                                              <h5 class="price-bg">₹{{ $item->product->product_sale_price }}</h5> 
                                               <div class="wishlist-bottom">
                                                   <a href="javascript:void(0)" class="thm-btn bg-light remove-wishlist" data-id="{{ $item->id }}">Remove</a>
                                                   <a href="javascript:void(0)" class="thm-btn add-to-cart cart-btn" data-id="{{ $item->product_id }}">Add to Cart</a>

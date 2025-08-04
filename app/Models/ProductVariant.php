@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Models\BaseModel;
-use App\Casts\ObjectIdCast;
+
 
 class ProductVariant extends BaseModel
 {
@@ -16,13 +16,6 @@ class ProductVariant extends BaseModel
         'variant_name',
         'price',
         'status'
-    ];
-
-    protected $casts = [
-        'product_id' => ObjectIdCast::class,
-        'stock' => 'integer',
-        'price' => 'decimal:2',
-        'status' => 'boolean'
     ];
 
     public function product()

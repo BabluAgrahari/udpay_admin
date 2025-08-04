@@ -29,7 +29,7 @@ Route::get('/cart-summary', [CartController::class, 'getCartSummary']);
 Route::group(['middleware' => ['customer.auth']], function () {
 // Wishlist Routes
 Route::post('/wishlist/add', [WishlistController::class, 'addToWishlist']);
-Route::post('/wishlist/remove/{id}', [WishlistController::class, 'removeWishlist']);
+Route::get('/wishlist/remove/{id}', [WishlistController::class, 'removeWishlist']);
 
 // Address Routes
 Route::prefix('address')->group(function () {
