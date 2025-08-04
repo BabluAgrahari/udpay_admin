@@ -65,6 +65,7 @@
                                 @if (!Auth::check())
                                 <a href="{{ url('signin') }}" data-popup="login1" class=" thm-btn">Login/Sign</a>
                                 @endif
+                                @if (Auth::check())
                                 <div class="profile-main">
                                     <a href="#" class="profile-icon">{{ Auth::user()->name ??''}}<i class="fa-solid fa-chevron-down"></i></a>
                                     <div class="profile-dropdown">
@@ -80,6 +81,7 @@
                                         </ul>
                                     </div>
                                 </div>
+                                @endif
                                 <div class="header-profile">
                                     <div class="position-relative">
                                         <button id="searchToggle" class="profile-icon"><i
