@@ -40,11 +40,11 @@
                                             <tbody>
                                                 @foreach ($group as $slider)
                                                     <tr>
-                                                        <td><img src="/{{ $slider->image }}"
+                                                        <td><img src="{{ $slider->slider_image }}"
                                                                 style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px;"
                                                                 class="border"></td>
                                                         <td>{{ $slider->title }}</td>
-                                                        <td><a href="javascript:void(0);" id="{{ $slider->_id }}"
+                                                        <td><a href="javascript:void(0);" id="{{ $slider->id }}"
                                                                 data-status="{{ $slider->status }}"
                                                                 class="toggle-status-btn badge {{ $slider->status ? 'bg-success' : 'bg-secondary' }}">{{ $slider->status ? 'Active' : 'Inactive' }}</a>
                                                         </td>
@@ -56,21 +56,21 @@
                                                             <div class="dropdown">
                                                                 <button
                                                                     class="btn btn-sm btn-outline-secondary dropdown-toggle"
-                                                                    type="button" id="dropdownMenu{{ $slider->_id }}"
+                                                                    type="button" id="dropdownMenu{{ $slider->id }}"
                                                                     data-bs-toggle="dropdown" aria-expanded="false">
                                                                     <i class="bx bx-cog"></i>
                                                                 </button>
                                                                 <ul class="dropdown-menu"
-                                                                    aria-labelledby="dropdownMenu{{ $slider->_id }}">
+                                                                    aria-labelledby="dropdownMenu{{ $slider->id }}">
                                                                     <li>
                                                                         <a class="dropdown-item"
-                                                                            href="{{ url('crm/slider') }}/{{ $slider->_id }}/edit">
+                                                                            href="{{ url('crm/slider') }}/{{ $slider->id }}/edit">
                                                                             <i class="bx bx-edit"></i> Edit
                                                                         </a>
                                                                     </li>
                                                                     <li>
                                                                         <a class="dropdown-item text-danger delete-slider-btn"
-                                                                            href="javascript:void(0);" id="remove-sliser-{{$slider->_id}}" data-id="{{ $slider->_id }}"><i
+                                                                            href="javascript:void(0);" id="remove-slider-{{$slider->id}}" data-id="{{ $slider->id }}"><i
                                                                                 class="bx bx-trash"></i> Delete</a>
                                                                     </li>
                                                                 </ul>
@@ -167,26 +167,57 @@
                     }
                 });
 
-                // Dropdowns (Bootstrap fallback)
-                $(document).on('click', '.dropdown-toggle', function(e) {
-                    e.preventDefault();
-                    var $dropdown = $(this).closest('.dropdown');
-                    var $menu = $dropdown.find('.dropdown-menu');
-                    $('.dropdown-menu').not($menu).removeClass('show');
-                    $('.dropdown').not($dropdown).removeClass('show');
-                    $dropdown.toggleClass('show');
-                    $menu.toggleClass('show');
-                });
-                $(document).on('click', function(e) {
-                    if (!$(e.target).closest('.dropdown').length) {
-                        $('.dropdown-menu').removeClass('show');
-                        $('.dropdown').removeClass('show');
+                // Initialize Bootstrap dropdowns
+                $(document).ready(function() {
+                    console.log('Bootstrap available:', typeof bootstrap !== 'undefined');
+                    
+                    // Check if Bootstrap is available
+                    if (typeof bootstrap !== 'undefined') {
+                        console.log('Initializing Bootstrap dropdowns...');
+                        // Initialize all dropdowns
+                        var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
+                        console.log('Found dropdown elements:', dropdownElementList.length);
+                        dropdownElementList.forEach(function(dropdownToggleEl) {
+                            try {
+                                new bootstrap.Dropdown(dropdownToggleEl);
+                                console.log('Dropdown initialized for:', dropdownToggleEl.id);
+                            } catch (error) {
+                                console.error('Error initializing dropdown:', error);
+                            }
+                        });
+                    } else {
+                        console.log('Bootstrap not available, using fallback...');
+                        // Fallback for dropdown functionality if Bootstrap is not available
+                        $(document).on('click', '.dropdown-toggle', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            console.log('Dropdown toggle clicked');
+                            var $dropdown = $(this).closest('.dropdown');
+                            var $menu = $dropdown.find('.dropdown-menu');
+                            
+                            // Close other dropdowns
+                            $('.dropdown-menu').not($menu).removeClass('show');
+                            $('.dropdown').not($dropdown).removeClass('show');
+                            
+                            // Toggle current dropdown
+                            $dropdown.toggleClass('show');
+                            $menu.toggleClass('show');
+                            console.log('Dropdown toggled, show class:', $menu.hasClass('show'));
+                        });
+                        
+                        // Close dropdowns when clicking outside
+                        $(document).on('click', function(e) {
+                            if (!$(e.target).closest('.dropdown').length) {
+                                $('.dropdown-menu').removeClass('show');
+                                $('.dropdown').removeClass('show');
+                            }
+                        });
                     }
                 });
             });
 
             function deleteSlider(sliderId) {
-                var self = $('#remove-sliser-'+sliderId);
+                var self = $('#remove-slider-'+sliderId);
                 if (confirm('Are you sure you want to delete this slider? This action cannot be undone.')) {
                     $.ajax({
                         url: "{{ url('crm/slider') }}/" + sliderId,
@@ -278,37 +309,6 @@
             }
         </style>
 
-        <script>
-            $(document).ready(function() {
-                // Initialize Bootstrap dropdowns
-                var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
-                var dropdownList = dropdownElementList.map(function(dropdownToggleEl) {
-                    return new bootstrap.Dropdown(dropdownToggleEl);
-                });
 
-                // Fallback for dropdown functionality
-                $('.dropdown-toggle').on('click', function(e) {
-                    e.preventDefault();
-                    var $dropdown = $(this).closest('.dropdown');
-                    var $menu = $dropdown.find('.dropdown-menu');
-
-                    // Close other dropdowns
-                    $('.dropdown-menu').not($menu).removeClass('show');
-                    $('.dropdown').not($dropdown).removeClass('show');
-
-                    // Toggle current dropdown
-                    $dropdown.toggleClass('show');
-                    $menu.toggleClass('show');
-                });
-
-                // Close dropdowns when clicking outside
-                $(document).on('click', function(e) {
-                    if (!$(e.target).closest('.dropdown').length) {
-                        $('.dropdown-menu').removeClass('show');
-                        $('.dropdown').removeClass('show');
-                    }
-                });
-            });
-        </script>
     @endpush
 @endsection

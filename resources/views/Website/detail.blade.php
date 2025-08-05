@@ -485,7 +485,7 @@
                             @if(Auth::check() && Gate::allows('isCustomer'))
                             <a href="javascript:void(0)" class="thm-btn bg-light w-100 add-to-wishlist" data-id="{{ $product->id }}">Add to wishlist</a>
                             @else
-                            <a href="#" data-popup="login1" class="openPopup thm-btn bg-light w-100 add-to-wishlist">Add to wishlist</a>
+                            <a href="#" data-popup="login1" class="openPopup thm-btn bg-light w-100 ">Add to wishlist</a>
                             @endif
                         </div>
                         <div class="box-color">
@@ -727,7 +727,7 @@
         <div class="col-lg-3 col-md-6">
             <div class="product-card">
                 <div class="product-image">
-                    <a href="{{ url('product/'.$product->slug_url) }}"><img src="{{ getImageWithFallback($product->product_image) }}" alt="img" class=""></a>
+                    <a href="{{ url('detail/'.$product->slug_url) }}"><img src="{{ getImageWithFallback($product->product_image) }}" alt="img" class=""></a>
                      <p class="product-review"><i class="fa fa-star"></i> 3.25 (12 Reviews)</p>
                     @if(Auth::check() && Gate::allows('isCustomer'))
                     <span class="prod-wish"><i class="fa-regular fa-heart add-to-wishlist" data-id="{{ $product->id }}"></i></span>
@@ -737,7 +737,7 @@
                 </div>
                 <div class="product-perra">
                     <div class="prduct-perra-top">
-                        <a href="{{ url('product/'.$product->slug_url) }}"><h3>{{ $product->product_name }}</h3></a>
+                        <a href="{{ url('detail/'.$product->slug_url) }}"><h3>{{ $product->product_name }}</h3></a>
                     </div>
                     <div class="d-flex justify-content-between">
                         <div class="price-mian">

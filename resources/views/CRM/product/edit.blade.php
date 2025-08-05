@@ -45,15 +45,15 @@
                                 </div>
 
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">Product Stock <span class="text-danger">*</span></label>
+                                    <label class="form-label">Product Stock </label>
                                     <input type="number" name="product_stock" id="product_stock" class="form-control"
-                                        placeholder="Enter stock quantity" value="{{ $product->product_stock }}" min="0" required>
+                                        placeholder="Enter stock quantity" value="{{ $product->product_stock }}" min="0" >
                                     <span class="text-danger error" id="product_stock_error"></span>
                                 </div>
 
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">Unit <span class="text-danger">*</span></label>
-                                    <select name="unit_id" id="unit_id" class="form-select" required>
+                                    <label class="form-label">Unit </label>
+                                    <select name="unit_id" id="unit_id" class="form-select">
                                         <option value="">Select Unit</option>
                                         @foreach ($units as $unit)
                                             <option value="{{ $unit->id }}" {{ $product->unit_id == $unit->id ? 'selected' : '' }}>

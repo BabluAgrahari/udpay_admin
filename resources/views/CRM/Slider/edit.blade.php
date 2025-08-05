@@ -54,7 +54,7 @@
                         </div>
                         <div class="col-md-12 mb-3">
                             <label class="form-label">Change Image</label>
-                            <input type="file" name="image[]" class="form-control" accept="image/*" id="imageInput">
+                            <input type="file" name="image[]" class="form-control" accept="image/*" id="imageInput" multiple>
                             <div id="imagePreview" class="mt-2"></div>
                             <span class="text-danger error" id="image_error"></span>
                         </div>
@@ -95,7 +95,7 @@
                         `<span class='spinner-border spinner-border-sm' role='status' aria-hidden='true'></span>&nbsp;Updating...`
                     ).attr('disabled', true);
                     $.ajax({
-                        url: '{{ url('crm/slider/' . $slider->_id) }}',
+                        url: '{{ url('crm/slider/' . $slider->id) }}',
                         type: 'POST',
                         data: formData,
                         contentType: false,

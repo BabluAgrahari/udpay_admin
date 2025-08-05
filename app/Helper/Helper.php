@@ -9,7 +9,6 @@ use App\Models\UserWallet;
 use App\Models\WalletHistory;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
-use MongoDB\BSON\ObjectId;
 use App\Models\Cart;
 use Illuminate\Support\Facades\Cookie;
 
@@ -141,10 +140,11 @@ if (!function_exists('generateSlug')) {
             $originalSlug = $slug;
             $count = 1;
 
-            while (\DB::connection('mongodb')->collection($collection)->where($column, $slug)->exists()) {
+            while (\DB::connection('mysql')->table($collection)->where($column, $slug)->exists()) {
                 $slug = $originalSlug . '-' . $count;
                 $count++;
             }
+
         }
 
         return $slug;
@@ -202,7 +202,7 @@ if (!function_exists('stockUpdate')) {
 if (!function_exists('wallet')) {
     function wallet()
     {
-        return UserWallet::where('user_id', new ObjectId(Auth::id()))->first();
+        return UserWallet::where('user_id', Auth::id())->first();
     }
 }
 
@@ -212,7 +212,7 @@ if (!function_exists('userWalletUpdate')) {
     {
         $data = (object) $data;
         // Get or create user wallet
-        $wallet = UserWallet::where('user_id', new ObjectId($data->user_id))->first();
+        $wallet = UserWallet::where('user_id', $data->user_id)->first();
 
         if (!$wallet) {
             $wallet = new UserWallet();
@@ -249,7 +249,7 @@ if (!function_exists('userWalletUpdate')) {
         // Store wallet history
         $history = new WalletHistory();
         $history->user_id = $data->user_id;
-        $history->wallet_id = $wallet->_id;
+        $history->wallet_id = $wallet->id;
         $history->type = $data->type;
         $history->remarks = $data->remarks ?? null;
         $history->amount = $data->amount;
@@ -261,8 +261,8 @@ if (!function_exists('userWalletUpdate')) {
             return [
                 'success' => true,
                 'message' => 'Wallet transaction completed successfully',
-                'wallet_id' => $wallet->_id,
-                'history_id' => $history->_id,
+                'wallet_id' => $wallet->id,
+                'history_id' => $history->id,
                 'new_balance' => $newAmount
             ];
         }

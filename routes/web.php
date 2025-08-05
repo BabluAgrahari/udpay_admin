@@ -36,7 +36,7 @@ Route::group(['middleware' => 'guest'], function () {
 });
 
 // Route::get('dashboard', [DashboardController::class, 'index']);
-Route::group(['prefix' => 'crm', 'middleware' => 'auth'], function () {
+Route::group(['prefix' => 'crm', 'middleware' => 'crm.auth'], function () {
 
    Route::get('dashboard', [DashboardController::class, 'index']);
 

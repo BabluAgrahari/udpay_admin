@@ -11,12 +11,10 @@
     <section class="section-padding py-4">
         <div class="container">
             <div class="banner-slider">
-                <div class="banner-bg" style="background-image: url({{ asset('front_assets') }}/images/banner/banner1.png);">
-                </div>
-                <div class="banner-bg" style="background-image: url({{ asset('front_assets') }}/images/banner/banner1.png);">
-                </div>
-                <div class="banner-bg" style="background-image: url({{ asset('front_assets') }}/images/banner/banner1.png);">
-                </div>
+                @foreach ($sliders as $slider)
+                    <div class="banner-bg" style="background-image: url({{ $slider->slider_image }});">
+                    </div>
+                @endforeach
             </div>
         </div>
     </section>

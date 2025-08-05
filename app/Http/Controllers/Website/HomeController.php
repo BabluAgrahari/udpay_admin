@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Slider;
 
 class HomeController extends Controller
 {
@@ -42,6 +43,9 @@ class HomeController extends Controller
 
             $data['featured_products'] = $featured;
             $data['products'] = $array;
+
+            $data['sliders'] = Slider::status()->where('slider_type', 'web')->get();
+
             return view('Website.home', $data);
         } catch (\Exception $e) {
             abort(500, $e->getMessage());

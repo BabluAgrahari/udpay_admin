@@ -17,8 +17,8 @@ class CashFree
         $this->baseUrl = env('CASHFREE_ENV') === 'production' 
             ? 'https://api.cashfree.com/pg' 
             : 'https://sandbox.cashfree.com/pg';
-        $this->clientId = 'TEST3112078d998d6cf650a5ff5f9e217199';//.env('CASHFREE_CLIENT_ID','');
-        $this->clientSecret = 'b779ebda1a6fc6c142ab3dc2d543e6ecfa47b2db';//env('CASHFREE_CLIENT_SECRET');
+        $this->clientId = env('CASHFREE_CLIENT_ID');
+        $this->clientSecret = env('CASHFREE_CLIENT_SECRET');
         $this->apiVersion = '2023-08-01';
     }
 
@@ -41,6 +41,7 @@ class CashFree
                     'return_url' => $customerData['return_url'] ?? url('payment') . '?order_id={order_id}'
                 ]
             ];
+            echo $this->baseUrl . '/orders';
 
             $response = Http::withHeaders([
                 'X-Client-Secret' => $this->clientSecret,

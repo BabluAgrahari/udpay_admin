@@ -14,8 +14,8 @@ class SliderController extends Controller
     public function index()
     {
         try {
-            $sliders = Slider::all()->groupBy('type');
-            return view('CRM.slider.index', compact('sliders'));
+            $sliders = Slider::all()->groupBy('slider_type');
+            return view('CRM.Slider.index', compact('sliders'));
         } catch (Exception $e) {
             abort(500, $e->getMessage());
         }
@@ -25,7 +25,7 @@ class SliderController extends Controller
     public function create()
     {   
         try {
-            return view('CRM.slider.create');
+            return view('CRM.Slider.create');
         } catch (Exception $e) {
             abort(500, $e->getMessage());
         }
@@ -39,8 +39,7 @@ class SliderController extends Controller
             'type' => 'required|string',
             'status' => 'required|in:0,1',
             'url' => 'nullable|url',
-            'image' => 'required',
-            'image.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image.*' => 'required|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -54,10 +53,10 @@ class SliderController extends Controller
                 $imagePath = singleFile($img, 'slider');
                 $slider = Slider::create([
                     'title' => $request->title,
-                    'type' => $request->type,
-                    'status' => (int)$request->status,
+                    'slider_type' => $request->type,
+                    'status' => $request->status,
                     'url' => $request->url,
-                    'image' => $imagePath,
+                    'slider_image' => $imagePath,
                 ]);
                 $responses[] = $slider;
             }
@@ -75,7 +74,7 @@ class SliderController extends Controller
     {
         try {
             $slider = Slider::findOrFail($id);
-            return view('CRM.slider.edit', compact('slider'));
+            return view('CRM.Slider.edit', compact('slider'));
         } catch (Exception $e) {
             abort(500, $e->getMessage());
         }
@@ -90,8 +89,7 @@ class SliderController extends Controller
             'type' => 'required|string',
             'status' => 'required|in:0,1',
             'url' => 'nullable|url',
-            'image' => 'nullable',
-            'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image.*' => 'nullable|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -100,13 +98,13 @@ class SliderController extends Controller
 
         $slider = Slider::findOrFail($id);
         $slider->title = $request->title;
-        $slider->type = $request->type;
-        $slider->status = (int)$request->status;
+        $slider->slider_type = $request->type;
+        $slider->status = $request->status;
         $slider->url = $request->url;
         if ($request->hasFile('image')) {
             $img = $request->file('image')[0];
             $imagePath = singleFile($img, 'slider');
-            $slider->image = $imagePath;
+            $slider->slider_image = $imagePath;
         }
         if($slider->save()){
             return $this->successMsg('Slider updated successfully');
@@ -127,7 +125,7 @@ class SliderController extends Controller
             if ($validator->fails()) {
                 return $this->validationMsg($validator->errors());
             }
-            $slider->status = (int)$request->status;
+            $slider->status = $request->status;
             if ($slider->save()) {
                 return $this->successMsg('Status updated successfully');
             }

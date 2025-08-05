@@ -33,7 +33,7 @@
                     <div class="row">
                         <div class="col-xl-2 col-md-3">
                             <a href="#" class="product-img w-100 h-100">
-                                <img src="{{ isValidImageUrl($item->product->product_image) ? $item->product->product_image : asset('front_assets') . '/images/product/5.jpg' }}" alt="Product" />
+                                <img src="{{ getImageWithFallback($item->product->product_image) }}" alt="Product" />
                             </a>
                         </div>
                         <div class="col-xl-10 col-md-9">
