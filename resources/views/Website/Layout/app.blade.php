@@ -17,6 +17,8 @@
     <link rel="stylesheet" href="{{ asset('front_assets') }}/css/plugins/bootstrap.min.css">
     <link rel="stylesheet" href="{{ asset('front_assets') }}/css/responsive.css">
     <link rel="stylesheet" href="{{ asset('front_assets') }}/css/style.css">
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <!--  -->
 </head>
 
@@ -81,6 +83,20 @@
                                         </ul>
                                     </div>
                                 </div>
+
+
+                                <div class="profile-main">
+                                    <a href="#" class="profile-icon">Wallet<i class="fa-solid fa-chevron-down"></i></a>
+                                    <div class="profile-dropdown">
+                                        <ul class="user-list-header">
+
+                                            <li><a href="{{ url('distributor/wallet/add-money') }}"><i class="fa-solid fa-plus"></i> Add Money</a></li>
+                                            <li><a href="{{ url('distributor/wallet/money-transfer') }}"><i class="fa-solid fa-exchange-alt"></i> Money Transfer</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+
                                 @endif
                                 <div class="header-profile">
                                     <div class="position-relative">
@@ -234,6 +250,8 @@
     <script src="{{ asset('front_assets') }}/js/plugins/bootstrap.js"></script>
     <script src="{{ asset('front_assets') }}/js/plugins/bootstrap.min.js"></script>
     <script src="{{ asset('front_assets') }}/js/custom.js"></script>
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         // Open any popup
@@ -280,18 +298,17 @@
             }, delay);
         }
 
-
-        //alert msg toast
-        function alertMsgSwal(status, msg, delay = 1000, remove = false, id = false) {
+        // SweetAlert function
+        function sweetalert(status, msg, delay = 3000) {
             Swal.fire({
                 icon: status ? 'success' : 'error',
-                title: status ? 'Success' : 'Error',
+                title: status ? 'Success!' : 'Error!',
                 text: msg,
                 timer: delay,
+                timerProgressBar: true,
+                confirmButtonColor: '#3085d6',
+                showConfirmButton: delay === 0 ? true : false
             });
-            setTimeout(function() {
-                $('#' + selector).fadeOut('slow');
-            }, delay);
         }
     </script>
 

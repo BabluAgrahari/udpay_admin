@@ -12,4 +12,14 @@ class Wallet extends BaseModel
     {
         return $this->hasMany(WalletTransition::class, 'user_id', 'userid')->orderBy('id','DESC')->limit('30');
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'userid', 'user_id');
+    }
+
+    public function history()
+    {
+        return $this->hasMany(WalletHistory::class, 'user_id', 'userid');
+    }
 }

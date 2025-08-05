@@ -151,11 +151,9 @@
         box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
     }
 </style>
-<div class="card shadow-sm border-0">
-    <div class="card-header bg-white border-0">
-        <h5 class="mb-0 text-dark"><i class="fa-solid fa-id-card me-2 text-brand-green"></i>KYC Verification Process</h5>
-    </div>
-    <div class="card-body">
+<div class="tab-panel active edit-form-open" id="kyc">
+    <h3 class="tab-title account-top">KYC Verification Process</h3>
+    <div class="tab-content-body">
         <!-- Multi-Step Form -->
         <div class="kyc-form-container">
             <!-- Progress Bar -->
@@ -192,7 +190,8 @@
             <!-- Step 1: Personal Information -->
             <div class="form-step active" id="step1">
                 <h6 class="text-brand-green mb-3"><i class="fa-solid fa-user me-2"></i>Personal Information</h6>
-                <form id="personalInfoForm" enctype="multipart/form-data" action="{{ url('distributor/kyc/personal-details') }}" method="post">
+                <form id="personalInfoForm" enctype="multipart/form-data"
+                    action="{{ url('distributor/kyc/personal-details') }}" method="post">
                     @csrf
                     <div class="row">
                         <div class="col-md-6 mb-2">
@@ -275,7 +274,8 @@
                         <div class="col-md-6 mb-2">
                             <label class="form-label">Date of Birth <span class="text-danger">*</span></label>
                             <input type="date" class="form-control" name="dob" required
-                                value="{{ $kyc->dob ?? '' }}" max="{{ date('Y-m-d') }}" min="{{ date('Y-m-d', strtotime('-100 years')) }}">
+                                value="{{ $kyc->dob ?? '' }}" max="{{ date('Y-m-d') }}"
+                                min="{{ date('Y-m-d', strtotime('-100 years')) }}">
                             <span class="text-danger error" id="dob_error"></span>
                         </div>
                         <div class="col-md-6 mb-2">
@@ -602,7 +602,7 @@
                             currentStep = 2;
                             updateForm();
                         }
-                        alertMsg(response.status, response.msg);
+                        sweetalert(response.status, response.msg);
                     },
                     error: function(xhr) {
                         if (xhr.status === 422) {
@@ -611,7 +611,7 @@
                                 $('#' + field + '_error').text(messages[0]);
                             });
                         } else {
-                            alertMsg(false, 'Something went wrong! Please try again.');
+                            sweetalert(false, 'Something went wrong! Please try again.');
                         }
                     },
                     complete: function() {
@@ -642,7 +642,7 @@
                             currentStep = 3;
                             updateForm();
                         }
-                        alertMsg(response.status, response.msg);
+                        sweetalert(response.status, response.msg);
                     },
                     error: function(xhr) {
                         if (xhr.status === 422) {
@@ -651,7 +651,7 @@
                                 $('#' + field + '_error').text(messages[0]);
                             });
                         } else {
-                            alertMsg(false, 'Something went wrong! Please try again.');
+                            sweetalert(false, 'Something went wrong! Please try again.');
                         }
                     },
                     complete: function() {
@@ -679,7 +679,7 @@
                     processData: false,
                     contentType: false,
                     success: function(response) {
-                        alertMsg(response.status, response.msg);
+                        sweetalert(response.status, response.msg);
                         if (response.status) {
                             showSuccessMessage();
                             $('#kycDocsForm')[0].reset();
@@ -692,7 +692,7 @@
                                 $('#' + field + '_error').text(messages[0]);
                             });
                         } else {
-                            alertMsg(false, 'Something went wrong! Please try again.');
+                            sweetalert(false, 'Something went wrong! Please try again.');
                         }
                     },
                     complete: function() {

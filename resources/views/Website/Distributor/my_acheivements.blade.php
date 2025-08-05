@@ -1,11 +1,8 @@
-<div class="card shadow-sm border-0">
-    <div class="card-header bg-white border-0">
-        <h5 class="mb-0 text-dark"><i class="fa-solid fa-tree-large me-2 text-brand-green"></i>My Acheivements</h5>
-    </div>
-    <div class="card-body">
-
+<div class="tab-panel active edit-form-open" id="my-acheivements">
+    <h3 class="tab-title account-top">My Acheivements</h3>
+    <div class="tab-content-body">
         <div class="row">
-        @if ($achievement)
+            @if ($achievement)
 
             @if ($achievement->bronze || $achievement->silver || $achievement->gold || $achievement->diamond)
                 <div class="col-md-3">
@@ -78,4 +75,5 @@
             </div>
         @endif
     </div>
+</div>
 </div>

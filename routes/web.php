@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\Website\Distributor\DashboardController;
 use App\Http\Controllers\Website\Distributor\KYCController;
+use App\Http\Controllers\Website\Distributor\AddMoneyController;
+use App\Http\Controllers\Website\Distributor\MoneyTransferController;
+use App\Http\Controllers\Website\Distributor\WalletController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
@@ -27,7 +30,24 @@ Route::group(['prefix' => 'distributor', 'middleware' => 'auth'], function () {
     Route::post('kyc/bank-details', [KYCController::class, 'updateBankDetails']);
     Route::post('kyc/documents', [KYCController::class, 'updateKYCDocuments']);
     Route::get('kyc/status', [KYCController::class, 'getKYCStatus']);
-    
+
+    // Wallet Routes
+    Route::get('wallet/add-money', [AddMoneyController::class, 'addMoney']);
+    Route::post('wallet/preview-add-money', [AddMoneyController::class, 'previewAddMoney']);
+    Route::post('wallet/add-money-save', [AddMoneyController::class, 'addMoneySave']);
+
+    // Money Transfer Routes
+    Route::get('wallet/money-transfer', [MoneyTransferController::class, 'index']);
+    Route::post('money-transfer/get-user-name', [MoneyTransferController::class, 'getUserName']);
+    Route::post('money-transfer/transfer', [MoneyTransferController::class, 'transferMoney']);
+
+    // Wallet Routes
+    Route::get('wallet/my-payout', [WalletController::class, 'myPayout']);
+    Route::get('wallet/transaction-history', [WalletController::class, 'transactionHistory']);
+    Route::get('wallet/wallet-balance', [WalletController::class, 'walletBalance']);
+    Route::get('wallet/my-earning', [WalletController::class, 'myEarning']);
+    Route::get('wallet/redeem-transaction', [WalletController::class, 'redeemTransaction']);
+
     // Route::resource('setting', SettingController::class);
     // Route::get('reset-password', [SettingController::class, 'resetPassword']);
     // Route::post('reset-password-save', [SettingController::class, 'saveResetPassword']);

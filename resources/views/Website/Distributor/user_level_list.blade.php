@@ -5,11 +5,9 @@
         color: #000 !important;
     }
 </style>
-<div class="card shadow-sm border-0">
-    <div class="card-header bg-white border-0">
-        <h5 class="mb-0 text-dark"><i class="fa-solid fa-tree-large me-2 text-brand-green"></i>User Level List (Level {{ $level }})</h5>
-    </div>
-    <div class="card-body">
+<div class="tab-panel active edit-form-open" id="user-level-list">
+    <h3 class="tab-title account-top">User Level List (Level {{ $level }})</h3>
+    <div class="tab-content-body">
         <div class="table-responsive">
             <table class="table table-bordered">
                 <thead class="table-light">
@@ -29,7 +27,7 @@
                             <td>{{ $record->user_id }}</td>
                             <td>{{ $record->name }}</td>
                             <td>{{ date('d-m-Y', strtotime($record->upgrade_date)) }}</td>
-                            <td>{{ $record->isactive ? 'Active' : 'Inactive' }}</td>
+                            <td>{{ $record->is_active ? 'Active' : 'Inactive' }}</td>
                             <td>
                                 <a href="{{ url('distributor/user-level-list/'.$record->lvl) }}" class="thm-btn">View</a>
                             </td>
