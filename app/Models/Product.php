@@ -86,4 +86,9 @@ class Product extends BaseModel
         return $this->hasOne(ProductDetail::class, 'product_id');
     }
 
+    public function reels()
+    {
+        return $this->hasMany(ProductReel::class, 'product_id');
+    }
+
 }

@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Website;
 use App\Models\Product;
 use App\Http\Controllers\Controller;
 use App\Models\ProductDetail;
+use App\Models\ProductReel;
 
 class ProductDetailController extends Controller
 {
@@ -35,6 +36,12 @@ class ProductDetailController extends Controller
                 ->get();
 
             $data['product_details'] = ProductDetail::where('product_id', $data['product']->id)->first();
+
+            // where('product_id', $data['product']->id)
+            $data['reels'] = ProductReel::
+                where('status', '1')
+                ->orderBy('created_at', 'desc')
+                ->get();
 
             return view('Website.detail', $data);
         } catch (\Exception $e) {

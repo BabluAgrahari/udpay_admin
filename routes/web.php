@@ -9,6 +9,7 @@ use App\Http\Controllers\CRM\LoginController;
 use App\Http\Controllers\CRM\OrderController;
 use App\Http\Controllers\CRM\PanelUserController;
 use App\Http\Controllers\CRM\ProductController;
+use App\Http\Controllers\CRM\ProductReelController;
 use App\Http\Controllers\CRM\ProfileController;
 use App\Http\Controllers\CRM\SettingController;
 use App\Http\Controllers\CRM\StockController;
@@ -66,6 +67,13 @@ Route::group(['prefix' => 'crm', 'middleware' => 'crm.auth'], function () {
     Route::get('products/{id}/details', [ProductController::class, 'details'])->middleware('permission:product');
     Route::post('products/store-detail', [ProductController::class, 'storeDetail'])->middleware('permission:product');
     Route::get('products/{id}/detail', [ProductController::class, 'getDetail'])->middleware('permission:product');
+
+    // Product Reels Routes
+    Route::get('products/{productId}/reels', [ProductReelController::class, 'index'])->middleware('permission:product');
+    Route::post('products/{productId}/reels', [ProductReelController::class, 'store'])->middleware('permission:product');
+    Route::get('products/{productId}/reels/list', [ProductReelController::class, 'getReels'])->middleware('permission:product');
+    Route::post('reels/{reelId}/status', [ProductReelController::class, 'updateStatus'])->middleware('permission:product');
+    Route::delete('reels/{reelId}', [ProductReelController::class, 'destroy'])->middleware('permission:product');
 
     // Brand Routes
     Route::get('brands/datatable-list', [BrandController::class, 'datatable'])->middleware('permission:brand');

@@ -188,6 +188,10 @@ $(document).ready(function() {
                            data-bs-toggle="tooltip" data-bs-placement="top" title="Details">
                             <i class='bx bx-detail'></i>
                         </a>
+                        <a href="{{ url('crm/products') }}/${data}/reels" class="btn btn-sm btn-icon btn-outline-success" 
+                           data-bs-toggle="tooltip" data-bs-placement="top" title="Manage Reels">
+                            <i class='bx bx-video'></i>
+                        </a>
                         <a href="{{ url('crm/products') }}/${data}/edit" class="btn btn-sm btn-icon btn-outline-primary" 
                            data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
                             <i class='bx bx-edit'></i>

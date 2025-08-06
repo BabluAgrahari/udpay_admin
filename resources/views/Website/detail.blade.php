@@ -372,6 +372,8 @@
     .zoom-gallery:hover img {
         transform: scale(1.05);
     }
+
+
 </style>
 <section class="section-padding pt-5" >
     <div class="container">
@@ -581,42 +583,7 @@
 <!-- marquee -->
 <section class="section-padding py-3" style="background: #FFF8E6;">
   <div class="container">
-    <div class="">
-        <div class="w-100 text-center">
-             <h2 class="mb-2">Our Happy Customers</h2>
-            <p>Reels of our customers that are happy with our products</p>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-lg-3 col-md-6">
-            <div class="client-testi-card">
-                <div class="client-image">
-                    <img src="{{ asset('front_assets') }}/images/client.png" alt="img">
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="client-testi-card">
-                <div class="client-image">
-                    <img src="{{ asset('front_assets') }}/images/client.png" alt="img">
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="client-testi-card">
-                <div class="client-image">
-                    <img src="{{ asset('front_assets') }}/images/client.png" alt="img">
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="client-testi-card">
-                <div class="client-image">
-                    <img src="{{ asset('front_assets') }}/images/client.png" alt="img">
-                </div>
-            </div>
-        </div>
-    </div>
+    <x-video-player :videos="$reels" title="Our Happy Customers" />
   </div>
 </section>
 <!-- Our Happy Customers -->
@@ -944,16 +911,20 @@
                 </div>
             </div>
         </div>
-    </div>
+      </div>
  </section>
- @endsection
 
 
- @push('scripts')
+
+@endsection
+
+
+@push('scripts')
 <script src="{{ asset('front_assets') }}/js/zoomProductGallery.js"></script>
 
   <script>
   $(document).ready(function() {
+    // Cart functionality
     $('.cart-increment').on('click', function() {
         var productId = $(this).data('product-id');
         var input = $('input[data-product-id="' + productId + '"]');
@@ -981,8 +952,9 @@
         }
         updateCartQuantity(productId, quantity);
     });
+
     
-    
-  });
+
+    });
   </script>
  @endpush
