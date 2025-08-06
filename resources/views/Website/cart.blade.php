@@ -3,6 +3,54 @@
 <!-- banner-section start -->
 @extends('Website.Layout.app')
 @section('content')
+<style>
+.coupon-item {
+    transition: all 0.3s ease;
+    border: 1px solid #e0e0e0 !important;
+}
+
+.coupon-item:hover {
+    border-color: #007bff !important;
+    box-shadow: 0 2px 8px rgba(0,123,255,0.1);
+}
+
+.coupon-item h6 {
+    color: #333;
+    font-weight: 600;
+}
+
+.coupon-item .btn-outline-primary {
+    border-radius: 20px;
+    padding: 5px 15px;
+    font-size: 12px;
+}
+
+.applied-coupon {
+    border: 2px solid #28a745;
+    background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+
+
+.alert {
+    border-radius: 8px;
+    border: none;
+    padding: 10px 15px;
+    margin-top: 10px;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border-left: 4px solid #28a745;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-left: 4px solid #dc3545;
+}
+</style>
 <section class="section-padding">
   <div class="container">
     <div class="row">
@@ -74,13 +122,32 @@
                     <button class="check-btn">Check</button>
                 </div>
                 
-                <button class="coupon-btn" id="openBtn">
-                    <div>
-                        <img src="asset('front_assets')/images/icons/bxs_offer.png" alt="offer"> <span class="px-2">Apply Coupon</span>
+                <div class="pincode-check mt-3">
+                    <input type="text" id="couponCode" placeholder="Enter coupon code" maxlength="50">
+                    <button class="check-btn" type="button" onclick="applyCoupon()" id="applyCouponBtn">
+                        <span class="btn-text">Apply</span>
+                        <span class="btn-loading d-none">
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        </span>
+                    </button>
+                </div>
+                <div id="couponMessage" class="mt-2"></div>
+                
+                @if(session('applied_coupon'))
+                    <div class="applied-coupon mt-2 p-2 bg-success text-white rounded">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ session('applied_coupon.code') }}</strong> - {{ session('applied_coupon.name') }}
+                                <br>
+                                <small>Discount: ₹{{ session('applied_coupon.discount_amount') }}</small>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-light" onclick="removeCoupon()">
+                                <i class="fa-solid fa-times"></i>
+                            </button>
+                        </div>
                     </div>
-                    <i class="fa-solid fa-chevron-right"></i>
-                </button>
-                <a href="{{url('checkout')}}" class="thm-btn w-100 mb-3">Proceed to Pay ₹{{$subtotal}}</a>
+                @endif
+                <a href="{{url('checkout')}}" class="thm-btn w-100 mb-3">Proceed to Pay ₹{{session('applied_coupon') ? $subtotal - session('applied_coupon.discount_amount') : $subtotal}}</a>
                 <button class="btn btn-outline-danger w-100 mb-3" onclick="clearCart()">Clear Cart</button>
 
                 <div class="summary-box">
@@ -89,59 +156,22 @@
                     @if($total_saving > 0)
                     <p>Total Discounts <span class="discount">−₹{{$total_saving}}</span></p>
                     @endif
+                    @if(session('applied_coupon'))
+                    <p>Coupon Discount <span class="discount">−₹{{session('applied_coupon.discount_amount')}}</span></p>
+                    @endif
 
                     <p>Convenience Fee <span>₹0</span></p>
                     <hr />
-                    <p class="total text-black">Payable Amount <span>₹{{$subtotal}}</span></p>
+                    <p class="total text-black">Payable Amount <span>₹{{session('applied_coupon') ? $subtotal - session('applied_coupon.discount_amount') : $subtotal}}</span></p>
                 </div>
             </div>
         </div>
     </div>
   </div>
 </section>
-<!-- offer modul open -->
-<div class="offcanvas p-0" id="myOffcanvas">
-  <div class="offcanvas-header">
-    <h6 class="mb-0" id="offcanvasRightLabel">Apply Coupon</h6>
-    <button type="button" class="btn-close" id="closeBtn"></button>
-  </div>
-  <div class="offcanvas-body p-0">
-    <div class="pincode-check p-2">
-        <input type="text" placeholder="Enter Pin code">
-        <button class="check-btn">Check</button>
-    </div>
-    <div class="offer-headding">
-        <p>Payment Offers</p>
-    </div>
-    <div class="offer-item">
-        <p class="mb-2 text-black">Simpl Flat Rs 200 cashback for New user & Flat Rs 75 cashback for Repeat user Via Simpl pay-in-3</p>
-        <p class="mb-2">Flat Rs 200 cashback for New user & Flat Rs 75 cashback for Repeat on Mov Rs 2500 user Via Simpl pay-in-3</p>
-        <div class="offer-item-bottom">
-            <p class="mb-0" style="color: #00BF5B;">No Code Required</p><p class="mb-0">T&C Apply</p>
-        </div>
-    </div>
-    <div class="offer-item">
-        <p class="mb-2 text-black">Simpl Flat Rs 200 cashback for New user & Flat Rs 75 cashback for Repeat user Via Simpl pay-in-3</p>
-        <p class="mb-2">Flat Rs 200 cashback for New user & Flat Rs 75 cashback for Repeat on Mov Rs 2500 user Via Simpl pay-in-3</p>
-        <div class="offer-item-bottom">
-            <p class="mb-0" style="color: #00BF5B;">No Code Required</p><p class="mb-0">T&C Apply</p>
-        </div>
-    </div>
-  </div>
-</div>
-<div class="backdrop" id="backdrop"></div>
+
 <!--  -->
-<!-- Success Modal -->
-<div id="couponModal" class="coupon-modal">
-  <div class="coupon-modal-content">
-    <button class="modal-close" onclick="closeCouponModal()">×</button>
-    <div class="offer-seccess-image mb-4">
-        <img src="assets/images/offer-seccess.png" alt="img">
-    </div>
-    <p class="mb-0 text-black">Coupon Applied Successfully!</p>
-    
-  </div>
-</div>
+
 @endsection
 
 @push('scripts')
@@ -180,6 +210,20 @@ $(document).ready(function() {
         if (confirm('Are you sure you want to remove this item from cart?')) {
             removeFromCart(productId);
         }
+    });
+
+    // Enter key functionality for coupon input
+    $('#couponCode').on('keypress', function(e) {
+        if (e.which === 13) { // Enter key
+            e.preventDefault();
+            applyCoupon();
+        }
+    });
+
+    // Backup click handler for apply button
+    $('#applyCouponBtn').on('click', function(e) {
+        e.preventDefault();
+        applyCoupon();
     });
 
     window.clearCart = function() {
@@ -270,6 +314,99 @@ $(document).ready(function() {
         
         $('.total-cart-count').text(cartData.total_items);
     }
+
+    // Coupon functionality
+    function applyCoupon() {
+        var couponCode = $('#couponCode').val().trim();
+        
+        if (!couponCode) {
+            showSnackbar('Please enter a coupon code', 'error');
+            return;
+        }
+
+        // Show loading state
+        $('#applyCouponBtn .btn-text').addClass('d-none');
+        $('#applyCouponBtn .btn-loading').removeClass('d-none');
+        $('#applyCouponBtn').attr('disabled', true);
+        $('#couponMessage').html('');
+
+        $.ajax({
+            url: '{{ url("apply-coupon") }}',
+            type: 'POST',
+            data: {
+                coupon_code: couponCode,
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(response) {
+                if (response.status) {
+                    showSnackbar(response.msg, 'success');
+                    $('#couponCode').val('');
+                    
+                    updateCartWithCoupon(response.data);
+                    
+                    setTimeout(function() {
+                        location.reload();
+                    }, 2000);
+                } else {
+                    showSnackbar(response.msg, 'error');
+                }
+            },
+            error: function(xhr) {
+                var errorMsg = 'Something went wrong!';
+                if (xhr.responseJSON && xhr.responseJSON.msg) {
+                    errorMsg = xhr.responseJSON.msg;
+                }
+                showSnackbar(errorMsg, 'error');
+            },
+            complete: function() {
+                // Reset button state
+                $('#applyCouponBtn .btn-text').removeClass('d-none');
+                $('#applyCouponBtn .btn-loading').addClass('d-none');
+                $('#applyCouponBtn').removeAttr('disabled');
+            }
+        });
+    }
+
+    function removeCoupon() {
+        if (confirm('Are you sure you want to remove this coupon?')) {
+            $.ajax({
+                url: '{{ url("remove-coupon") }}',
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    if (response.status) {
+                        showSnackbar(response.msg, 'success');
+                        location.reload();
+                    } else {
+                        showSnackbar(response.msg, 'error');
+                    }
+                },
+                error: function() {
+                    showSnackbar('Something went wrong!', 'error');
+                }
+            });
+        }
+    }
+
+    function updateCartWithCoupon(couponData) {
+        // Update the cart summary with coupon discount
+        var finalAmount = couponData.final_amount;
+        $('.summary-box p:contains("Payable Amount") span').text('₹' + finalAmount);
+        $('.thm-btn').text('Proceed to Pay ₹' + finalAmount);
+        
+        // Add coupon discount line if not exists
+        if ($('.summary-box p:contains("Coupon Discount")').length === 0) {
+            $('.summary-box p:contains("Convenience Fee")').before(
+                '<p>Coupon Discount <span class="discount">−₹' + couponData.discount_amount + '</span></p>'
+            );
+        }
+    }
+
+
+
+
 });
 </script>
 @endpush

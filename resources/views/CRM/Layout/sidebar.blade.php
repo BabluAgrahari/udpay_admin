@@ -45,7 +45,7 @@
 
 
         <li
-            class="menu-item {{ Request::is('crm/brands.*') || Request::is('crm/categories.*') || Request::is('crm/products.*') || Request::is('crm/units.*') || Request::is('crm/stock-history.*') ? 'open' : '' }}">
+            class="menu-item {{ Request::is('crm/brands.*') || Request::is('crm/categories.*') || Request::is('crm/products.*') || Request::is('crm/units.*') || Request::is('crm/stock-history.*') || Request::is('crm/coupons.*') ? 'open' : '' }}">
 
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-package"></i>
@@ -73,6 +73,14 @@
                         <a href="{{ url('crm/products') }}" class="menu-link">
 
                             <div class="text-truncate" data-i18n="Product">Product</div>
+                        </a>
+                    </li>
+                @endif
+                @if (auth()->user()->hasPermissionTo('coupon'))
+                    <li class="menu-item {{ Request::is('crm/coupons.*') ? 'active' : '' }}">
+                        <a href="{{ url('crm/coupons') }}" class="menu-link">
+
+                            <div class="text-truncate" data-i18n="Coupon">Coupon</div>
                         </a>
                     </li>
                 @endif

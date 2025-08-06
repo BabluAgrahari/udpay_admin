@@ -24,6 +24,9 @@ Route::post('/update-cart-quantity', [CartController::class, 'updateQuantity']);
 Route::post('/remove-from-cart', [CartController::class, 'removeFromCart']);
 Route::post('/clear-cart', [CartController::class, 'clearCart']);
 Route::get('/cart-summary', [CartController::class, 'getCartSummary']);
+Route::post('/apply-coupon', [CartController::class, 'applyCoupon']);
+Route::post('/remove-coupon', [CartController::class, 'removeCoupon']);
+Route::get('/available-coupons', [CartController::class, 'getAvailableCoupons']);
 
 
 Route::group(['middleware' => ['customer.auth']], function () {

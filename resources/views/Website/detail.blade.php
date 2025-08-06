@@ -503,10 +503,9 @@
                         <div class="box-color">
                             <p class="mb-0 text-black">Product Details</p>
                             <ul class="delivery-service-list">
-                                @if($product->product_description)
-                                    {!! nl2br(e($product->product_description)) !!}
-                                @else
-                                    <li>Product description not available.</li>
+                                @if($product_details)
+                                    {!! nl2br(e($product_details->details)) !!}
+                              
                                 @endif
                             </ul>
                         </div>
@@ -625,44 +624,14 @@
   <div class="container">
     <div class="">
         <div class="w-100 text-center">
-             <h2 class="mb-2">Benefits of D-tox Green Tea </h2>
+             <h2 class="mb-2">Benefits of {{ $product->product_name }} </h2>
             <p>Benefits that helps you stay healthy and live longer</p>
         </div>
     </div>
     <div class="row">
-        <div class="col-lg-4 col-md-6">
-            <div class="benefits-card">
-                <div class="benefits-image">
-                    <img src="{{ asset('front_assets') }}/images/testi/1.png" alt="img">
-                </div>
-                <div class="benefits-content">
-                    <h6>Blood Sugar Management</h6>
-                    <p>Naturally helps manage blood sugar and HbA1c levels on consuming as advised for at least 3 Months</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-4 col-md-6">
-            <div class="benefits-card">
-                <div class="benefits-image">
-                    <img src="{{ asset('front_assets') }}/images/testi/2.png" alt="img">
-                </div>
-                <div class="benefits-content">
-                    <h6>Has Herbs to Improve Insulin Release</h6>
-                    <p>Vijaysaar helps regenerate insulin-producing cells & Gudmar, Giloy, etc. help improve insulin release in the body</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-4 col-md-6">
-            <div class="benefits-card">
-                <div class="benefits-image">
-                    <img src="{{ asset('front_assets') }}/images/testi/3.png" alt="img">
-                </div>
-                <div class="benefits-content">
-                    <h6>Prevent Other Related Complications</h6>
-                    <p>Naturally controlling Blood Sugar can prevent other health complications like BP and kidney issues</p>
-                </div>
-            </div>
-        </div>
+        @if($product_details)
+            {!! nl2br(e($product_details->result)) !!}
+        @endif
     </div>
   </div>
 </section>
@@ -676,39 +645,9 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-lg-4 col-md-6">
-            <div class="key-card">
-                <div class="key-image">
-                    <img src="{{ asset('front_assets') }}/images/key-ingredients/1.jpg" alt="img">
-                </div>
-                <div class="key-content">
-                    <h6>Bitter Gourd (karela)</h6>
-                    <p>Bitter Gourd is beneficial for regulating blood sugar levels. It contains Polypeptide-P which acts like insulin</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-4 col-md-6">
-            <div class="key-card">
-                <div class="key-image">
-                    <img src="{{ asset('front_assets') }}/images/key-ingredients/2.jpg" alt="img">
-                </div>
-                <div class="key-content">
-                    <h6>Amla</h6>
-                    <p>Regulates carbohydrate metabolism and relieve digestive ailments with high fiber content</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-4 col-md-6">
-            <div class="key-card">
-                <div class="key-image">
-                    <img src="{{ asset('front_assets') }}/images/key-ingredients/3.jpg" alt="img">
-                </div>
-                <div class="key-content">
-                    <h6>Jamun</h6>
-                    <p>Lowers the conversion of starch in food to sugar in the bloodstream.</p>
-                </div>
-            </div>
-        </div>
+        @if(!empty($product_details->key_ings))
+            {!! nl2br(e($product_details->key_ings)) !!}
+        @endif
     </div>
   </div>
 </section>
@@ -868,24 +807,9 @@
                 </div>
             </div>
             <div class="col-lg-6">
-                <div class="how-use-list">
-                    <div class="how-use-items">
-                        <h6>Step 1 : Mix</h6>
-                        <p>Shake the bottle & add 30 ml of Dia Free Juice to a glass of water</p>
-                    </div>
-                    <div class="how-use-items">
-                        <h6>Step 2 : Consume</h6>
-                        <p>Drink twice daily on an empty stomach in the morning and half an hour before dinner</p>
-                    </div>
-                    <div class="how-use-items">
-                        <h6>Step 3 : Stay Consistent</h6>
-                        <p>Consume daily for at least 3 months (Dosage may be varied as prescribed by a healthcare professional/physician.)</p>
-                    </div>
-                    <div class="how-use-items">
-                        <h6>Step 4 : Can consume with Allopathic Medicines</h6>
-                        <p>Kapiva Dia Free Juice can be taken with other allopathic medicines as well</p>
-                    </div>
-                </div>
+                @if(!empty($product_details->uses))
+                    {!! nl2br(e($product_details->uses)) !!}
+                @endif
             </div>
         </div>
     </div>

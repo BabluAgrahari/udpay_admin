@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Website;
 
 use App\Models\Product;
 use App\Http\Controllers\Controller;
-
+use App\Models\ProductDetail;
 
 class ProductDetailController extends Controller
 {
@@ -33,6 +33,8 @@ class ProductDetailController extends Controller
                 ->inRandomOrder()
                 ->limit(10)
                 ->get();
+
+            $data['product_details'] = ProductDetail::where('product_id', $data['product']->id)->first();
 
             return view('Website.detail', $data);
         } catch (\Exception $e) {

@@ -12,6 +12,7 @@ use App\Models\Brand;
 use Illuminate\Support\Facades\Validator;
 use Exception;
 use App\Models\ProductVariant;
+use App\Models\ProductDetail;
 use Illuminate\Support\Facades\DB;
 use App\Models\Unit;
 use Illuminate\Support\Facades\Auth;
@@ -412,6 +413,90 @@ class ProductController extends Controller
     }
 
   
+    public function details($id)
+    {
+        try {
+            $data['product'] = Product::findOrFail($id);
+            $data['detail'] = ProductDetail::where('product_id', $id)->first();
+            
+            return view('CRM.Product.details', $data);
+        } catch (Exception $e) {
+            return $this->failMsg($e->getMessage());
+        }
+    }
+
+    public function storeDetail(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'product_id' => 'required|exists:uni_products,id',
+                'details' => 'nullable|string',
+                'key_ings' => 'nullable|string',
+                'uses' => 'nullable|string',
+                'result' => 'nullable|string',
+                'status' => 'nullable|in:0,1'
+            ]);
+
+            if ($validator->fails()) {
+                return $this->validationMsg($validator->errors());
+            }
+
+            DB::beginTransaction();
+
+            $ingredients = ProductDetail::where('product_id', $request->product_id)->first();
+
+            if ($ingredients) {
+                // Update existing record
+                $ingredients->details = $request->details;
+                $ingredients->key_ings = $request->key_ings;
+                $ingredients->uses = $request->uses;
+                $ingredients->result = $request->result;
+                $ingredients->status = $request->status ?? '1';
+                $ingredients->save();
+            } else {
+                // Create new record
+                ProductDetail::create([
+                    'product_id' => $request->product_id,
+                    'details' => $request->details,
+                    'key_ings' => $request->key_ings,
+                    'uses' => $request->uses,
+                    'result' => $request->result,
+                    'status' => $request->status ?? '1'
+                ]);
+            }
+
+            DB::commit();
+            return $this->successMsg('Product details saved successfully');
+        } catch (Exception $e) {
+            DB::rollBack();
+            return $this->failMsg($e->getMessage());
+        }
+    }
+
+    public function getDetail($productId)
+    {
+        try {
+            $ingredients = ProductDetail::where('product_id', $productId)->first();
+            
+            if ($ingredients) {
+                return response()->json([
+                    'success' => true,
+                    'data' => $ingredients
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No details found for this product'
+                ]);
+            }
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
     private function deleteImage($imagePath)
     {
         // Extract the file path from the asset URL

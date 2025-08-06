@@ -374,6 +374,7 @@
            <li><a href="{{ route('terms.conditions') }}">Terms & Conditions</a></li>
            <li><a href="{{ route('privacy.policy') }}">Privacy Policy</a></li>
            <li><a href="{{ route('return.policy') }}">Return Policy</a></li>
+           <li><a href="{{ route('shipping.policy') }}">Shipping Policy</a></li>
            <li><a href="{{ route('track.order') }}">Track Order</a></li>
            <li><a href="{{ route('compliance.documents') }}">Compliance Documents</a></li>
        </ul>

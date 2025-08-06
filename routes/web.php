@@ -3,6 +3,7 @@
 use App\Http\Controllers\CRM\AccountSettingController;
 use App\Http\Controllers\CRM\BrandController;
 use App\Http\Controllers\CRM\CategoryController;
+use App\Http\Controllers\CRM\CouponController;
 use App\Http\Controllers\CRM\DashboardController;
 use App\Http\Controllers\CRM\LoginController;
 use App\Http\Controllers\CRM\OrderController;
@@ -62,11 +63,19 @@ Route::group(['prefix' => 'crm', 'middleware' => 'crm.auth'], function () {
     Route::get('products/datatable-list', [ProductController::class, 'datatable'])->middleware('permission:product');
     Route::resource('products', ProductController::class)->middleware('permission:product');
     Route::post('products/update-status', [ProductController::class, 'updateStatus'])->middleware('permission:product');
+    Route::get('products/{id}/details', [ProductController::class, 'details'])->middleware('permission:product');
+    Route::post('products/store-detail', [ProductController::class, 'storeDetail'])->middleware('permission:product');
+    Route::get('products/{id}/detail', [ProductController::class, 'getDetail'])->middleware('permission:product');
 
     // Brand Routes
     Route::get('brands/datatable-list', [BrandController::class, 'datatable'])->middleware('permission:brand');
     Route::resource('brands', BrandController::class)->middleware('permission:brand');
     Route::post('brands/update-status', [BrandController::class, 'updateStatus'])->middleware('permission:brand');
+   
+    // Coupon Routes
+    Route::get('coupons/datatable-list', [CouponController::class, 'datatable'])->middleware('permission:coupon');
+    Route::resource('coupons', CouponController::class)->middleware('permission:coupon');
+    Route::post('coupons/update-status', [CouponController::class, 'updateStatus'])->middleware('permission:coupon');
    
     // Unit Routes
     Route::get('units/datatable-list', [UnitController::class, 'datatable'])->middleware('permission:unit');
