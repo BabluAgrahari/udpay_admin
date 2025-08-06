@@ -103,4 +103,9 @@ class Customer extends Authenticatable implements JWTSubject
     {
         return [];
     }
+
+    public function rank()
+    {
+        return $this->hasOne(Royalty::class, 'userId', 'user_num');
+    }
 }

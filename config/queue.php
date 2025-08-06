@@ -34,22 +34,22 @@ return [
             'driver' => 'sync',
         ],
 
-        // 'database' => [
-        //     'driver' => 'database',
-        //     'table' => 'jobs',
-        //     'queue' => 'default',
-        //     'retry_after' => 90,
-        //     'after_commit' => false,
-        // ],
-
         'database' => [
-            'driver' => 'mongodb',
-            'connection' => 'mongodb',
-            'collection' => 'jobs',
+            'driver' => 'database',
+            'table' => 'jobs',
             'queue' => 'default',
             'retry_after' => 90,
             'after_commit' => false,
         ],
+
+        // 'database' => [
+        //     'driver' => 'mongodb',
+        //     'connection' => 'mongodb',
+        //     'collection' => 'jobs',
+        //     'queue' => 'default',
+        //     'retry_after' => 90,
+        //     'after_commit' => false,
+        // ],
 
         'beanstalkd' => [
             'driver' => 'beanstalkd',
@@ -116,17 +116,17 @@ return [
     |
     */
 
-    // 'failed' => [
-    //     'driver' => env('QUEUE_FAILED_DRIVER', 'database-uuids'),
-    //     'database' => env('DB_CONNECTION', 'mysql'),
-    //     'table' => 'failed_jobs',
-    // ],
-
     'failed' => [
-        'driver' => 'mongodb',
-        'database' => 'mongodb',
-        'connection' => 'mongodb',
-        'collection' => 'failed_jobs',
+        'driver' => env('QUEUE_FAILED_DRIVER', 'database-uuids'),
+        'database' => env('DB_CONNECTION', 'mysql'),
+        'table' => 'failed_jobs',
     ],
+
+    // 'failed' => [
+    //     'driver' => 'mongodb',
+    //     'database' => 'mongodb',
+    //     'connection' => 'mongodb',
+    //     'collection' => 'failed_jobs',
+    // ],
 
 ];

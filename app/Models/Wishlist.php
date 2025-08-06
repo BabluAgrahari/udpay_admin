@@ -2,11 +2,7 @@
 
 namespace App\Models;
 
-use App\Casts\ObjectIdCast;
 use App\Models\BaseModel;
-use App\Observers\Timestamp;
-use Illuminate\Support\Facades\Auth;
-use MongoDB\BSON\ObjectId;
 
 class Wishlist extends BaseModel
 {

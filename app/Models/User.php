@@ -88,4 +88,6 @@ class User extends Authenticatable implements JWTSubject
 
         return in_array($permission, $this->roleTable->permissions ?? []);
     }
+
+    
 }

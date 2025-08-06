@@ -6,6 +6,7 @@ use App\Models\BaseModel;
 
 class UserKyc extends BaseModel
 {
+    protected $table = 'user_kyc';
     protected $fillable = [
         'user_id',
         'mobile_no',

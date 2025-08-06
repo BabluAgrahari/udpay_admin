@@ -29,7 +29,7 @@ Route::post('/remove-coupon', [CartController::class, 'removeCoupon']);
 Route::get('/available-coupons', [CartController::class, 'getAvailableCoupons']);
 
 
-Route::group(['middleware' => ['customer.auth']], function () {
+Route::group(['middleware' => ['auth']], function () {
 // Wishlist Routes
 Route::post('/wishlist/add', [WishlistController::class, 'addToWishlist']);
 Route::get('/wishlist/remove/{id}', [WishlistController::class, 'removeWishlist']);

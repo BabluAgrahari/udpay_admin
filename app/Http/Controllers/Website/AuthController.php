@@ -14,9 +14,6 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
-
-
-
 class AuthController extends Controller
 {
     public function sendOtp(Request $request)
@@ -122,7 +119,8 @@ class AuthController extends Controller
                 }
             }
 
-            Auth::login($user);
+            $authUser = Customer::where('user_id', $user->user_id)->where('mobile', $mobile)->first();
+            Auth::login($authUser);
             Session::forget(['otp', 'mobile', 'otp_expiry', 'otp_sent_time', 'otp_attempts']);
 
             $this->cartItems();
@@ -185,13 +183,13 @@ class AuthController extends Controller
                 'msg' => 'Something went wrong.'
             ], 500);
         }
-    }
+    }   
 
     private function createNewUser($mobile)
     {
-        $user = Customer::select('id')->orderBy('id', 'DESC')->first();
+        $user = Customer::select('id','user_id')->orderBy('id', 'DESC')->first();
         $user_id = !empty($user->id) ? $user->user_id + 1 : 1;
-        $user_nm = uniqCode(8);
+        $user_nm = rand(10000000, 99999999);//should be unique
 
         $customer = new Customer();
         $customer->mobile = $mobile;
@@ -199,6 +197,7 @@ class AuthController extends Controller
         $customer->user_num = $user_nm;
         $customer->alpha_num_uid = 'UNI' . $user_nm;
         $customer->role = 'customer';
+        $customer->type = 'customer';
         $customer->isactive = 1;
         return $customer->save() ? $customer : null;
     }

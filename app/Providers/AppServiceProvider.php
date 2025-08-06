@@ -37,6 +37,10 @@ class AppServiceProvider extends ServiceProvider
             return $user->role == 'customer' || $user->role == '';
         });
 
+        Gate::define('isDistributor', function (User $user) {
+            return $user->role == 'distributor';
+        });
+
         Paginator::defaultView('Pagination');
     }
 }

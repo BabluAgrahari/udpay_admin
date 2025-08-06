@@ -12,12 +12,12 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 // use romanzipp\QueueMonitor\Traits\IsMonitored;
-use violetshih\MongoQueueMonitor\Traits\IsMonitored;
+// use violetshih\MongoQueueMonitor\Traits\IsMonitored;
 
 
 class RequestUpdateJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, IsMonitored;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels; //, IsMonitored;
 
     protected $user_id, $id;
     /**
