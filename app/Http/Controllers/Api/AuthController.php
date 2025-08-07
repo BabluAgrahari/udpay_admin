@@ -3,24 +3,25 @@
 namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
-use App\Models\UniQrcode;
 use App\Jobs\RegisterJob;
-use SimpleSoftwareIO\QrCode\Facades\QrCode as FacadesQrCode;
-use Illuminate\Support\Facades\Storage;
+use App\Models\LevelCount;
+use App\Models\Royalty;
+use App\Models\UniQrcode;
 use App\Models\User;
 use App\Models\UsersLvlS1;
-use App\Models\WalletTransition;
-use App\Models\LevelCount;
 use App\Models\Wallet;
-use Illuminate\Support\Facades\File;
+use App\Models\WalletTransition;
 use App\Services\SmsService;
-use App\Models\Royalty;
+use App\Models\UserKyc;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use SimpleSoftwareIO\QrCode\Facades\QrCode as FacadesQrCode;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
@@ -73,7 +74,7 @@ class AuthController extends Controller
             $validator = Validator::make($request->all(), [
                 'otp' => 'required|numeric|digits:6',
                 'mobile_no' => 'required|digits:10',
-                'ref_id' => 'required|string',
+                'ref_id' => 'nullable|string',
             ]);
             if ($validator->fails())
                 return $this->validationRes($validator->messages());
@@ -93,7 +94,7 @@ class AuthController extends Controller
             if (empty($user)) {
                 $lastuser = User::select('id', 'user_id')->orderBy('id', 'DESC')->first();
                 $user_id = !empty($lastuser->user_id) ? $lastuser->user_id + 1 : 1;
-                $user_nm = uniqCode(8);
+                $user_nm = rand(10000000, 99999999);
 
                 $user = new User();
                 $user->ref_id = $request->ref_id ?? null;
@@ -126,15 +127,138 @@ class AuthController extends Controller
                 return $this->failRes('Invalid Credentials.');
             }
 
-            $dataArr = $this->userData($user, $token);
+            $data = $this->profileData($user,$token);
             DB::commit();
-            return $this->recordRes($dataArr, 'Otp Verified, Registered Successfully!');
+            return $this->recordRes($data, 'Otp Verified, Registered Successfully!');
         } catch (Exception $e) {
             return $this->failRes($e->getMessage());
         }
     }
 
-    private function userData($user, $token = null)
+    private function profileData($user,$token = null)
+    {
+        $data = [
+            'user_num' => $user->user_num,
+            'user_id' => $user->user_id ?? '',
+            'alpha_user_id' => $user->alpha_num_uid ?? '',
+            'full_name' => $user->name ?? '',
+            'email' => $user->email ?? '',
+            'mobile_no' => $user->mobile ?? '',
+            'gender' => $user->gender ?? '',
+            'dob' => $user->userKyc->dob ?? '',
+            'city' => $user->userKyc->district ?? '',
+            'state' => $user->userKyc->state ?? '',
+            'pincode' => $user->userKyc->pincode ?? '',
+            'address' => $user->userKyc->address ?? '',
+            'landmark' => $user->userKyc->locality ?? '',
+            'created_at' => $user->created_at ?? '',
+            'updated_at' => $user->updated_at ?? '',
+        ];
+        if($token){
+            $data['authorisation'] = [
+                'token' => $token,
+                'type' => 'bearer',
+            ];
+        }
+        return $data;
+    }
+
+    public function getProfile(Request $request)
+    {
+        try {
+            $user_id = Auth::user()->id;
+            $user = User::with(['UserKyc'])->find($user_id);
+
+            $data = $this->profileData($user);
+            return $this->recordRes($data, 'Profile Fetched Successfully!');
+        } catch (Exception $e) {
+            return $this->failRes($e->getMessage());
+        }
+    }
+
+
+    public function updateProfile(Request $request){
+        try {
+            $validator = Validator::make($request->all(), [
+                'full_name' => 'required|string',
+                'gender' => 'required|string|in:male,female,other',
+                'dob' => 'required|date',
+                'email' => 'required|email',
+                'city' => 'required|string',
+                'state' => 'required|string',
+                'pincode' => 'required|digits:6',
+                'address' => 'required|string',
+                'landmark' => 'required|string',
+            ],[
+                'full_name.required' => 'Full name is required.',
+                'gender.required' => 'Gender is required.',
+                'dob.required' => 'Date of birth is required.',
+                'email.required' => 'Email is required.',
+                'city.required' => 'City is required.',
+                'state.required' => 'State is required.',
+                'pincode.required' => 'Pincode is required.',
+                'address.required' => 'Address is required.',
+                'landmark.required' => 'Landmark is required.',
+            ]);
+            if ($validator->fails())
+                return $this->validationRes($validator->messages());
+
+            $existUser = User::where('email', $request->email)->where('id', '!=', Auth::user()->id)->first();
+            if($existUser){
+                return $this->failRes('Email already exists.');
+            }
+           
+
+            DB::beginTransaction();
+            $user_id = Auth::user()->id;
+            $user = User::find($user_id);
+            $user->name = $request->full_name;
+            $user->gender = $request->gender;
+            $user->email = $request->email;
+            if(!$user->save()){
+                DB::rollBack();
+                return $this->failRes('Something went wrong, Profile not updated.');
+            }
+                $userKyc = UserKyc::where('userId', $user->user_id)->first();
+                if(empty($userKyc)){
+                    $userKyc = new UserKyc();
+                    $userKyc->userId = $user->user_id;
+                }
+                $userKyc->name = $request->full_name;
+                $userKyc->gender = $request->gender;
+                $userKyc->dob = $request->dob;
+                $userKyc->district = $request->city;
+                $userKyc->state = $request->state;
+                $userKyc->pincode = $request->pincode;
+                $userKyc->address = $request->address;
+                $userKyc->locality = $request->landmark;
+                if(!$userKyc->save()){
+                    DB::rollBack();
+                    return $this->failRes('Something went wrong, Profile not updated.');
+                }
+           
+            DB::commit();
+            return $this->recordRes($this->profileData($user), 'Profile Updated Successfully!');
+        } catch (Exception $e) {
+            DB::rollBack();
+            return $this->failRes($e->getMessage());
+        }
+    }
+
+    public function currentUserDetail()
+    {
+        try {
+            $user_id = Auth::user()->id;
+            $user = User::with(['UserKyc', 'Wallet', 'Royalty'])->find($user_id);
+
+            $data = $this->userDataWithKYC($user);
+            return $this->recordRes($data, 'Profile Fetched Successfully!');
+        } catch (Exception $e) {
+            return $this->failRes($e->getMessage());
+        }
+    }
+
+    private function userDataWithKYC($user, $token = null)
     {
         $post = 'user';
         $pgimg = 'user.jpg';
@@ -167,7 +291,7 @@ class AuthController extends Controller
         $wallet = $user->Wallet;
 
         $kycRecord = $this->kycDetails($user->UserKyc ?? array());
-        $totalWalletAmt = ($wallet->amount??0) + ($wallet->earning??0) + ($wallet->unicash??0);
+        $totalWalletAmt = ($wallet->amount ?? 0) + ($wallet->earning ?? 0) + ($wallet->unicash ?? 0);
 
         $dataArr = array(
             'user_num' => $user->user_num,
@@ -181,10 +305,10 @@ class AuthController extends Controller
             'post' => $post,
             'user_count' => (int) $userCount,
             'wallet_balance' => (float) round($totalWalletAmt, 2),
-            'bp' => (float) ($wallet->bp??0),
+            'bp' => (float) ($wallet->bp ?? 0),
             'post_icon' => url('/') . 'assets/images/post/' . $pgimg,
             'total_unicash' => (float) ($unicashTotal),
-            'available_unicash' => (float) ($wallet->unicash??0),
+            'available_unicash' => (float) ($wallet->unicash ?? 0),
             'qrcode' => $this->generateQRCode($user->user_num),
             'post_membership' => ($user->planMem == 1) ? 'Active' : 'Inactive',
             'kyc_flag' => $user->UserKyc->kyc_flag ?? 0,
@@ -202,19 +326,6 @@ class AuthController extends Controller
             ];
         }
         return $dataArr;
-    }
-
-    public function getProfile(Request $request)
-    {
-        try {
-            $user_id = Auth::user()->id;
-            $user = User::with(['Wallet', 'UserKyc', 'Royalty'])->find($user_id);
-
-            $dataArr = $this->userData($user);
-            return $this->recordRes($dataArr, 'Profile Fetched Successfully!');
-        } catch (Exception $e) {
-            return $this->failRes($e->getMessage());
-        }
     }
 
     private function kycDetails($data)
@@ -264,7 +375,6 @@ class AuthController extends Controller
 
     private function generateQRCode($uid)
     {
-
         // ->where('qr_type', 'user')
         $qr = UniQrcode::where('uid', $uid)->first();
         if (!empty($qr->img))
@@ -390,10 +500,10 @@ class AuthController extends Controller
         }
 
         $payload = ['user_id' => $user_id, 'unm' => $user_nm, 'refered_by' => $refered_by, 'org' => $org = ''];
-       // dispatch(new RegisterJob($payload));  // here run job queue  hereeeee
+        // dispatch(new RegisterJob($payload));  // here run job queue  hereeeee
 
         $walletUpdate = Wallet::where('unm', $refered_by)->first();
-        if(empty($walletUpdate)){
+        if (empty($walletUpdate)) {
             return ['status' => true, 'msg' => 'Wallet Amount Updated Successfully!'];
         }
         $existbp = $walletUpdate->bp ?? 0;

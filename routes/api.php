@@ -64,23 +64,21 @@ Route::controller(AuthController::class)->group(function () {
 });
 
 
-// Route::controller(RegisterController::class)->group(function () {
-//     Route::post('register', 'store');
-//     Route::post('user-availability', 'userAvailability');
-//     Route::post('verify-otp', 'verifyOtp');
-//     Route::post('resend-otp', 'resendOtp');
-//     Route::post('test-1', 'test1');
-// });
-
 Route::get('appPopup', [AppPopupController::class, 'getList']);
 
 Route::group(['middleware' => ['jwt.verify']], function () {
 
     Route::get('profile', [AuthController::class, 'getProfile']);
+    Route::post('update-profile', [AuthController::class, 'updateProfile']);
+    Route::get('current-user-detail', [AuthController::class, 'currentUserDetail']);
 
     //category
     Route::get('category-list', [CategoryController::class, 'index']);
     Route::get('category/{id}', [CategoryController::class, 'show']);
+
+    Route::get('home-product-list', [ProductController::class, 'homePageProducts']);
+    Route::get('product-list', [ProductController::class, 'productList']);
+    Route::get('product-detail/{id}', [ProductController::class, 'productDetail']);
 
     //wallet
     Route::get('wallet', [WalletController::class, 'index']);
@@ -119,7 +117,7 @@ Route::group(['middleware' => ['jwt.verify']], function () {
     Route::post('address-update/{id}', [ShippingBillingController::class, 'update']);
     Route::get('remove-address/{id}', [ShippingBillingController::class, 'remove']);
 
-    Route::get('product-list', [ProductController::class, 'productList']);
+   
 
     Route::post('add-to-cart', [CartController::class, 'addToCart']);
     Route::post('update-quantity', [CartController::class, 'updateQuantity']);

@@ -7,6 +7,8 @@ use App\Casts\ObjectIdCast;
 
 class ProductVariant extends BaseModel
 {
+    protected $table = 'uni_product_variant';
+    
     protected $fillable = [
         'product_id',
         'sku',

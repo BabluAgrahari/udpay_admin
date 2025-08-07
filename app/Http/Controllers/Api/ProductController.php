@@ -1,100 +1,210 @@
 <?php
-//use Log;
+// use Log;
 namespace App\Http\Controllers\Api;
 
-use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
-use App\Models\Product\Products;
-use App\Models\Product\ProductCategory;
+use App\Models\Category;
+use App\Models\Product;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use DB;
 use Exception;
 
 class ProductController extends Controller
 {
-	public function productList()
+	public function homePageProducts()
 	{
 		try {
-			$user =  User::where('user_id', Auth::user()->user_id)->first();
-			
-			$records = Products::with(['Category', 'Details', 'Gallery'])->where('product_status', 1)->get();
-			
+			$user = User::where('user_id', Auth::user()->user_id)->first();
+
+			$categories = Category::where('status', '1')->where('pro_section', 'primary')->get();
+
 			$data = [];
-			$fol='products';
-			foreach ($records as $record) {
-				
-				$folder = strtolower($record->pro_section) == 'deals' ? 'deals' : 'products';
-				
-				if($folder == 'deals'){
-					$fol = 'deals/gallery';
-				}
-				$disnt  = (float)$record->mrp - (float)$record->product_sale_price;
-				if (strtolower($record->pro_section) == 'primary') {
-					if ($user->isactive1 == 0 && strtolower($record->pro_type) != 'primary1') {
-					  Log::info('msg:id',[$record->product_id]);
-						continue;
-					}
-					
-				}
-				$data[strtolower($record->pro_section)][] =  [
-					'id'         => $record->product_id,
-					'title'      => $record->product_name,
-					'ap'         => $record->ap,
-					'rp'         => $record->rp,
-					'sv'		 => $record->sv,
-					'mrp'        => (float)$record->mrp,
-					'sale_price' => (float)$record->product_sale_price,
-					'stock'      => $record->stock_status == 'OUT' ? 'OUT OF STOCK' : 'Available',
-					'thumbnail'  => !empty($record->product_image) ? 'https://uni-pay.in/uploads/' . $folder . '/' . $record->product_image : "",
-					'category'   => [
-						'id'     => $record->Category->cat_id ?? '',
-						'title'  => $record->Category->cat_name ?? '',
-						'image'  => !empty($record->Category->img) ? 'https://uni-pay.in/uploads/category/' . $record->Category->img : null,
-					],
-					'details' => $record->Details->map(function ($detail) {
-						return [
-							'id'              => $detail->id,
-							'description'     => $detail->details,
-							'key_ingredients' => $detail->key_ings,
-							'uses'            => $detail->uses,
-							'result'          => $detail->result
-						];
-					}),
-					'gallery' => $record->Gallery->map(function ($record) use ($fol) {
-						return [
-							'image' => 'https://uni-pay.in/uploads/' . $fol . '/' . $record->img,
-						];
-					}),
-					'attributes' => $record->Attributes->map(function ($record) {
-						return [
-							'id'   => $record->id,
-							'type' => $record->att_type,
-							'size' => $record->size
-						];
-					}),
-					'offer'        => $record->offer ? 1 : 0,
-					'discount_per' => strtolower($record->pro_section)=='deals'?number_format($record->up):round(($disnt / $record->mrp) * 100, 2) . '%',
-					'note'         => "5% Extra unipoint discount",
-				];
+
+			$data['featured'] = Product::with(['category'])->where('status', '1')->where('is_featured', '1')->limit(10)->get()->map(function ($product) {
+				return $this->field($product);
+			});
+
+			foreach ($categories as $category) {
+				$records = Product::with(['category'])->where('status', '1')->where('product_category_id', $category->id)->limit(10)->get()->map(function ($product) {
+					return $this->field($product);
+				});
+				$data[$category->name] = $records;
 			}
 
-			$categories = ProductCategory::where('cat_status', 1)->get();
-			if ($categories->isNotEmpty()) {
-				foreach ($categories as $key => $record) {
-					$data['categories'][strtolower($record->pro_section)][] = array(
-						'id'       => $record->cat_id,
-						'image'    => 'https://uni-pay.in/uploads/category/' . $record->img,
-						'category_name' => $record->cat_name,
+			$data = collect($data);
 
-					);
-					$data['sequence'][strtolower($record->pro_section)][] = $record->cat_name;
-				}
-			}
-
-			return $this->recordRes($data);
+			return $this->recordsRes($data);
 		} catch (Exception $e) {
 			return $this->failRes($e->getMessage());
 		}
+	}
+
+	private function field($product)
+	{
+		$field = [
+			'id' => (int) $product->id,
+			'product_name' => (string) $product->product_name,
+			'slug_url' => (string) $product->slug_url,
+			'product_category_id' => (int) $product->product_category_id,
+			'product_image' => (string) $product->product_image,
+			'brand_id' => (int) $product->brand_id,
+			'product_price' => (float) $product->product_price,
+			'product_sale_price' => (float) $product->product_sale_price,
+			'mrp' => (float) $product->mrp,
+			'product_stock' => (int) $product->product_stock,
+			'product_short_description' => (string) $product->product_short_description,
+			'product_description' => (string) $product->product_description,
+			'category' => [
+				'id' => (int) $product->category->id,
+				'name' => (string) $product->category->name,
+				'slug' => (string) $product->category->slug,
+				'img' => (string) $product->category->img,
+				'description' => (string) $product->category->description,
+			],
+			'created_at' => (string) $product->created_at
+		];
+		return $field;
+	}
+
+	public function productList(Request $request)
+	{
+		try {
+			$limit = $request->limit ?? 10;
+			$page = $request->page ?? 1;
+			$skip = ($page - 1) * $limit;
+
+			$query = Product::with(['category'])->where('status', '1');
+
+			if (!empty($request->category_id)) {
+				$query->where('product_category_id', $request->category_id);
+			}
+
+			if (!empty($request->product_name)) {
+				$query->where('product_name', 'like', '%' . $request->product_name . '%');
+			}
+
+			$products = $query->limit($limit)->skip($skip)->get()->map(function ($product) {
+				return $this->field($product);
+			});
+
+			return $this->recordsRes($products);
+		} catch (Exception $e) {
+			return $this->failRes($e->getMessage());
+		}
+	}
+
+	public function productDetail($id)
+	{
+		try {
+			$product = Product::with(['category', 'brand', 'images', 'variants', 'details', 'reels','reviews', 'reviews.user'])->where('status', '1')->where('id', $id)->first();
+
+			$product = $this->productField($product);
+			return $this->recordRes($product);
+		} catch (Exception $e) {
+			return $this->failRes($e->getMessage());
+		}
+	}
+
+	private function productField($product)
+	{
+		$field = [
+			'id' => (int) $product->id??0,
+			'product_name' => (string) $product->product_name??'',
+			'hsn_code' => (string) $product->hsn_code??'',
+			'sku_code' => (string) $product->sku_code??'',
+			'slug_url' => (string) $product->slug_url??'',
+			'product_category_id' => (int) $product->product_category_id??0,
+			'product_image' => (string) $product->product_image??'',
+			'brand_id' => (int) $product->brand_id??0,
+			'product_price' => (float) $product->product_price??0,
+			'product_sale_price' => (float) $product->product_sale_price??0,
+			'mrp' => (float) $product->mrp??0,
+			'product_stock' => (int) $product->product_stock??0,
+			'product_short_description' => (string) $product->product_short_description??'',
+			'product_description' => (string) $product->product_description??'',
+			'product_min_qty' => (int) $product->product_min_qty??0,
+			'igst' => (float) $product->igst??0,
+			'is_featured' => $product->is_featured??0,
+			'up' => (int) $product->up??0,
+			'sv' => (float) $product->sv??0,
+			'offer' =>$product->offer??0,
+			'offer_date' => (string) $product->offer_date??'',
+			'pro_type' => (string) $product->pro_type??'',
+			'pro_section' => (string) $product->pro_section??'',
+			
+			'images' => $product->images->map(function ($image) {
+				return [
+					'id' => (int) $image->id??0,
+					'image' => (string) $image->image??'',
+				];
+			}),
+			'variants' => $product->variants->where('status', '1')->map(function ($variant) {
+				return [
+					'id' => (int) $variant->id??0,
+					'sku' => (string) $variant->sku??'',
+					'stock' => (int) $variant->stock??0,
+					'variant_name' => (string) $variant->variant_name??'',
+					'price' => (float) $variant->price??0,
+				];
+			}),
+			'reels' => $product->reels->where('status', '1')->map(function ($reel) {
+				return [
+					'id' => (int) $reel->id??0,
+					'path' => (string) $reel->path??'',
+					'is_video' => $reel->is_video??0,
+				];
+			}),
+			'reviews' => $product->reviews->where('status', '1')->map(function ($review) {
+				$d = [
+					'id' => (int) $review->id??0,
+					'rating' => (float) $review->rating??0,
+					'review' => (string) $review->review??'',
+					'created_at' => (string) $review->created_at??'',
+				];
+
+				if(!empty($review->user)){
+					$d['user'] = [
+						'id' => (int) $review->user->id??0,
+						'name' => (string) $review->user->name??'',
+						'image' => (string) $review->user->image??'',
+					];
+				}
+				return $d;
+			}),
+			'created_at' => (string) $product->created_at
+		];
+
+		if(!empty($product->brand)){
+			$field['brand'] = [
+				'id' => (int) $product->brand->id??0,
+				'name' => (string) $product->brand->name??'',
+				'slug' => (string) $product->brand->slug??'',
+				'img' => (string) $product->brand->img??'',
+				'description' => (string) $product->brand->description??'',
+			];
+		}
+
+		if(!empty($product->category)){
+			$field['category'] = [
+				'id' => (int) $product->category->id??0,
+				'name' => (string) $product->category->name??'',
+				'slug' => (string) $product->category->slug??'',
+				'img' => (string) $product->category->img??'',
+				'description' => (string) $product->category->description??'',
+			];
+		}
+		if(!empty($product->details)){
+			$field['details'] = [
+				'id' => (int) $product->details->id??0,
+				'details' => (string) $product->details->details??'',
+				'key_ings' => (string) $product->details->key_ings??'',
+				'uses' => (string) $product->details->uses??'',
+				'result' => (float) $product->details->result??0,
+			];
+		}
+		return $field;
 	}
 }

@@ -53,7 +53,7 @@ class Product extends BaseModel
 
     public function brand()
     {
-        return $this->belongsTo(Brand::class, 'brand_id');
+        return $this->hasOne(Brand::class, 'id', 'brand_id');
     }
 
     public function unit()
@@ -69,6 +69,21 @@ class Product extends BaseModel
     public function variants()
     {
         return $this->hasMany(ProductVariant::class, 'product_id');
+    }
+
+    public function details()
+    {
+        return $this->hasOne(ProductDetail::class, 'product_id');
+    }
+
+    public function reels()
+    {
+        return $this->hasMany(ProductReels::class, 'product_id');
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(ProductReview::class, 'product_id');
     }
 
     public function createdBy()
