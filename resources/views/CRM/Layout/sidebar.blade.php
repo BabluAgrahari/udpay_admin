@@ -103,7 +103,7 @@
             </ul>
         </li>
 
-        <li class="menu-item ">
+        <li class="menu-item {{ Request::is('crm/slider') || Request::is('crm/reviews*') ? 'open' : '' }}">
 
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-package"></i>
@@ -111,9 +111,16 @@
             </a>
             <ul class="menu-sub">
                 @if (auth()->user()->hasPermissionTo('slider'))
-                    <li class="menu-item">
+                    <li class="menu-item {{ Request::is('crm/slider') ? 'active' : '' }}">
                         <a href="{{ url('crm/slider') }}" class="menu-link">
                             <div class="text-truncate" data-i18n="slider">Slider</div>
+                        </a>
+                    </li>
+                @endif
+                @if (auth()->user()->hasPermissionTo('review'))
+                    <li class="menu-item {{ Request::is('crm/reviews*') ? 'active' : '' }}">
+                        <a href="{{ url('crm/reviews') }}" class="menu-link">
+                            <div class="text-truncate" data-i18n="reviews">Reviews</div>
                         </a>
                     </li>
                 @endif

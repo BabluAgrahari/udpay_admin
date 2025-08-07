@@ -634,7 +634,7 @@
             <div class="product-card">
                 <div class="product-image">
                     <a href="{{ url('detail/'.$product->slug_url) }}"><img src="{{ getImageWithFallback($product->product_image) }}" alt="img" class=""></a>
-                     <p class="product-review"><i class="fa fa-star"></i> 3.25 (12 Reviews)</p>
+                     <p class="product-review"><i class="fa fa-star"></i> {{ $product->reviews->avg('rating') }} ({{ $product->reviews->count() }} Reviews)</p>
                     @if(Auth::check() && Gate::allows('isCustomer'))
                     <span class="prod-wish"><i class="fa-regular fa-heart add-to-wishlist" data-id="{{ $product->id }}"></i></span>
                     @else
@@ -668,87 +668,31 @@
         </div>
     </div>
     <div class="client-slider">
+        @foreach($product->reviews as $review)
         <div class="testimonial-card">
            <div class="testi-header">
              <img src="https://randomuser.me/api/portraits/men/1.jpg" alt="Leo" class="testimonial-avatar">
              <div class="testi-content">
-                <h4>Leo</h4>
-                <div class="position-main">
-                    <p class="position">Lead Designer</p>
+                <h4>{{ $review->user->first_name }} {{ $review->user->last_name }}</h4>
+                <div class="position-main"> 
+                    <p class="position">{{ $review->user->role }}</p>
                     <div class="rating">
-                        <i class="fa fa-star"></i>
-                        <i class="fa fa-star"></i>
-                        <i class="fa fa-star"></i>
-                        <i class="fa fa-star"></i>
-                        <i class="fa fa-star"></i>
+                        @for($i = 1; $i <= 5; $i++)
+                            @if($i <= $review->rating)
+                                <i class="fa fa-star"></i>
+                            @else
+                                <i class="fa fa-star-o"></i>
+                            @endif
+                        @endfor
                     </div>
                 </div>
              </div>
            </div>
-            <h5>It was a very good experience</h5>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cursus nibh mauris, nec turpis orci lectus maecenas. Suspendisse sed magna eget nibh in turpis. Consequat duis diam lacus arcu. Faucibus venenatis felis id augue sit cursus pellentesque enim arcu. Elementum felis magna pretium in tincidunt. Suspendisse sed magna eget nibh in turpis. Consequat duis diam lacus arcu.</p>
+            <p>{{ $review->review }}</p>
+            <p>{{ date('M d, Y', strtotime($review->created_at)) }}</p>
         </div>
-
-        <div class="testimonial-card">
-           <div class="testi-header">
-             <img src="https://randomuser.me/api/portraits/men/1.jpg" alt="Leo" class="testimonial-avatar">
-             <div class="testi-content">
-                <h4>Leo</h4>
-                <div class="position-main">
-                    <p class="position">Lead Designer</p>
-                    <div class="rating">
-                        <i class="fa fa-star"></i>
-                        <i class="fa fa-star"></i>
-                        <i class="fa fa-star"></i>
-                        <i class="fa fa-star"></i>
-                        <i class="fa fa-star"></i>
-                    </div>
-                </div>
-             </div>
-           </div>
-            <h5>It was a very good experience</h5>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cursus nibh mauris, nec turpis orci lectus maecenas. Suspendisse sed magna eget nibh in turpis. Consequat duis diam lacus arcu. Faucibus venenatis felis id augue sit cursus pellentesque enim arcu. Elementum felis magna pretium in tincidunt. Suspendisse sed magna eget nibh in turpis. Consequat duis diam lacus arcu.</p>
-        </div>
-        <div class="testimonial-card">
-           <div class="testi-header">
-             <img src="https://randomuser.me/api/portraits/men/1.jpg" alt="Leo" class="testimonial-avatar">
-             <div class="testi-content">
-                <h4>Leo</h4>
-                <div class="position-main">
-                    <p class="position">Lead Designer</p>
-                    <div class="rating">
-                        <i class="fa fa-star"></i>
-                        <i class="fa fa-star"></i>
-                        <i class="fa fa-star"></i>
-                        <i class="fa fa-star"></i>
-                        <i class="fa fa-star"></i>
-                    </div>
-                </div>
-             </div>
-           </div>
-            <h5>It was a very good experience</h5>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cursus nibh mauris, nec turpis orci lectus maecenas. Suspendisse sed magna eget nibh in turpis. Consequat duis diam lacus arcu. Faucibus venenatis felis id augue sit cursus pellentesque enim arcu. Elementum felis magna pretium in tincidunt. Suspendisse sed magna eget nibh in turpis. Consequat duis diam lacus arcu.</p>
-        </div>
-        <div class="testimonial-card">
-           <div class="testi-header">
-             <img src="https://randomuser.me/api/portraits/men/1.jpg" alt="Leo" class="testimonial-avatar">
-             <div class="testi-content">
-                <h4>Leo</h4>
-                <div class="position-main">
-                    <p class="position">Lead Designer</p>
-                    <div class="rating">
-                        <i class="fa fa-star"></i>
-                        <i class="fa fa-star"></i>
-                        <i class="fa fa-star"></i>
-                        <i class="fa fa-star"></i>
-                        <i class="fa fa-star"></i>
-                    </div>
-                </div>
-             </div>
-           </div>
-            <h5>It was a very good experience</h5>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cursus nibh mauris, nec turpis orci lectus maecenas. Suspendisse sed magna eget nibh in turpis. Consequat duis diam lacus arcu. Faucibus venenatis felis id augue sit cursus pellentesque enim arcu. Elementum felis magna pretium in tincidunt. Suspendisse sed magna eget nibh in turpis. Consequat duis diam lacus arcu.</p>
-        </div>
+        @endforeach
+       
     </div>
   </div>
 </section>

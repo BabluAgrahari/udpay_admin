@@ -91,4 +91,10 @@ class Product extends BaseModel
         return $this->hasMany(ProductReel::class, 'product_id');
     }
 
+    public function reviews()
+    {
+        return $this->hasMany(ProductReview::class, 'product_id');
+    }
+
+
 }

@@ -17,10 +17,10 @@
                 <div class="edit-form-open">
                     <div class="address-header-title">
                         <h5 class="mb-0">Payment</h5>
-                        <button class="add-address editBtn">+ Add New Address</button>
+                        <button class="add-address editBtn" {{ $addresses->isNotEmpty() ? 'style="display:none;"' : '' }}>+ Add New Address</button>
                     </div>
                     <!-- Add/Edit Address Form -->
-                    <div class="edit-form-box mb-3" id="addAddressForm" style="display:none;">
+                    <div class="edit-form-box mb-3" id="addAddressForm" style="display:{{ $addresses->isNotEmpty() ? 'none' : 'block !important' }};">
                         <h4 class="mb-4 form-title">Add New Address</h4>
                         <form id="addressForm" method="POST" action="{{ url('address') }}">
                             @csrf

@@ -20,6 +20,7 @@ use App\Http\Controllers\CRM\PickupAddressController;
 use App\Http\Controllers\CRM\SliderController;
 use App\Http\Controllers\CRM\WalletManagementController;
 use App\Http\Controllers\CRM\RolePermissionController;
+use App\Http\Controllers\CRM\ReviewController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
@@ -138,6 +139,14 @@ Route::group(['prefix' => 'crm', 'middleware' => 'crm.auth'], function () {
     // Slider Module
     Route::resource('slider',SliderController::class)->middleware('permission:slider');
     Route::post('slider/{slider}/status', [SliderController::class, 'updateStatus'])->middleware('permission:slider');
+
+    // Review Module
+    Route::get('reviews', [ReviewController::class, 'index'])->name('crm.reviews.index')->middleware('permission:review');
+    Route::get('reviews/datatable-list', [ReviewController::class, 'datatable'])->middleware('permission:review');
+    Route::get('reviews/{id}', [ReviewController::class, 'show'])->middleware('permission:review');
+    Route::put('reviews/{id}/status', [ReviewController::class, 'updateStatus'])->middleware('permission:review');
+    Route::delete('reviews/{id}', [ReviewController::class, 'destroy'])->middleware('permission:review');
+    Route::get('reviews-statistics', [ReviewController::class, 'statistics'])->middleware('permission:review');
 
     Route::resource('role-permission', RolePermissionController::class)->middleware('can:isSuperAdmin');
     Route::post('save-module-permission', [RolePermissionController::class, 'saveModulePermission'])->middleware('can:isSuperAdmin');

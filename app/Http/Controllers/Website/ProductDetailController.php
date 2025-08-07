@@ -13,7 +13,7 @@ class ProductDetailController extends Controller
     public function index($slug)
     {
         try {
-            $data['product'] = Product::with(['images', 'category', 'brand', 'unit', 'variants'])
+            $data['product'] = Product::with(['images', 'category', 'brand', 'unit', 'variants','reviews'])
                 ->where('slug_url', $slug)
                 ->where('status', '1')
                 ->first();

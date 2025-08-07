@@ -11,6 +11,7 @@ use App\Http\Controllers\Website\AddressController;
 use App\Http\Controllers\Website\WishlistController;
 use App\Http\Controllers\Website\OrderHistoryController;
 use App\Http\Controllers\Website\DashboardController;
+use App\Http\Controllers\Website\ReviewController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -28,6 +29,10 @@ Route::post('/apply-coupon', [CartController::class, 'applyCoupon']);
 Route::post('/remove-coupon', [CartController::class, 'removeCoupon']);
 Route::get('/available-coupons', [CartController::class, 'getAvailableCoupons']);
 
+// Review Routes
+Route::post('/review/store', [ReviewController::class, 'store']);
+Route::get('/review/product/{productId}', [ReviewController::class, 'getProductReviews']);
+Route::get('/review/check/{productId}', [ReviewController::class, 'checkUserReview']);
 
 Route::group(['middleware' => ['auth']], function () {
 // Wishlist Routes

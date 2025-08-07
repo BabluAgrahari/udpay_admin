@@ -20,7 +20,7 @@ class OrderHistoryController extends Controller
     public function index(Request $request)
     {
         try {
-            $data['orders'] = Order::with('orderToProducts', 'orderToProducts.product', 'orderToProducts.variant')->where('uid', Auth::user()->id)->orderBy('created_at', 'desc')->paginate(10);
+            $data['orders'] = Order::with([ 'orderToProducts', 'orderToProducts.product', 'orderToProducts.variant']   )->where('uid', Auth::user()->id)->orderBy('created_at', 'desc')->paginate(10);
             return view('Website.order_history', $data);
         } catch (\Exception $e) {
             abort(500, $e->getMessage());
@@ -29,12 +29,12 @@ class OrderHistoryController extends Controller
 
     public function orderDetail($id)
     {
-        try {
-            $data['order'] = Order::with('orderToProducts', 'orderToProducts.product', 'orderToProducts.variant')->where('id', $id)->first();
+        // try {
+            $data['order'] = Order::with([  'orderToProducts', 'orderToProducts.product', 'orderToProducts.variant'])->where('id', $id)->first();
             return view('Website.order_detail', $data);
-        } catch (\Exception $e) {
-            abort(500, $e->getMessage());
-        }
+        // } catch (\Exception $e) {
+        //     abort(500, $e->getMessage());
+        // }
     }
 
 

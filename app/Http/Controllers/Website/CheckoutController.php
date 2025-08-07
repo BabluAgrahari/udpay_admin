@@ -67,11 +67,11 @@ class CheckoutController extends Controller
     public function checkout(Request $request)
     {
 
-        $payment = new CashFree();
-        $res = $payment->createOrder(100, 'INR', ['customer_id' => '1234567890', 'customer_name' => 'John Doe', 'customer_email' => 'john.doe@example.com', 'customer_phone' => '+919876543210']);
+        // $payment = new CashFree();
+        // $res = $payment->createOrder(100, 'INR', ['customer_id' => '1234567890', 'customer_name' => 'John Doe', 'customer_email' => 'john.doe@example.com', 'customer_phone' => '+919876543210']);
 
-        print_r($res);
-        die;
+        // print_r($res);
+        // die;
         
         $validator = Validator::make($request->all(), [
             'address_id' => 'required|exists:user_address,id',
