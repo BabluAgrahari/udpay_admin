@@ -1,0 +1,336 @@
+# UniPay E-commerce Platform - Project Intelligence
+
+## Project Overview
+UniPay is a comprehensive Laravel-based e-commerce platform specializing in herbal and wellness products. The platform serves both B2C (customer-facing) and B2B (distributor) markets with integrated payment processing, inventory management, and multi-level user management.
+
+## Technology Stack
+- **Backend**: Laravel 10.x (PHP 8.1+)
+- **Database**: MySQL 8.0+ with MongoDB integration
+- **Frontend**: Blade templates with Bootstrap 5
+- **Payment**: CashFree payment gateway
+- **Authentication**: Laravel Sanctum + JWT
+- **File Storage**: Local filesystem with organized structure
+
+## Key Architecture Patterns
+
+### MVC Structure
+- **Models**: Eloquent models with proper relationships
+- **Controllers**: Thin controllers with service delegation
+- **Views**: Blade templates with component-based structure
+- **Routes**: Separate routing for CRM and Website sections
+
+### Database Conventions
+- **Table Prefix**: `uni_` for all tables
+- **Naming**: Snake_case for columns, plural table names
+- **Foreign Keys**: `entity_id` format
+- **Timestamps**: Automatic created_at/updated_at handling
+
+### File Organization
+- **Public Assets**: Entity-based folders (products/, users/, brands/, etc.)
+- **Views**: CRM/ and Website/ separation
+- **Controllers**: Namespace-based organization (CRM/, Website/)
+- **Models**: Single namespace with relationship definitions
+
+## Critical Implementation Paths
+
+### Product Management
+```php
+// Product creation flow
+ProductController::store() → ProductRequest validation → File upload → Product model → ProductImage/ProductVariant creation → Database transaction
+
+// Key files:
+app/Http/Controllers/CRM/ProductController.php
+app/Models/Product.php
+app/Http/Requests/ProductRequest.php
+resources/views/CRM/Product/
+```
+
+### Order Processing
+```php
+// Order flow
+CartController::addToCart() → Stock validation → Cart model → CheckoutController::process() → Payment processing → Order creation → Inventory update
+
+// Key files:
+app/Http/Controllers/Website/CartController.php
+app/Http/Controllers/Website/CheckoutController.php
+app/Models/Cart.php
+app/Models/Order.php
+```
+
+### Authentication System
+```php
+// Multi-role authentication
+LoginController::login() → User authentication → Role-based redirect → Middleware protection
+
+// Key files:
+app/Http/Controllers/CRM/LoginController.php
+app/Http/Middleware/Authenticate.php
+app/Providers/AuthServiceProvider.php
+```
+
+## User Preferences & Workflow
+
+### Development Workflow
+1. **Feature Development**: Start with model → controller → view → routes
+2. **Validation**: Always use Form Request classes for validation
+3. **File Uploads**: Use custom helpers (singleFile/multiFile)
+4. **Database**: Use migrations for schema changes
+5. **Testing**: Write tests for critical business logic
+
+### Code Standards
+- **PSR-12**: Follow PHP coding standards
+- **Laravel Conventions**: Use framework-specific patterns
+- **Comments**: Document complex business logic
+- **Error Handling**: Use try-catch with proper rollback
+
+### File Upload Patterns
+```php
+// Use these helpers for file uploads
+singleFile($file, 'folder_name') // Single file upload
+multiFile($files, 'folder_name') // Multiple file upload
+
+// File organization:
+public/products/ - Product images
+public/user/ - User profile images
+public/brands/ - Brand logos
+public/category/ - Category images
+public/kyc/ - KYC documents
+```
+
+## Project-Specific Patterns
+
+### Response Handling
+```php
+// Use WebResponse trait for consistent responses
+use App\Traits\WebResponse;
+
+class Controller extends BaseController
+{
+    use WebResponse;
+    
+    public function method()
+    {
+        try {
+            // Business logic
+            return $this->successMsg('Success message');
+        } catch (Exception $e) {
+            return $this->failMsg($e->getMessage());
+        }
+    }
+}
+```
+
+### Database Transactions
+```php
+// Always use transactions for multi-table operations
+DB::beginTransaction();
+try {
+    // Database operations
+    DB::commit();
+    return $this->successMsg('Operation successful');
+} catch (Exception $e) {
+    DB::rollBack();
+    return $this->failMsg($e->getMessage());
+}
+```
+
+### Image Handling
+```php
+// Use fallback for missing images
+{{ isValidImageUrl($product->product_image) ? $product->product_image : asset('front_assets/images/no_image.jpeg') }}
+
+// Helper function in app/Helper/Helper.php
+function isValidImageUrl($url)
+{
+    return filter_var($url, FILTER_VALIDATE_URL) !== false;
+}
+```
+
+## Known Challenges & Solutions
+
+### Performance Issues
+- **N+1 Queries**: Use eager loading with Eloquent relationships
+- **Large Datasets**: Implement pagination and DataTables
+- **Image Loading**: Use lazy loading and image optimization
+- **Database Queries**: Add proper indexes and optimize queries
+
+### Security Considerations
+- **File Uploads**: Validate file types and sizes
+- **SQL Injection**: Use Eloquent ORM (prevents injection)
+- **XSS Protection**: Use Blade escaping and input sanitization
+- **CSRF Protection**: All forms include CSRF tokens
+
+### Common Patterns
+```php
+// Eager loading to prevent N+1 queries
+Product::with(['category', 'brand', 'images'])->get();
+
+// Status scopes for filtering
+public function scopeStatus($query)
+{
+    return $query->where('status', '1');
+}
+
+// Permission-based access
+Route::middleware('permission:product')->group(function () {
+    // Product routes
+});
+```
+
+## Integration Points
+
+### External Services
+- **CashFree**: Payment gateway integration
+- **SMS Service**: Custom API for notifications
+- **iCarry**: Courier service integration
+- **File Storage**: Local filesystem with organized structure
+
+### API Design
+- **RESTful**: Standard HTTP methods
+- **JSON Responses**: Consistent response format
+- **Authentication**: JWT tokens for API access
+- **Rate Limiting**: API usage restrictions
+
+## Development Tools & Commands
+
+### Essential Commands
+```bash
+# Database operations
+php artisan migrate
+php artisan db:seed
+php artisan migrate:rollback
+
+# Cache management
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+
+# File permissions
+chmod -R 755 storage/
+chmod -R 755 bootstrap/cache/
+
+# Asset compilation
+npm run dev
+npm run build
+```
+
+### Debugging Tools
+- **Laravel Logs**: storage/logs/laravel.log
+- **Log Viewer**: /crm/logs (admin panel)
+- **Telescope**: Laravel debugging tool (optional)
+- **Xdebug**: PHP debugging extension
+
+## Testing Strategy
+
+### Test Types
+- **Unit Tests**: Business logic testing
+- **Feature Tests**: End-to-end functionality
+- **API Tests**: REST API testing
+- **Browser Tests**: User interface testing
+
+### Test Patterns
+```php
+// Model testing
+public function test_product_creation()
+{
+    $product = Product::factory()->create();
+    $this->assertDatabaseHas('uni_products', ['id' => $product->id]);
+}
+
+// Controller testing
+public function test_product_store()
+{
+    $response = $this->post('/crm/products', $this->validProductData());
+    $response->assertStatus(200);
+}
+```
+
+## Deployment Considerations
+
+### Environment Setup
+- **Production**: Optimized for performance
+- **Staging**: Mirror of production for testing
+- **Development**: Debug mode enabled
+- **Testing**: Separate database for tests
+
+### Production Optimizations
+- **Caching**: Route, config, and view caching
+- **Asset Optimization**: Minified CSS/JS
+- **Database**: Proper indexing and optimization
+- **Security**: HTTPS, secure headers, file permissions
+
+## Evolution of Project Decisions
+
+### Architecture Evolution
+1. **Initial**: Basic Laravel MVC structure
+2. **Growth**: Added service layer for business logic
+3. **Scale**: Implemented DataTables for admin management
+4. **Integration**: Added external service integrations
+5. **Future**: Planning microservices architecture
+
+### Technology Decisions
+- **Laravel**: Chosen for rapid development and ecosystem
+- **MySQL**: Primary database for ACID compliance
+- **Bootstrap 5**: Frontend framework for responsive design
+- **CashFree**: Payment gateway for Indian market
+- **Local Storage**: File storage for simplicity and cost
+
+## Tool Usage Patterns
+
+### IDE Configuration
+- **PHPStorm/VS Code**: Recommended IDEs
+- **Extensions**: PHP Intelephense, Laravel Snippets
+- **Debugging**: Xdebug configuration
+- **Git Integration**: Source control integration
+
+### Development Workflow
+1. **Feature Branch**: Create feature branch from main
+2. **Development**: Implement feature with tests
+3. **Code Review**: Pull request review process
+4. **Testing**: Run test suite before merge
+5. **Deployment**: Automated deployment pipeline
+
+## Critical Files & Locations
+
+### Core Application Files
+- `app/Models/Product.php` - Product model with relationships
+- `app/Http/Controllers/CRM/ProductController.php` - Admin product management
+- `app/Http/Controllers/Website/ProductDetailController.php` - Customer product views
+- `app/Helper/Helper.php` - Custom helper functions
+- `config/global.php` - Global application settings
+
+### View Templates
+- `resources/views/CRM/Product/` - Admin product views
+- `resources/views/Website/` - Customer-facing views
+- `resources/views/components/` - Reusable components
+- `resources/views/layouts/` - Base layouts
+
+### Configuration Files
+- `.env` - Environment variables
+- `config/database.php` - Database configuration
+- `config/services.php` - External service credentials
+- `routes/web.php` - Web routes
+- `routes/website.php` - Customer website routes
+
+## Future Development Guidelines
+
+### Feature Development
+1. **Requirements**: Document feature requirements
+2. **Design**: Plan database schema and API endpoints
+3. **Implementation**: Follow established patterns
+4. **Testing**: Write comprehensive tests
+5. **Documentation**: Update documentation
+
+### Code Quality
+- **Standards**: Follow PSR-12 and Laravel conventions
+- **Documentation**: Comment complex business logic
+- **Testing**: Maintain high test coverage
+- **Review**: Code review for all changes
+
+### Performance
+- **Optimization**: Profile and optimize slow queries
+- **Caching**: Implement strategic caching
+- **Monitoring**: Monitor performance metrics
+- **Scaling**: Plan for horizontal scaling
+
+This project intelligence helps maintain consistency and quality across all development work on the UniPay e-commerce platform. 
