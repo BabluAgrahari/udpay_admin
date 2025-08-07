@@ -48,11 +48,11 @@ class AuthController extends Controller
 
             $expiryTime = now()->addMinutes(5);
 
-            // $smsService = new SmsService();
-            // $res = $smsService->sendMessage('send_otp', $mobile, $otp);
-            // if ($res['status'] == false) {
-            //     return $this->failMsg($res['msg']);
-            // }
+            $smsService = new SmsService();
+            $res = $smsService->sendMessage('send_otp', $mobile, $otp);
+            if ($res['status'] == false) {
+                return $this->failMsg($res['msg']);
+            }
 
             Session::put('otp', $otp);
             Session::put('mobile', $mobile);
