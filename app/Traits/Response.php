@@ -103,7 +103,7 @@ trait Response
 
         return response()->json([
             'status' => false,
-            'msg' => 'Parameter is missing.'
+            'msg' => 'Not Found Any Records.'
         ], 200);
     }
 }

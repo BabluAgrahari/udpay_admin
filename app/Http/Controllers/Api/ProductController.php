@@ -23,12 +23,12 @@ class ProductController extends Controller
 
 			$data = [];
 
-			$data['featured'] = Product::with(['category'])->where('status', '1')->where('is_featured', '1')->limit(10)->get()->map(function ($product) {
+			$data['featured'] = Product::with(['category','reviews'])->where('status', '1')->where('is_featured', '1')->limit(4)->get()->map(function ($product) {
 				return $this->field($product);
 			});
 
 			foreach ($categories as $category) {
-				$records = Product::with(['category'])->where('status', '1')->where('product_category_id', $category->id)->limit(10)->get()->map(function ($product) {
+				$records = Product::with(['category','reviews'])->where('status', '1')->where('product_category_id', $category->id)->limit(4)->get()->map(function ($product) {
 					return $this->field($product);
 				});
 				$data[$category->name] = $records;
@@ -57,6 +57,8 @@ class ProductController extends Controller
 			'product_stock' => (int) $product->product_stock,
 			'product_short_description' => (string) $product->product_short_description,
 			'product_description' => (string) $product->product_description,
+			'no_of_reviews' => (int) $product->reviews->where('status', '1')->count()??0,
+			'avg_rating' => (float) $product->reviews->where('status', '1')->avg('rating')??0,
 			'category' => [
 				'id' => (int) $product->category->id,
 				'name' => (string) $product->category->name,
@@ -76,7 +78,7 @@ class ProductController extends Controller
 			$page = $request->page ?? 1;
 			$skip = ($page - 1) * $limit;
 
-			$query = Product::with(['category'])->where('status', '1');
+			$query = Product::with(['category','reviews'])->where('status', '1');
 
 			if (!empty($request->category_id)) {
 				$query->where('product_category_id', $request->category_id);
@@ -91,6 +93,20 @@ class ProductController extends Controller
 			});
 
 			return $this->recordsRes($products);
+		} catch (Exception $e) {
+			return $this->failRes($e->getMessage());
+		}
+	}
+
+
+	public function relatedProducts($id)
+	{
+		try {
+			$product = Product::with(['category','reviews'])->where('status', '1')->where('id', $id)->first();
+			$relatedProducts = Product::with(['category','reviews'])->where('status', '1')->where('product_category_id', $product->product_category_id)->limit(10)->get()->map(function ($product) {
+				return $this->field($product);
+			});
+			return $this->recordsRes($relatedProducts);
 		} catch (Exception $e) {
 			return $this->failRes($e->getMessage());
 		}
@@ -134,7 +150,9 @@ class ProductController extends Controller
 			'offer_date' => (string) $product->offer_date??'',
 			'pro_type' => (string) $product->pro_type??'',
 			'pro_section' => (string) $product->pro_section??'',
-			
+			'no_of_reviews' => (int) $product->reviews->where('status', '1')->count()??0,
+			'avg_rating' => (float) $product->reviews->where('status', '1')->avg('rating')??0,
+
 			'images' => $product->images->map(function ($image) {
 				return [
 					'id' => (int) $image->id??0,

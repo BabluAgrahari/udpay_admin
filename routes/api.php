@@ -28,6 +28,9 @@ use App\Http\Controllers\Api\InrController;
 use App\Http\Controllers\Api\UniPostController;
 use App\Http\Controllers\Api\CardServiceController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\WishListController;
+use App\Http\Controllers\Api\CouponController;
+use App\Http\Controllers\Api\ReviewController;
 
 
 /*
@@ -79,6 +82,30 @@ Route::group(['middleware' => ['jwt.verify']], function () {
     Route::get('home-product-list', [ProductController::class, 'homePageProducts']);
     Route::get('product-list', [ProductController::class, 'productList']);
     Route::get('product-detail/{id}', [ProductController::class, 'productDetail']);
+    Route::get('related-products/{id}', [ProductController::class, 'relatedProducts']);
+
+    //wishlist
+    Route::get('wishlist-items', [WishListController::class, 'getWishlist']);
+    Route::post('add-to-wishlist', [WishListController::class, 'addToWishlist']);
+    Route::post('remove-wishlist', [WishListController::class, 'removeWishlist']);
+
+    //coupon
+    Route::get('coupon-list', [CouponController::class, 'index']);
+
+    //review
+    Route::post('add-review', [ReviewController::class, 'store']);
+
+    //address
+    Route::get('address-list', [ShippingBillingController::class, 'index']);
+    Route::get('address-detail/{id}', [ShippingBillingController::class, 'show']);
+    Route::post('address-save', [ShippingBillingController::class, 'store']);
+    Route::post('address-update/{id}', [ShippingBillingController::class, 'update']);
+    Route::get('remove-address/{id}', [ShippingBillingController::class, 'remove']);
+
+
+
+
+
 
     //wallet
     Route::get('wallet', [WalletController::class, 'index']);
@@ -112,10 +139,7 @@ Route::group(['middleware' => ['jwt.verify']], function () {
     Route::post('recharge', [RechargeController::class, 'recharge']);
     Route::get('recharge-history', [RechargeController::class, 'rechargeHistory']);
 
-    Route::get('address-list', [ShippingBillingController::class, 'index']);
-    Route::post('address-save', [ShippingBillingController::class, 'store']);
-    Route::post('address-update/{id}', [ShippingBillingController::class, 'update']);
-    Route::get('remove-address/{id}', [ShippingBillingController::class, 'remove']);
+   
 
    
 

@@ -13,4 +13,9 @@ class ProductReview extends BaseModel
     {
         return $this->belongsTo(User::class, 'user_id','uid');
     }
+
+    public function product()
+    {
+        return $this->hasOne(Product::class, 'id','product_id');
+    }
 }
