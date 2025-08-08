@@ -28,7 +28,7 @@
             <div class="product-card">
                 <div class="product-image">
                     <a href="{{url('detail')}}/{{$product->slug_url}}"><img src="{{ getImageWithFallback($product->product_image) }}" alt="img" class="" onerror="this.src='{{ asset('front_assets/images/no-image.svg') }}'"></a>
-                     <p class="product-review"><i class="fa fa-star"></i> 3.25 (12 Reviews)</p>
+                     <p class="product-review"><i class="fa fa-star"></i> {{ $product->reviews->avg('rating') }} ({{ $product->reviews->count() }} Reviews)</p>
                      @if(Auth::check() && Gate::allows('isCustomer'))
                     <span class="prod-wish"><i class="fa-regular fa-heart add-to-wishlist" data-id="{{ $product->id }}"></i></span>
                     @else

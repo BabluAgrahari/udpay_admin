@@ -8,9 +8,9 @@
                 <h5>Product Reviews</h5>
             </div>
             <div class="col-md-2 text-right">
-                <button type="button" class="btn btn-outline-info btn-sm" onclick="loadStatistics()">
+                {{-- <button type="button" class="btn btn-outline-info btn-sm" onclick="loadStatistics()">
                     <i class="bx bx-stats"></i>&nbsp;Statistics
-                </button>
+                </button> --}}
             </div>
         </div>
 

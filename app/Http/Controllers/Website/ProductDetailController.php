@@ -21,14 +21,14 @@ class ProductDetailController extends Controller
                 abort(404, 'Product not found');
             }
 
-            $data['frequentlyBoughtTogether'] = Product::with(['images', 'category', 'brand', 'unit', 'variants'])
+            $data['frequentlyBoughtTogether'] = Product::with(['images', 'category', 'brand', 'unit', 'variants','reviews'])
                 ->where('status', '1')
                 ->where('id', '!=', $data['product']->id)
                 ->inRandomOrder()
                 ->limit(3)
                 ->get();
 
-            $data['similarProducts'] = Product::with(['images', 'category', 'brand', 'unit', 'variants'])
+            $data['similarProducts'] = Product::with(['images', 'category', 'brand', 'unit', 'variants','reviews'])
                 ->where('status', '1')
                 ->where('id', '!=', $data['product']->id)
                 ->inRandomOrder()

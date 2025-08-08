@@ -436,13 +436,18 @@
                         <span class="color-one border-bottom">{{ $product->category->name ?? 'Category' }}</span>
                         <h1 class="title">{{ $product->product_name }}</h1>                        
                         <div class="rating ">
+                            @if(!empty($product->reviews) && $product->reviews->count() > 0)
                             <div>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                            </div> 4<span>(39 Reviews)</span>
+                                @for($i = 1; $i <= 5; $i++)
+                                @if($i <= $product->reviews->avg('rating'))
+                                    <i class="fa fa-star"></i>
+                                @else
+                                    <i class="fa fa-star-o"></i>
+                                @endif
+                            @endfor
+                                </div>
+                                 <span>({{ $product->reviews->count() }} Reviews)</span>
+                            @endif
                         </div>
                         <div class="box-color">
                             <p class="color-one mb-0">{{ $product->product_short_description ?? 'Product description not available.' }}</p>
@@ -533,7 +538,7 @@
             <div class="product-card mx-0">
                 <div class="product-image">
                     <a href="{{ url('product/'.$product->slug_url) }}"><img src="{{ getImageWithFallback($product->product_image) }}" alt="img" class=""></a>
-                     <p class="product-review"><i class="fa fa-star"></i> 3.25 (12 Reviews)</p>
+                     <p class="product-review"><i class="fa fa-star"></i> {{ $product->reviews->avg('rating') }} ({{ $product->reviews->count() }} Reviews)</p>
                 </div>
                 <div class="product-perra">
                     <div class="prduct-perra-top">
@@ -635,7 +640,7 @@
                 <div class="product-image">
                     <a href="{{ url('detail/'.$product->slug_url) }}"><img src="{{ getImageWithFallback($product->product_image) }}" alt="img" class=""></a>
                      <p class="product-review"><i class="fa fa-star"></i> {{ $product->reviews->avg('rating') }} ({{ $product->reviews->count() }} Reviews)</p>
-                    @if(Auth::check() && Gate::allows('isCustomer'))
+                    @if(Auth::check())
                     <span class="prod-wish"><i class="fa-regular fa-heart add-to-wishlist" data-id="{{ $product->id }}"></i></span>
                     @else
                     <span class="prod-wish"><i class="fa-regular fa-heart add-to-wishlist" data-popup="login1" class="openPopup"></i></span>
@@ -673,9 +678,9 @@
            <div class="testi-header">
              <img src="https://randomuser.me/api/portraits/men/1.jpg" alt="Leo" class="testimonial-avatar">
              <div class="testi-content">
-                <h4>{{ $review->user->first_name }} {{ $review->user->last_name }}</h4>
+                <h4>{{ !empty($review->user->name) ? $review->user->name : 'Anonymous' }}</h4>
                 <div class="position-main"> 
-                    <p class="position">{{ $review->user->role }}</p>
+                    <p class="position">{{ !empty($review->user->role) ? $review->user->role : 'Customer' }}</p>
                     <div class="rating">
                         @for($i = 1; $i <= 5; $i++)
                             @if($i <= $review->rating)

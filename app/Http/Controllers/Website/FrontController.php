@@ -17,7 +17,7 @@ class FrontController extends Controller
     //
     public function productList(Request $request, $category=null){
     	
-    	$query = Product::query();
+    	$query = Product::query()->with('reviews');
     	$category_data = null;
     	if($category){
     		$category_data = Category::where('slug', $category)->status()->first();
