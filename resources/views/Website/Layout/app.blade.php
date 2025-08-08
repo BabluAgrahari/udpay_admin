@@ -320,7 +320,7 @@
                             </ul>
 
 
-                           @can('isDistributor')
+                           @can('isCustomer')
 
                            <div class="profile-main">
                             <a href="#" class="profile-icon">Business<i class="fa-solid fa-chevron-down"></i></a>

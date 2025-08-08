@@ -179,7 +179,7 @@ class SignupController extends Controller
             $customer->mobile = $request->mobile;
             $customer->password = Hash::make($request->password);
             $customer->pwd = $request->password;
-            $customer->role = 'distributor';
+            $customer->role = 'customer';
             $customer->type = 'customer';
             if ($customer->save()) {
                

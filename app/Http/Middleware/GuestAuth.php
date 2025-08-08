@@ -9,14 +9,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
-class CRMAuth
+class GuestAuth
 {
     use Response;
 
     public function handle(Request $request, Closure $next)
     {
-        if (!Auth::check() || Auth::user()->type != 'supperadmin') {
-            return redirect()->to('crm');
+        if (!Auth::check() || Auth::user()->role != 'guest') {
+            return redirect()->route('home');
         }
         return $next($request);
     }

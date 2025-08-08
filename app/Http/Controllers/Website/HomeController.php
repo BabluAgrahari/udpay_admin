@@ -13,7 +13,7 @@ class HomeController extends Controller
 {
     public function index()
     {
-        try {
+        // try {
 
             $data['categories'] = Category::status()->where('parent_id', '0')->get();
             $category = Category::status()->where('parent_id', '0')->where('pro_section', 'primary')->get();
@@ -47,8 +47,8 @@ class HomeController extends Controller
             $data['sliders'] = Slider::status()->where('slider_type', 'web')->get();
 
             return view('Website.home', $data);
-        } catch (\Exception $e) {
-            abort(500, $e->getMessage());
-        }
+        // } catch (\Exception $e) {
+        //     abort(500, $e->getMessage());
+        // }
     }
 }

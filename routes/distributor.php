@@ -16,7 +16,7 @@ Route::post('/distributor/signup/complete', [SignupController::class, 'completeR
 Route::post('/distributor/signup/resend-otp', [SignupController::class, 'resendOTP']);
 
 
-Route::group(['prefix' => 'distributor', 'middleware' => 'distributor.auth'], function () {
+Route::group(['prefix' => 'distributor', 'middleware' => 'customer.auth'], function () {
     Route::get('/{type}', [DashboardController::class, 'index']);
     Route::get('/user-level-list/{level}', [DashboardController::class, 'userLeavelList']);
     

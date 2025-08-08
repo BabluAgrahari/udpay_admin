@@ -196,7 +196,7 @@ class AuthController extends Controller
         $customer->user_id = $user_id;
         $customer->user_num = $user_nm;
         $customer->alpha_num_uid = 'UNI' . $user_nm;
-        $customer->role = 'customer';
+        $customer->role = 'guest';
         $customer->type = 'customer';
         $customer->isactive = 1;
         return $customer->save() ? $customer : null;

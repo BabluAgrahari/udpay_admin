@@ -83,7 +83,7 @@ class User extends Authenticatable implements JWTSubject
     }
     public function hasPermissionTo($permission)
     {
-        if(Auth::user()->role=='supperadmin')
+        if(Auth::user()->type=='supperadmin')
         return true;
 
         return in_array($permission, $this->roleTable->permissions ?? []);

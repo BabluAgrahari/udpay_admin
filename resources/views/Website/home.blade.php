@@ -51,7 +51,7 @@
                                     <a href="{{ url('detail') }}/{{ $product->slug_url }}"><img src="{{ isValidImageUrl($product->product_image) ? $product->product_image : asset('front_assets') . '/images/no_image.jpeg' }}" alt="img"
                                             class=""></a>
                                     <p class="product-review"><i class="fa fa-star"></i> {{ $product->reviews->avg('rating') }} ({{ $product->reviews->count() }} Reviews)</p>
-                                    @if(Auth::check() && Gate::allows('isCustomer'))
+                                    @if(Auth::check())
                                     <span class="prod-wish"><i class="fa-regular fa-heart add-to-wishlist" data-id="{{ $product->id }}"></i></span>
                                     @else
                                     <span class="prod-wish"><i class="fa-regular fa-heart add-to-wishlist" data-popup="login1" class="openPopup"></i></span>
@@ -102,7 +102,7 @@
                                         <a href="{{url('detail')}}/{{$product->slug_url??''}}"><img src="{{ isValidImageUrl($product->product_image??'') ? $product->product_image : asset('front_assets') . '/images/no_image.jpeg' }}"
                                                 alt="img" class=""></a>
                                         <p class="product-review"><i class="fa fa-star"></i> {{ $product->reviews->avg('rating') }} ({{ $product->reviews->count() }} Reviews)</p>
-                                        @if(Auth::check() && Gate::allows('isCustomer'))
+                                        @if(Auth::check())
                                         <span class="prod-wish"><i class="fa-regular fa-heart add-to-wishlist" data-id="{{ $product->id }}"></i></span>
                                         @else
                                         <span class="prod-wish"><i class="fa-regular fa-heart" data-popup="login1" class="openPopup"></i></span>

@@ -42,7 +42,7 @@ class CartController extends Controller
             $save->product_id = $request->product_id;
             $save->quantity = 1;
             $save->variant_id = $request->variant_id ?? null;
-            $save->attribue_id = $request->attribue_id ?? null;
+            $save->attribute_id = $request->attribute_id ?? null;
             if ($save->save()) {
                 return $this->successMsg('Product added to cart successfully', ['cartCount' => cartCount()]);
             } else {

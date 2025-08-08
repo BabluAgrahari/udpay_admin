@@ -41,7 +41,7 @@ class LoginController extends Controller
 
         if (Auth::attempt($credentials)) {
 
-            if (Auth::user()->role !='supperadmin') {
+            if (Auth::user()->type !='supperadmin') {
                 $request->session()->flush();
                 Auth::logout();
                 return back()->with('error', 'Invalid credentails');

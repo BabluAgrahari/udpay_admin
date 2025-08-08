@@ -483,13 +483,13 @@
                         <div class="details-add-btn">
                             <a href="javascript:void(0)" data-id="{{ $product->id }}" class="thm-btn cart-btn">Add to cart</a>
 
-                            @if(Auth::check() && Gate::allows('isCustomer'))
+                            @if(Auth::check())
                             <a href="{{ url('buy/'.$product->slug_url) }}" class="thm-btn buy-now">Quick Buy</a>
                             @else
                             <a href="#" data-popup="login1" class="openPopup thm-btn buy-now">Quick Buy</a>
                             @endif
 
-                            @if(Auth::check() && Gate::allows('isCustomer'))
+                            @if(Auth::check())
                             <a href="javascript:void(0)" class="thm-btn bg-light w-100 add-to-wishlist" data-id="{{ $product->id }}">Add to wishlist</a>
                             @else
                             <a href="#" data-popup="login1" class="openPopup thm-btn bg-light w-100 ">Add to wishlist</a>
