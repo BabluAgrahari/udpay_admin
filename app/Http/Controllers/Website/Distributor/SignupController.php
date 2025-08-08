@@ -43,12 +43,12 @@ class SignupController extends Controller
         Session::put('signup_mobile', $request->mobile);
         Session::put('otp_expires_at', now()->addMinutes(5));
 
-        // $smsService = new SmsService();
-        // $smsSent = $smsService->sendMessage('send_otp', $request->mobile, $otp);
+        $smsService = new SmsService();
+        $smsSent = $smsService->sendMessage('send_otp', $request->mobile, $otp);
 
-        // if (!$smsSent['status']) {
-        //     return $this->failMsg($smsSent['msg']);
-        // }
+        if (!$smsSent['status']) {
+            return $this->failMsg($smsSent['msg']);
+        }
 
         return $this->successMsg('OTP sent successfully to your phone number', ['otp' => $otp]);
     }
