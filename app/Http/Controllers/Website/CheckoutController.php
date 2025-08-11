@@ -29,7 +29,11 @@ class CheckoutController extends Controller
 
         $cartItems = Cart::with('product')->where('user_id', $user->id)->get();
         $subtotal = $cartItems->sum(function ($item) {
-            return $item->product ? $item->product->product_sale_price * $item->quantity : 0;
+            if(Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer')){
+                return $item->product ? $item->product->product_sale_price * $item->quantity : 0;
+            }else{
+                return $item->product ? $item->product->guest_price * $item->quantity : 0;
+            }
         });
         $total_mrp = $cartItems->sum(function ($item) {
             return $item->product && isset($item->product->mrp) ? $item->product->mrp * $item->quantity : 0;
@@ -49,7 +53,11 @@ class CheckoutController extends Controller
     public function buyProduct($slug)
     {
         $product = Product::where('slug_url', $slug)->first();
-        $subtotal = $product->product_sale_price;
+        if(Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer')){
+            $subtotal = $product->product_sale_price;
+        }else{
+            $subtotal = $product->guest_price;
+        }
         $total_mrp = $product->mrp;
         $total_saving = $total_mrp - $subtotal;
         $total_items = 1;
@@ -100,12 +108,27 @@ class CheckoutController extends Controller
             if ($cartItems->isEmpty()) {
                 return $this->failMsg('Cart is Empty.');
             }
+
+            $total_gst = 0;
             $subtotal = $cartItems->sum(function ($item) {
-                return $item->product ? $item->product->product_sale_price * $item->quantity : 0;
+                if(Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer')){
+                    return $item->product ? $item->product->product_sale_price * $item->quantity : 0;
+                }else{
+                    return $item->product ? $item->product->guest_price * $item->quantity : 0;
+                }
             });
-            $total_gst = $cartItems->sum(function ($item) {
-                return $item->product ? $item->product->igst * $item->product->product_sale_price * $item->quantity / 100 : 0;
-            });
+
+            if(Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer')){
+                $total_gst = $cartItems->sum(function ($item) {
+                    return $item->product ? (($item->product->product_sale_price/(100 + $item->product->igst))*100)*$item->quantity : 0;
+                });
+            }else{
+                $total_gst = $cartItems->sum(function ($item) {
+                    return $item->product ? (($item->product->guest_price/(100 + $item->product->igst))*100)*$item->quantity : 0;
+                });
+            }
+
+            $coupon_id = session('applied_coupon.id') ?? null;
 
             $total_discount = $cartItems->sum(function ($item) {
                 return $item->product ? $item->product->discount * $item->quantity : 0;
@@ -141,7 +164,11 @@ class CheckoutController extends Controller
                     $orderToProduct->variant_id = $cartItem->variant_id;
                     $orderToProduct->attribute_id = null;
                     $orderToProduct->quantity = $cartItem->quantity;
-                    $orderToProduct->price = $cartItem->product->product_sale_price;
+                    if(Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer')){
+                        $orderToProduct->price = $cartItem->product->product_sale_price;
+                    }else{
+                        $orderToProduct->price = $cartItem->product->guest_price;
+                    }
                     $orderToProduct->gst = $cartItem->product->igst;
                     if (!$orderToProduct->save()) {
                         DB::rollBack();

@@ -82,7 +82,7 @@ class DashboardController extends Controller
 
     public function wishlist(Request $request) {
         try {
-            $data['wishlist'] = Wishlist::with('product')->where('user_id', Auth::user()->id)->get();
+            $data['wishlist'] = Wishlist::with('product','product.reviews')->where('user_id', Auth::user()->id)->get();
             return view('Website.Dashboard.wishlist', $data);
         } catch (\Exception $e) {
             abort(500, $e->getMessage());

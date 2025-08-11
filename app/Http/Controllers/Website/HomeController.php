@@ -18,7 +18,7 @@ class HomeController extends Controller
             $data['categories'] = Category::status()->where('parent_id', '0')->get();
             $category = Category::status()->where('parent_id', '0')->where('pro_section', 'primary')->get();
 
-            $products = Product::status()->with('reviews')->get();
+            $products = Product::status()->with('reviews')->where('pro_section', 'primary')->get();
             $array = [];
             $featured = [];
             foreach ($products as $product) {

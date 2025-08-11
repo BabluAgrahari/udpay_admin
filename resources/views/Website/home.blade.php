@@ -26,7 +26,8 @@
                 @foreach ($categories as $category)
                     <div class="category-card">
                         <img src="{{ $category->img }}" alt="{{ $category->name }}">
-                        <a href="{{url('product/')}}/{{$category->slug}}" class="category-name">{{ ucwords($category->name) }}</a>
+                        <a href="{{ url('product/') }}/{{ $category->slug }}"
+                            class="category-name">{{ ucwords($category->name) }}</a>
                     </div>
                 @endforeach
             </div>
@@ -48,13 +49,18 @@
                         <div class="col-lg-3 col-md-6">
                             <div class="product-card">
                                 <div class="product-image">
-                                    <a href="{{ url('detail') }}/{{ $product->slug_url }}"><img src="{{ isValidImageUrl($product->product_image) ? $product->product_image : asset('front_assets') . '/images/no_image.jpeg' }}" alt="img"
-                                            class=""></a>
-                                    <p class="product-review"><i class="fa fa-star"></i> {{ $product->reviews->avg('rating') }} ({{ $product->reviews->count() }} Reviews)</p>
-                                    @if(Auth::check())
-                                    <span class="prod-wish"><i class="fa-regular fa-heart add-to-wishlist" data-id="{{ $product->id }}"></i></span>
+                                    <a href="{{ url('detail') }}/{{ $product->slug_url }}"><img
+                                            src="{{ isValidImageUrl($product->product_image) ? $product->product_image : asset('front_assets') . '/images/no_image.jpeg' }}"
+                                            alt="img" class=""></a>
+                                    <p class="product-review"><i class="fa fa-star"></i>
+                                        {{ $product->reviews->avg('rating') }} ({{ $product->reviews->count() }} Reviews)
+                                    </p>
+                                    @if (Auth::check())
+                                        <span class="prod-wish"><i class="fa-regular fa-heart add-to-wishlist"
+                                                data-id="{{ $product->id }}"></i></span>
                                     @else
-                                    <span class="prod-wish"><i class="fa-regular fa-heart add-to-wishlist" data-popup="login1" class="openPopup"></i></span>
+                                        <span class="prod-wish"><i class="fa-regular fa-heart add-to-wishlist"
+                                                data-popup="login1" class="openPopup"></i></span>
                                     @endif
                                 </div>
                                 <div class="product-perra">
@@ -65,10 +71,22 @@
                                     </div>
                                     <div class="d-flex justify-content-between">
                                         <div class="price-mian">
-                                            <span class="price-throuth">₹{{ $product->mrp }}</span><span
-                                                class="price-bg">₹{{ $product->product_sale_price }}</span>
+                                            <span class="price-throuth">₹{{ $product->mrp }}</span>
+
+                                            <span
+                                                class="price-bg">
+                                                @canany(['isDistributor', 'isCustomer'])
+                                                    ₹{{ $product->product_sale_price }}
+                                                @else
+                                                    ₹{{ $product->guest_price }}
+                                                @endcanany
+                                            </span>
+                                            @canany(['isDistributor', 'isCustomer'])
+                                                <span class="price-bg"><small>Sv: {{ $product->sv }}</small></span>
+                                            @endcanany
                                         </div>
-                                        <a href="javascript:void(0)" data-id="{{$product->id}}" class="thm-btn cart-btn">+</a>
+                                        <a href="javascript:void(0)" data-id="{{ $product->id }}"
+                                            class="thm-btn cart-btn">+</a>
                                     </div>
                                 </div>
                             </div>
@@ -88,38 +106,54 @@
                 <div class="container">
                     <div class="section-heading">
                         <div class="w-100 text-left">
-                            <h2>{{ ucwords(str_replace('_',' ',$productSection['category'])) }}</h2>
-                            <p class="mb-0">{{ $productSection['category_description']??'' }}</p>
+                            <h2>{{ ucwords(str_replace('_', ' ', $productSection['category'])) }}</h2>
+                            <p class="mb-0">{{ $productSection['category_description'] ?? '' }}</p>
                         </div>
-                        <a href="{{url('product/'.$productSection['category_slug'])}}" class="veiw-btn">View More >></a>
+                        <a href="{{ url('product/' . $productSection['category_slug']) }}" class="veiw-btn">View More
+                            >></a>
                     </div>
                     <div class="row product-slider">
                         @foreach ($productSection['products'] as $product)
-                     
-                            <div class="col-lg-3 col-md-6"> 
+                            <div class="col-lg-3 col-md-6">
                                 <div class="product-card">
                                     <div class="product-image">
-                                        <a href="{{url('detail')}}/{{$product->slug_url??''}}"><img src="{{ isValidImageUrl($product->product_image??'') ? $product->product_image : asset('front_assets') . '/images/no_image.jpeg' }}"
+                                        <a href="{{ url('detail') }}/{{ $product->slug_url ?? '' }}"><img
+                                                src="{{ isValidImageUrl($product->product_image ?? '') ? $product->product_image : asset('front_assets') . '/images/no_image.jpeg' }}"
                                                 alt="img" class=""></a>
-                                        <p class="product-review"><i class="fa fa-star"></i> {{ $product->reviews->avg('rating') }} ({{ $product->reviews->count() }} Reviews)</p>
-                                        @if(Auth::check())
-                                        <span class="prod-wish"><i class="fa-regular fa-heart add-to-wishlist" data-id="{{ $product->id }}"></i></span>
+                                        <p class="product-review"><i class="fa fa-star"></i>
+                                            {{ $product->reviews->avg('rating') }} ({{ $product->reviews->count() }}
+                                            Reviews)</p>
+                                        @if (Auth::check())
+                                            <span class="prod-wish"><i class="fa-regular fa-heart add-to-wishlist"
+                                                    data-id="{{ $product->id }}"></i></span>
                                         @else
-                                        <span class="prod-wish"><i class="fa-regular fa-heart" data-popup="login1" class="openPopup"></i></span>
+                                            <span class="prod-wish"><i class="fa-regular fa-heart" data-popup="login1"
+                                                    class="openPopup"></i></span>
                                         @endif
                                     </div>
                                     <div class="product-perra">
                                         <div class="prduct-perra-top">
-                                            <a href="{{url('detail')}}/{{$product->slug_url??''}}">
-                                                <h3>{{ $product->product_name??'' }}</h3>
+                                            <a href="{{ url('detail') }}/{{ $product->slug_url ?? '' }}">
+                                                <h3>{{ $product->product_name ?? '' }}</h3>
                                             </a>
                                         </div>
                                         <div class="d-flex justify-content-between">
                                             <div class="price-mian">
-                                                <span class="price-throuth">₹{{ $product->mrp??0 }}</span><span
-                                                    class="price-bg">₹{{ $product->product_sale_price??0 }}</span>
+                                                <span class="price-throuth">₹{{ $product->mrp ?? 0 }}</span>
+                                                <span
+                                                    class="price-bg">
+                                                @canany(['isDistributor', 'isCustomer'])
+                                                    ₹{{ $product->product_sale_price }}
+                                                @else
+                                                    ₹{{ $product->guest_price }}
+                                                @endcanany
+                                                </span>
+                                                @canany(['isDistributor', 'isCustomer'])
+                                                    <span class="price-bg"><small>Sv: {{ $product->sv }}</small></span>
+                                                @endcanany
                                             </div>
-                                            <a href="javascript:void(0)" data-id="{{$product->id??0}}" class="thm-btn cart-btn">+</a>
+                                            <a href="javascript:void(0)" data-id="{{ $product->id ?? 0 }}"
+                                                class="thm-btn cart-btn">+</a>
                                         </div>
                                     </div>
                                 </div>

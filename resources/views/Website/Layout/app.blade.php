@@ -359,6 +359,9 @@
                                                 class="fa-solid fa-chevron-down"></i></a>
                                         <div class="profile-dropdown">
                                             <ul class="user-list-header">
+                                                @can('isCustomer')
+                                                <li><a href="{{ url('/products') }}"><i class="fa-solid fa-user"></i> Become a Distributor</a></li>
+                                                @endcan
                                                 <li><a href="{{ url('my-account') }}"><i class="fa-solid fa-user"></i>
                                                         My Account</a></li>
                                                 <li><a href="{{ url('order-history') }}"><i
@@ -683,6 +686,24 @@
                 }
             });
         }
+
+        function updateCartSummary(cartData) {
+                console.log(cartData);
+                $('.cart-header').text('Shopping Cart (' + cartData.total_items + ' Items)');
+
+                $('.summary-box h6').html('<span class="text-black">Order Summary</span> (' + cartData.total_items +
+                    ' Items)');
+                $('.summary-box p:contains("Total MRP") span').text('₹' + cartData.total_mrp);
+
+                if (cartData.total_saving > 0) {
+                    $('.summary-box p:contains("Total Discounts") span').text('-₹' + cartData.total_saving);
+                }
+
+                $('.summary-box p:contains("Payable Amount") span').text('₹' + cartData.subtotal);
+                $('.thm-btn').text('Proceed to Pay ₹' + cartData.subtotal);
+
+                $('.total-cart-count').text(cartData.total_items);
+            }
     </script>
 
     <script>

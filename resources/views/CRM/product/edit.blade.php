@@ -184,6 +184,13 @@
                                 </div>
 
                                 <div class="col-md-6 mb-3">
+                                    <label class="form-label">Guest Price <span class="text-danger">*</span></label>
+                                    <input type="number" step="0.01" name="guest_price" id="guest_price" class="form-control" 
+                                           placeholder="Enter Guest Price" value="{{ $product->guest_price }}" min="0" required>
+                                    <span class="text-danger error" id="guest_price_error"></span>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
                                     <label class="form-label">IGST (%)</label>
                                     <input type="number" step="0.01" name="igst" id="igst" class="form-control" 
                                            placeholder="Enter IGST" value="{{ $product->igst ?? 0 }}" min="0" max="100">

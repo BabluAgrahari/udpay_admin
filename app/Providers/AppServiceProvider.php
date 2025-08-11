@@ -32,7 +32,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Gate::define('isCustomer', function (User $user) {
-            return $user->role == 'customer' || $user->role == '';
+            return $user->role == 'customer';
         });
 
         Gate::define('isDistributor', function (User $user) {

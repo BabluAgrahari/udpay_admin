@@ -453,14 +453,29 @@
                             <p class="color-one mb-0">{{ $product->product_short_description ?? 'Product description not available.' }}</p>
                         </div>
                         <div class="price-box">
-                            <span class="current-price">Price: ₹{{ number_format($product->product_sale_price, 2) }}</span>
+                            <span class="current-price">Price: 
+                                @canany(['isDistributor', 'isCustomer'])
+                                    ₹{{ number_format($product->guest_price, 2) }}
+                                @else
+                                    ₹{{ number_format($product->product_sale_price, 2) }}
+                                @endcanany
+                            </span>
                             <span class="old-price">Price: ₹{{ number_format($product->mrp, 2) }}</span>
+                            @canany(['isDistributor', 'isCustomer'])
+                            <span class="price-bg">Sv: {{ $product->sv }}</span>
+                            @endcanany
                         </div>
                         <div class="price-box mt-0">
+
+                            @canany(['isDistributor', 'isCustomer'])
+                                @php $price = $product->product_sale_price; @endphp
+                            @else
+                                @php $price = $product->guest_price; @endphp
+                            @endcanany
                             @php
                                 $discount = 0;
                                 if($product->mrp > 0) {
-                                    $discount = round((($product->mrp - $product->product_sale_price) / $product->mrp) * 100);
+                                    $discount = round((($product->mrp - $price) / $product->mrp) * 100);
                                 }
                             @endphp
                             @if($discount > 0)
@@ -546,7 +561,19 @@
                     </div>
                     <div class="d-flex justify-content-between">
                         <div class="price-mian">
-                            <span class="price-throuth">₹{{ number_format($product->product_sale_price, 2) }}</span><span class="price-bg">₹{{ number_format($product->mrp, 2) }}</span>
+                            <span class="price-throuth">
+                                @canany(['isDistributor', 'isCustomer'])
+                                    ₹{{ number_format($product->guest_price, 2) }}
+                                @else
+                                    ₹{{ number_format($product->product_sale_price, 2) }}
+                                @endcanany
+                            </span>
+                            <span class="price-bg">
+                                ₹{{ number_format($product->mrp, 2) }}
+                            </span>
+                            @canany(['isDistributor', 'isCustomer'])
+                            <span class="price-bg"><small>Sv: {{ $product->sv }}</small></span>
+                            @endcanany
                         </div>
                     </div>
                 </div>
@@ -652,7 +679,17 @@
                     </div>
                     <div class="d-flex justify-content-between">
                         <div class="price-mian">
-                            <span class="price-throuth">₹{{ number_format($product->product_sale_price, 2) }}</span><span class="price-bg">₹{{ number_format($product->mrp, 2) }}</span>
+                            <span class="price-throuth">
+                                @canany(['isDistributor', 'isCustomer'])
+                                    ₹{{ number_format($product->guest_price, 2) }}
+                                @else
+                                    ₹{{ number_format($product->product_sale_price, 2) }}
+                                @endcanany
+                            </span>
+                            <span class="price-bg">₹{{ number_format($product->mrp, 2) }}</span>
+                            @canany(['isDistributor', 'isCustomer'])
+                            <span class="price-bg"><small>Sv: {{ $product->sv }}</small></span>
+                            @endcanany
                         </div>
                         <a href="javascript:void(0)" class="thm-btn cart-btn" data-id="{{ $product->id }}">+</a>
                     </div>

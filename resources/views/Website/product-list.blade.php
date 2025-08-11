@@ -41,7 +41,17 @@
                     </div>
                     <div class="d-flex justify-content-between">
                         <div class="price-mian">
-                            <span class="price-throuth">₹{{ $product->mrp }}</span><span class="price-bg">₹{{ $product->product_sale_price }}</span>
+                            <span class="price-throuth">₹{{ $product->mrp }}</span>
+                            <span class="price-bg">
+                              @canany(['isDistributor', 'isCustomer'])
+                                ₹{{ $product->product_sale_price }}
+                              @else
+                                ₹{{ $product->guest_price }}
+                              @endcanany
+                            </span>
+                            @canany(['isDistributor', 'isCustomer'])
+                            <span class="price-bg"><small>Sv: {{ $product->sv }}</small></span>
+                            @endcanany
                         </div>
                         <a href="javascript:void(0)" data-id="{{$product->id}}" class="thm-btn cart-btn">+</a>
                     </div>

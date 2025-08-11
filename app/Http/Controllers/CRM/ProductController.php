@@ -65,6 +65,7 @@ class ProductController extends Controller
             $product->product_price = $request->product_price;
             $product->product_sale_price = $request->product_sale_price;
             $product->mrp = $request->mrp;
+            $product->guest_price = $request->guest_price;
             $product->product_stock = $request->product_stock ?? 0;
             $product->unit_id = $request->unit_id;
             $product->product_description = $request->product_description;
@@ -169,6 +170,7 @@ class ProductController extends Controller
             $product->product_price = $request->product_price;
             $product->product_sale_price = $request->product_sale_price;
             $product->mrp = $request->mrp;
+            $product->guest_price = $request->guest_price;
             $product->product_stock = $request->product_stock ?? 0;
             $product->unit_id = $request->unit_id;
             $product->product_description = $request->product_description;

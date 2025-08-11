@@ -157,9 +157,22 @@ class CartController extends Controller
         $total_mrp = 0;
         $total_items = 0;
 
+        //apply coupon discount
+        $couponDiscount = 0;
+        if (session('applied_coupon.discount_amount')) {
+            $couponDiscount = session('applied_coupon.discount_amount');
+        }
+
         foreach ($query->get() as $item) {
             if ($item->product) {
-                $itemTotal = $item->product->product_sale_price * $item->quantity;
+               if(Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer')){
+                    $itemTotal = $item->product->product_sale_price * $item->quantity;
+                    $price = $item->product->product_sale_price;
+               }else{
+                    $itemTotal = $item->product->guest_price * $item->quantity;
+                    $price = $item->product->guest_price;
+               }
+
                 $itemMrp = (isset($item->product->mrp) && $item->product->mrp > 0) ? $item->product->mrp * $item->quantity : $itemTotal;
 
                 $subtotal += $itemTotal;
@@ -167,18 +180,9 @@ class CartController extends Controller
                 $total_items += $item->quantity;
 
                 if (isset($item->product->mrp) && $item->product->mrp > 0) {
-                    $total_saving += ($item->product->mrp - $item->product->product_sale_price) * $item->quantity;
+                    $total_saving += ($item->product->mrp - $price) * $item->quantity;
                 }
             }
-        }
-
-        // Calculate coupon discount if applied
-        $couponDiscount = 0;
-        $finalAmount = $subtotal;
-        
-        if (session('applied_coupon')) {
-            $couponDiscount = session('applied_coupon.discount_amount');
-            $finalAmount = $subtotal - $couponDiscount;
         }
 
         return [
@@ -187,7 +191,7 @@ class CartController extends Controller
             'total_saving' => $total_saving,
             'total_mrp' => $total_mrp,
             'coupon_discount' => $couponDiscount,
-            'final_amount' => $finalAmount,
+            'final_amount' => $subtotal - $couponDiscount,
             'applied_coupon' => session('applied_coupon')
         ];
     }
@@ -212,55 +216,32 @@ class CartController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return response()->json([
-                    'status' => false,
-                    'msg' => $validator->errors()->first()
-                ]);
+                return $this->failMsg($validator->errors()->first());
             }
 
             $couponCode = strtoupper(trim($request->coupon_code));
             $coupon = Coupon::where('code', $couponCode)->first();
 
             if (!$coupon) {
-                return response()->json([
-                    'status' => false,
-                    'msg' => 'Invalid coupon code'
-                ]);
+                return $this->failMsg('Invalid coupon code');
             }
 
-            // Check if coupon is active
             if (!$coupon->status) {
-                return response()->json([
-                    'status' => false,
-                    'msg' => 'This coupon is inactive'
-                ]);
+                return $this->failMsg('This coupon is inactive');
             }
 
-            // Check if coupon is expired
             if ($coupon->isExpired()) {
-                return response()->json([
-                    'status' => false,
-                    'msg' => 'This coupon has expired'
-                ]);
+                return $this->failMsg('This coupon has expired');
             }
 
-            // Check if coupon has started
             if ($coupon->isNotStarted()) {
-                return response()->json([
-                    'status' => false,
-                    'msg' => 'This coupon is not yet active'
-                ]);
+                return $this->failMsg('This coupon is not yet active');
             }
 
-            // Check if usage limit reached
             if ($coupon->isUsageLimitReached()) {
-                return response()->json([
-                    'status' => false,
-                    'msg' => 'This coupon usage limit has been reached'
-                ]);
+                return $this->failMsg('This coupon usage limit has been reached');
             }
 
-            // Get cart total from database
             $query = Cart::with('product');
             if (Auth::user()) {
                 $query->where('user_id', Auth::user()->id);
@@ -273,23 +254,22 @@ class CartController extends Controller
             $total_mrp = 0;
 
             foreach ($cartItems as $item) {
-                $subtotal += ($item->product->product_sale_price * $item->quantity);
+                if(Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer')){
+                    $subtotal += ($item->product->product_sale_price * $item->quantity);
+                }else{
+                    $subtotal += ($item->product->guest_price * $item->quantity);
+                }
                 $total_mrp += (isset($item->product->mrp) && $item->product->mrp > 0 ? $item->product->mrp : $item->product->product_sale_price) * $item->quantity;
             }
 
-            // Check minimum amount requirement
             if ($coupon->minimum_amount > 0 && $subtotal < $coupon->minimum_amount) {
-                return response()->json([
-                    'status' => false,
-                    'msg' => 'Minimum order amount of ₹' . $coupon->minimum_amount . ' required for this coupon'
-                ]);
+                return $this->failMsg('Minimum order amount of ₹' . $coupon->minimum_amount . ' required for this coupon');
+        
             }
 
-            // Calculate discount
             $discount = 0;
             if ($coupon->discount_type === 'percentage') {
                 $discount = ($subtotal * $coupon->discount_value) / 100;
-                // Apply maximum discount limit
                 if ($coupon->maximum_discount > 0 && $discount > $coupon->maximum_discount) {
                     $discount = $coupon->maximum_discount;
                 }
@@ -313,9 +293,7 @@ class CartController extends Controller
                 ]
             ]);
 
-            return response()->json([
-                'status' => true,
-                'msg' => 'Coupon applied successfully!',
+            return $this->successMsg('Coupon applied successfully!', [
                 'data' => [
                     'coupon_code' => $coupon->code,
                     'coupon_name' => $coupon->name,
@@ -329,10 +307,7 @@ class CartController extends Controller
             ]);
 
         } catch (Exception $e) {
-            return response()->json([
-                'status' => false,
-                'msg' => 'Something went wrong!'
-            ]);
+            return $this->failMsg($e->getMessage());
         }
     }
 
@@ -341,15 +316,9 @@ class CartController extends Controller
         try {
             session()->forget('applied_coupon');
             
-            return response()->json([
-                'status' => true,
-                'msg' => 'Coupon removed successfully'
-            ]);
+            return $this->successMsg('Coupon removed successfully');
         } catch (Exception $e) {
-            return response()->json([
-                'status' => false,
-                'msg' => 'Something went wrong!'
-            ]);
+            return $this->failMsg($e->getMessage());
         }
     }
 
@@ -396,15 +365,9 @@ class CartController extends Controller
                 $html = '<p class="text-muted">No coupons available at the moment.</p>';
             }
             
-            return response()->json([
-                'status' => true,
-                'html' => $html
-            ]);
+            return $this->successMsg('Coupons fetched successfully', ['html' => $html]);
         } catch (Exception $e) {
-            return response()->json([
-                'status' => false,
-                'msg' => 'Something went wrong!'
-            ]);
+            return $this->failMsg($e->getMessage());
         }
     }
 }
