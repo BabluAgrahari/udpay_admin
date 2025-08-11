@@ -68,7 +68,7 @@
                         @canany(['isDistributor', 'isCustomer'])
                             @php $price = $item->product->product_sale_price; @endphp
                         @else
-                            @php $price = $item->product->guest_price; @endphp
+                            @php $price = $item->product->guest_price??0; @endphp
                         @endcanany
                             @php
 
@@ -106,9 +106,9 @@
                                             </div>
                                             <div class="price">
                                                 @canany(['isCustomer', 'isDistributor'])
-                                                    ₹{{ $item->product->product_sale_price }}
+                                                    ₹{{ $item->product->product_sale_price??0 }}
                                                 @else
-                                                    ₹{{ $item->product->guest_price }}
+                                                    ₹{{ $item->product->guest_price??0 }}
                                                 @endcanany
                                                 @if (isset($item->product->mrp) && $item->product->mrp > $item->product->product_sale_price)
                                                     <span class="old-price">₹{{ $item->product->mrp }}</span>

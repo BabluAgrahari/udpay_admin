@@ -75,7 +75,7 @@
                     <div class="address-list">
                         @if($addresses->isNotEmpty())
                         @foreach($addresses as $address)
-                        <div class="address-card checkout-address" data-address="{{ json_encode([
+                        <div class="address-card checkout-address {{ $addresses->count()==1 ? 'selected' : '' }}" data-address="{{ json_encode([
                             'id' => $address->id,
                             'name' => $address->user_add_name,
                             'mobile' => $address->user_add_mobile,
@@ -107,7 +107,9 @@
                                 <form method="POST" action="{{ url('checkout') }}">
                                     @csrf
                                     <input type="hidden" name="address_id" value="{{ $address->id }}">
+                                    @if($addresses->count() > 1)
                                     <button type="submit" class="thm-btn btn-small">Deliver Here</button>
+                                    @endif
                                 </form>
                                 <label class="select-add">
                                     {{ ucfirst($address->address_for??'') }}
@@ -139,7 +141,7 @@
                 <h6 class="mb-2">Payment Method</h6>
                 <form method="post" id="saveOrder" action="{{ url('checkout') }}">
                     @csrf
-                    <input type="hidden" name="address_id" value="">
+                    <input type="hidden" name="address_id"  id="address_id" value="{{ $addresses->count()==1 ? $addresses->first()->id : '' }}">
                     <select name="payment_gateway" class="form-control mb-2">
                         <option value="cashfree">Cashfree</option>
                         <option value="razorpay">Razorpay</option>
@@ -527,7 +529,7 @@ $(document).ready(function() {
         $('.address-card').removeClass('selected');
         $(this).addClass('selected');
         const addressId = $(this).find('input[name="address_id"]').val();
-        $('input[name="address_id"][type="hidden"]').val(addressId);
+        $('#address_id').val(addressId);
     });
     
     $('.form-control').on('blur', function() {
