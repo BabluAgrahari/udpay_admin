@@ -1,6 +1,8 @@
 <?php
 
+use App\Models\Cart;
 use App\Models\Merchant;
+use App\Models\PayoutTransaction;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\Stock;
@@ -8,9 +10,8 @@ use App\Models\User;
 use App\Models\UserWallet;
 use App\Models\WalletHistory;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
-use App\Models\Cart;
 use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Str;
 
 if (!function_exists('getCookieData')) {
     function getCookieData($cookieName)
@@ -144,7 +145,6 @@ if (!function_exists('generateSlug')) {
                 $slug = $originalSlug . '-' . $count;
                 $count++;
             }
-
         }
 
         return $slug;
@@ -274,8 +274,7 @@ if (!function_exists('userWalletUpdate')) {
     }
 }
 
-
-//check a valid image url
+// check a valid image url
 if (!function_exists('isValidImageUrl')) {
     function isValidImageUrl($url)
     {
@@ -313,10 +312,9 @@ if (!function_exists('cartCount')) {
                 $cartCount = Cart::where('cart_cookie_id', $cookieId)->sum('quantity');
             }
         }
-        return (int)$cartCount;
+        return (int) $cartCount;
     }
 }
-
 
 if (!function_exists('total_cart_amount')) {
     function total_cart_amount()
@@ -329,7 +327,7 @@ if (!function_exists('total_cart_amount')) {
                 ->where('uni_cart.user_id', $userId)
                 ->sum(DB::raw('uni_products.price * uni_cart.quantity'));
         } else {
-            $cookieId = Cookie::get('cart_cookie_id'); // $request->cookie('');
+            $cookieId = Cookie::get('cart_cookie_id');  // $request->cookie('');
             if ($cookieId) {
                 $totalAmount = DB::table('uni_cart')
                     ->join('uni_products', 'uni_cart.product_id', '=', 'uni_products.id')
@@ -342,58 +340,143 @@ if (!function_exists('total_cart_amount')) {
     }
 }
 
-
 // Get image with fallback to no-image placeholder
 if (!function_exists('getImageWithFallback')) {
-    function getImageWithFallback($imageUrl, $placeholder = null) {
+    function getImageWithFallback($imageUrl, $placeholder = null)
+    {
         // If no image URL provided, return placeholder
         if (empty($imageUrl)) {
             return $placeholder ?? asset('front_assets/images/no-image.png');
         }
-        
+
         // If it's a valid URL, return it (we'll handle 404s with CSS/JS)
         if (filter_var($imageUrl, FILTER_VALIDATE_URL) !== false) {
             return $imageUrl;
         }
-        
+
         // If it's a relative path, check if file exists
         if (file_exists(public_path($imageUrl))) {
             return asset($imageUrl);
         }
-        
+
         // Return placeholder if image doesn't exist
         return $placeholder ?? asset('front_assets/images/no-image.svg');
     }
 }
 
-// if (!function_exists('walletCredit')) {
-//     function walletCredit($userId, $amount, $remarks = null, $source = 'system', $actionBy = null)
-//     {
-//         $data = [
-//             'user_id' => $userId,
-//             'type' => 'credit',
-//             'amount' => $amount,
-//             'remarks' => $remarks,
-//             'source' => $source,
-//             'action_by' => $actionBy ?? Auth::id()
-//         ];
+if (!function_exists('insertPayout')) {
+    function insertPayout($amount, $parent_id, $in_type, $user_id, $order_id, $sv, $level)
+    {
+        $qry = new Payout();
+        $qry->amount = $amount;
+        $qry->parent_id = $parent_id;
+        $qry->user_id = $user_id;
+        $qry->in_type = $in_type;
+        $qry->cur_date = date('Y-m-d');
+        $qry->sv = $sv;
+        $qry->level = $level;
+        $qry->order_id = $order_id;
+        $qry->status = 1;
+        if ($qry->save())
+            return true;
 
-//         return walletHistoryStore($data);
-//     }
-// }
+        return false;
+    }
+}
 
-// if (!function_exists('walletDebit')) {
-//     function walletDebit($userId, $amount, $remarks = null, $source = 'system', $actionBy = null)
-//     {
-//         $data = [
-//             'user_id' => $userId,
-//             'type' => 'debit',
-//             'amount' => $amount,
-//             'remarks' => $remarks,
-//             'source' => $source,
-//             'action_by' => $actionBy ?? Auth::id()
-//         ];
+if (!function_exists('addWallet1')) {
+    function addWallet1($key, $uid, $payoutVal, $order_id, $tp)
+    {
+        $payout = $payoutVal - ($payoutVal * 0.05);
+        $walletBal = Wallet::where('unm', $uid)->first();
+        if (empty($walletBal))
+            return false;
+        if ($key == 1) {
+            $walletBal->earning = $walletBal->earning + $payout;
+            $walletBal->save();
+        }
+        $tds = $payoutVal * 0.05;
 
-//         return walletHistoryStore($data);
-//     }
-// }
+        $save1 = new WalletTransition();
+        $save1->unm = $uid;
+        $save1->user_id = $walletBal->userid;
+        $save1->credit = $payout;
+        $save1->balance = $walletBal->amount + $walletBal->earning + $walletBal->unicash;
+        $save1->transition_type = $tp;
+        $save1->in_type = 'Your Wallet is Creditd ' . $payout . ' as Performance Bonus from Unipay';
+        $save1->ord_id = $order_id;
+        $save1->unicash = 0;
+        $save1->earning = $payout;
+        $save1->amount = 0;
+        $save1->unipoint = 0;
+        $save1->created_on = date('Y-m-d H:i:s');
+        $save1->description = '';
+        $save1->save();
+
+        $insert = new PayoutTransaction();
+        $insert->uid = $walletBal->userid;
+        $insert->amount = $payoutVal;
+        $insert->tds_amt = $tds;
+        $insert->net_amt = $payout;
+        $insert->cur_date = date('Y-m-d');
+        $insert->for_date = date('Y-m-d');
+        $insert->status = 1;
+        $insert->pay_type = '';
+        $insert->st = 0;
+        if ($insert->save())
+            return true;
+
+        return false;
+    }
+
+    if (!function_exists('insertPayoutSelf')) {
+        function insertPayoutSelf($amt, $parent, $in_type, $child, $order_id, $sv, $level, $tp)
+        {
+            $qry = new Payout();
+            $qry->amount = $amt;
+            $qry->parent_id = $parent;
+            $qry->user_id = $child;
+            $qry->in_type = $in_type;
+            $qry->cur_date = date('Y-m-d');
+            $qry->status = 1;
+            $qry->sv = $sv;
+            $qry->level = $level;
+            $qry->payout_type = $tp;
+            $qry->order_id = $order_id;
+            if ($qry->save())
+                return true;
+
+            return false;
+        }
+    }
+
+
+    if (!function_exists('walletTransaction')) {
+        function walletTransaction($request)
+        {
+            
+            $request = (object)$request;
+            $userData = User::where('user_num',$request->num)->first();
+            $save = new WalletTransition();
+            $save->unm	   = $request->num;
+            $save->user_id     = $request->user_id;
+            $save->transition_type  = $request->transition_type ?? '';
+            $save->credit      = $request->credit ?? 0;
+            $save->debit       = $request->debit ?? 0;
+            $save->balance      = $request->balance ?? 0;
+            $save->in_type     = $request->in_type ?? '';
+            $save->created_on  = date('Y-m-d H:i:s');
+            $save->description = $request->description ?? '';
+            $save->remark      = $request->remark ?? '';
+            $save->unicash     = $request->unicash ?? 0;
+            $save->earning     = $request->earning ?? 0;
+            $save->amount      = $request->amount ?? 0;
+            $save->unipoint    = $request->unipoint ?? 0;
+            $save->ord_id      = $request->order_id ?? '';
+            if ($save->save())
+                return true;
+    
+            return false;
+        }
+    }
+}

@@ -3,25 +3,28 @@
 namespace App\Http\Controllers\Website;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderToProduct;
-use App\Models\UserAddress;
 use App\Models\Product;
+use App\Models\User;
+use App\Models\UserAddress;
+use App\Services\PaymentGatway\CashFree;
+use App\Services\OrderService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use App\Services\PaymentGatway\CashFree;
+use App\Models\ApOrder;
 
 class CheckoutController extends Controller
 {
-
     public function index(Request $request)
     {
         $user = Auth::user();
 
-        $data['addresses'] = UserAddress::where('user_id', $user->id)->where('add_status', 1)
+        $data['addresses'] = UserAddress::where('user_id', $user->id)
+            ->where('add_status', 1)
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -29,9 +32,9 @@ class CheckoutController extends Controller
 
         $cartItems = Cart::with('product')->where('user_id', $user->id)->get();
         $subtotal = $cartItems->sum(function ($item) {
-            if(Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer')){
+            if (Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer')) {
                 return $item->product ? $item->product->product_sale_price * $item->quantity : 0;
-            }else{
+            } else {
                 return $item->product ? $item->product->guest_price * $item->quantity : 0;
             }
         });
@@ -49,13 +52,12 @@ class CheckoutController extends Controller
         return view('Website.checkout', $data);
     }
 
-
     public function buyProduct($slug)
     {
         $product = Product::where('slug_url', $slug)->first();
-        if(Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer')){
+        if (Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer')) {
             $subtotal = $product->product_sale_price;
-        }else{
+        } else {
             $subtotal = $product->guest_price;
         }
         $total_mrp = $product->mrp;
@@ -74,70 +76,80 @@ class CheckoutController extends Controller
 
     public function checkout(Request $request)
     {
-
         // $payment = new CashFree();
         // $res = $payment->createOrder(100, 'INR', ['customer_id' => '1234567890', 'customer_name' => 'John Doe', 'customer_email' => 'john.doe@example.com', 'customer_phone' => '+919876543210']);
 
         // print_r($res);
         // die;
-        
-        $validator = Validator::make($request->all(), [
+
+        $rules = [
             'address_id' => 'required|exists:user_address,id',
-            'payment_gateway' => 'required|in:cashfree,razorpay',
-        ], [
+            'payment_gateway' => 'required|in:cashfree,razorpay,wallet',
+        ];
+        if (Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer')) {
+            $rules['delivery_mode'] = 'required|in:self_pickup,courier';
+        }
+        $validator = Validator::make($request->all(), $rules, [
             'address_id.required' => 'Address is required.',
             'payment_gateway.required' => 'Payment gateway is required.',
             'payment_gateway.in' => 'Invalid payment gateway.',
+            'delivery_mode.required' => 'Delivery mode is required.',
+            'delivery_mode.in' => 'Invalid delivery mode.',
         ]);
 
         if ($validator->fails()) {
             return $this->validationMsg($validator->errors()->first());
         }
 
+        $user = Auth::user();
+        $address = UserAddress::where('id', $request->address_id)->where('user_id', $user->id)->where('add_status', 1)->first();
+        if (!$address) {
+            return $this->failMsg('Invalid Address Id.');
+        }
+
+        $cart_type = 'deals';
+        if (Auth::user()->can('isDistributor')) {
+            $cart_type = 'ap_shopping';
+        } elseif (Auth::user()->can('isCustomer')) {
+            $cart_type = 'shopping';
+        }
+        $cartItems = Cart::with('product')->where('user_id', $user->id)->where('cart_type', $cart_type)->get();
+        if ($cartItems->isEmpty()) {
+            return $this->failMsg('Cart is Empty.');
+        }
+
+        if (Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer')) {
+            $res = $this->ApOrder($request, $cartItems);
+        } else {
+            $res = $this->DealOrder($request, $cartItems);
+        }
+        if (!empty($res['status'])) {
+            return $this->successMsg($res['msg'] ?? '', $res['array'] ?? array());
+        } else {
+            return $this->failMsg($res['msg'] ?? '', $res['array'] ?? array());
+        }
+    }
+
+    private function DealOrder($request, $cartItems)
+    {
         try {
             DB::beginTransaction();
 
-            $user = Auth::user();
-
-            $address = UserAddress::where('id', $request->address_id)->where('user_id', $user->id)->where('add_status', 1)->first();
-            if (!$address) {
-                return $this->failMsg('Invalid Address Id.');
-            }
-
-            $cartItems = Cart::with('product')->where('user_id', $user->id)->get();
-            if ($cartItems->isEmpty()) {
-                return $this->failMsg('Cart is Empty.');
-            }
-
+            $subtotal = 0;
             $total_gst = 0;
-            $subtotal = $cartItems->sum(function ($item) {
-                if(Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer')){
-                    return $item->product ? $item->product->product_sale_price * $item->quantity : 0;
-                }else{
-                    return $item->product ? $item->product->guest_price * $item->quantity : 0;
-                }
-            });
-
-            if(Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer')){
-                $total_gst = $cartItems->sum(function ($item) {
-                    return $item->product ? (($item->product->product_sale_price/(100 + $item->product->igst))*100)*$item->quantity : 0;
-                });
-            }else{
-                $total_gst = $cartItems->sum(function ($item) {
-                    return $item->product ? (($item->product->guest_price/(100 + $item->product->igst))*100)*$item->quantity : 0;
-                });
+            $total_discount = 0;
+            foreach ($cartItems as $cartItem) {
+                $subtotal += $cartItem->product->guest_price * $cartItem->quantity;
+                $total_gst += $cartItem->product->igst * $cartItem->quantity;
+                $total_discount += $cartItem->product->discount * $cartItem->quantity;
             }
-
             $coupon_id = session('applied_coupon.id') ?? null;
-
-            $total_discount = $cartItems->sum(function ($item) {
-                return $item->product ? $item->product->discount * $item->quantity : 0;
-            });
 
             $order = new Order();
             $order->uid = $user->id;
-            $order->order_id = 'ECOM-' . time() . '-' . $user->id;
+            $order->order_id = 'DEAL-' . time() . '-' . $user->id;
             $order->address_id = $request->address_id;
+            $order->coupon_id = $coupon_id;
             $order->amount = $subtotal;
             $order->total_qty = $cartItems->sum('quantity');
             $order->total_gst = $total_gst;
@@ -150,10 +162,10 @@ class CheckoutController extends Controller
             $order->payment_gateway = $request->payment_gateway;
             $order->txn_id = '';
             $order->payment_response = json_encode([]);
-            $order->status ='status';
+            $order->status = 'pending';
             if (!$order->save()) {
                 DB::rollBack();
-                return $this->failMsg('Failed to create order.');
+                return ['status' => false, 'msg' => 'Failed to create order.'];
             }
 
             foreach ($cartItems as $cartItem) {
@@ -164,15 +176,11 @@ class CheckoutController extends Controller
                     $orderToProduct->variant_id = $cartItem->variant_id;
                     $orderToProduct->attribute_id = null;
                     $orderToProduct->quantity = $cartItem->quantity;
-                    if(Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer')){
-                        $orderToProduct->price = $cartItem->product->product_sale_price;
-                    }else{
-                        $orderToProduct->price = $cartItem->product->guest_price;
-                    }
+                    $orderToProduct->price = $cartItem->product->guest_price;
                     $orderToProduct->gst = $cartItem->product->igst;
                     if (!$orderToProduct->save()) {
                         DB::rollBack();
-                        return $this->failMsg('Failed to create order to product.');
+                        return ['status' => false, 'msg' => 'Failed to create order to product.'];
                     }
                 }
             }
@@ -180,16 +188,160 @@ class CheckoutController extends Controller
 
             DB::commit();
 
-            return $this->successMsg('Order placed successfully!');
+            return ['status' => true, 'msg' => 'Order placed successfully!'];
         } catch (\Exception $e) {
             DB::rollback();
-            return $this->failMsg('Failed to process order: ' . $e->getMessage());
+            return ['status' => false, 'msg' => 'Failed to process order: ' . $e->getMessage()];
         }
+    }
+
+    private function ApOrder($request, $cartItems)
+    {
+        $user_id = Auth::user()->user_id;
+        $userRes = User::where('user_id', $user_id)->first();
+
+        $delivery_mode = $request->delivery_mode;
+        $reffer_id = $request->reffer_id;
+
+        $order_id = 'UNI' . date('ymds') . rand(1111, 9999);
+        $uniqueOd = 'UNI' . date('ymdis') . rand(11111, 99999);
+
+        $ord_type = 'sv';
+        $ord_tp = 'sv_order';
+        if ($userRes->role == 'distributor') {
+            $ord_type = 'rp';
+            $ord_tp = 'rp_order';
+        }
+
+        $totalQty = 0;
+        $totalAmount = 0;
+        $totalGst = 0;
+        $totSv = 0;
+        $totDiscount = 0;
+        $totalNetAmt = 0;
+        $totalGross = 0;
+        foreach ($cartItems as $cart) {
+            $totSv += $cart->sv;
+            $totalQty += $cart->qty;
+            $totalAmount += $cart->product->product_sale_price * $cart->quantity;
+
+            $gst = 100 / (100 + $cart->product->igst);
+            $gross = $totalAmount * $gst;
+            $totalGst += $totalAmount - $gross;
+            $totalNetAmt = $gross + $totalGst;
+            $totalGross += $gross;
+        }
+
+        $shippingCharge = 0;
+        if (($totalNetAmt < 649) && $delivery_mode != 'self_pickup')
+            $shippingCharge = 100;
+
+        if (in_array($request->payment_gateway, ['wallet'])) {
+            $orderService = new OrderService();
+            $checkWallet = $orderService->checkWallet(($totalNetAmt + $shippingCharge), $order_id, $ord_tp, $totDiscount, true);
+            if (!$checkWallet['status'])
+                return ['status' => false, 'msg' => $checkWallet['msg']];
+        }
+
+        $save = new ApOrder();
+        $save->uid = $user_id;
+        $save->order_id = $order_id;
+        $save->sv = $totSv;
+        $save->total_qty = $totalQty;
+        $save->total_amt = $totalAmount;
+        $save->discount_amt = 0;
+        $save->gst_amt = $totalGst;
+        $save->total_gross = $totalGross;
+        $save->total_net_amt = $totalNetAmt;
+        $save->address_id = $request->address_id;
+        $save->shipping_charge = $shippingCharge;
+        $save->unique_order_id = $uniqueOd;
+        $save->delivery_mode = $request->delivery_mode;
+        $save->order_type = $ord_type;
+        $save->status = 'pending';
+        if (!$save->save())
+            return ['status' => false, 'msg' => 'Something Went Wrong, Order not created.'];
+
+        foreach ($cartItems as $cartItem) {
+            if ($cartItem->product) {
+                $orderToProduct = new OrderToProduct();
+                $orderToProduct->order_id = $save->id;
+                $orderToProduct->product_id = $cartItem->product_id;
+                $orderToProduct->variant_id = $cartItem->variant_id;
+                $orderToProduct->attribute_id = null;
+                $orderToProduct->quantity = $cartItem->quantity;
+                $orderToProduct->price = $cartItem->product->product_sale_price;
+                $orderToProduct->gst = $cartItem->product->igst;
+                if (!$orderToProduct->save()) {
+                    DB::rollBack();
+                    return $this->failMsg('Failed to create order to product.');
+                }
+            }
+        }
+
+        if (in_array($request->payment_gateway, ['wallet'])) {
+            $orderService = new OrderService();
+            $checkWallet = $orderService->checkWallet(($totalNetAmt + $shippingCharge), $order_id, $ord_tp, $totDiscount, false);
+            if (!$checkWallet['status'])
+                return ['status' => false, 'msg' => ($checkWallet['msg'])];
+        }
+
+        if (($request->payment_gateway == 'wallet' ||
+            (in_array($request->payment_gateway, ['razorpay'])) &&
+                $request->payment_gateway['status'] == 'success')) {
+            $orderService = new OrderService();
+            $orderService->distributePayout($totSv, $order_id);
+
+            $directPay = User::where('id', Auth::user()->id)->first();
+            $in_type = "Start Bonus from {$directPay->user_nm} - level 1";
+            $amount = $totSv * 0.4;
+            $insert = insertPayout($amount, $directPay->ref_id, $in_type, $directPay->user_num, $order_id, $totSv, 1);
+            if ($insert) {
+                addWallet1(1, $directPay->ref_id, $amount, $order_id, 'gen_payout');
+            } else {
+                Log::info("$amount not inserted at Level 1 >>> Payout user id: {$directPay->ref_id}");
+            }
+
+            if ($userRes->isactive1 == 1) {
+                $in_type = 'Self Repurchase Bonus';
+                $amount = $totSv * 0.05;
+                $insert = insertPayoutSelf($amount, $directPay->user_num, $in_type, 0, $order_id, $totSv, 0, 'rp');
+                if ($insert) {
+                    addWallet1(1, $directPay->user_nm, $amount, $order_id, 'repurchase_payout');
+                } else {
+                    Log::info("$amount not inserted at Level 1 >>> Payout user id: {$directPay->refid}");
+                }
+            } else {
+                $userLvl = User::where('user_id', $user_id)->first();
+                $userLvl->isactive = 1;
+                $userLvl->isactive1 = 1;
+                $userLvl->sv = $userLvl->sv + $totSv;
+                $userLvl->role = 'distributor';
+                $userLvl->upgrade_date = date('Y-m-d');
+                if (!$userLvl->save())
+                    return ['status' => false, 'msg' => 'Something Went Wrong, Order not created.'];
+            }
+            $purstep = 2;
+            $bonus = 0;
+        } else {
+            $bonus = 0;
+            $purstep = 1;
+        }
+        $msg = 'Your Order Received Successfully. Your Order Id is ' . $order_id;
+        $message = 'Your Order Received Successfully. Your Order Id is ' . $order_id;
+
+        $resResponse = [
+            'order_id' => $order_id,
+            'message' => $message,
+            'purchase' => $purstep,
+            'bonus' => $bonus
+        ];
+        Cart::where('user_id', Auth::user()->id)->delete();
+        return ['status' => true, 'array' => $resResponse, 'msg' => $msg];
     }
 
     public function paymentProcess()
     {
-
         $payment = new CashFree();
         $res = $payment->createOrder(100, 'INR', ['customer_id' => '1234567890', 'customer_name' => 'John Doe', 'customer_email' => 'john.doe@example.com', 'customer_phone' => '+919876543210']);
 

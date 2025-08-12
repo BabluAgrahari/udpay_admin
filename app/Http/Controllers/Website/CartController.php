@@ -3,21 +3,20 @@
 namespace App\Http\Controllers\Website;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Http\Requests\CartRequest;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\DB;
 use App\Models\Cart;
-use App\Models\Product;
-use Illuminate\Support\Facades\Cookie;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
 use App\Models\Coupon;
+use App\Models\Product;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Exception;
 
 class CartController extends Controller
 {
-
     public function addToCart(Request $request)
     {
         try {
@@ -26,7 +25,7 @@ class CartController extends Controller
 
             $cartIdentifier = $userId ? ['user_id' => $userId] : ['cart_cookie_id' => $cookieId];
             if (!$request->hasCookie('cart_cookie_id')) {
-                Cookie::queue('cart_cookie_id', $cookieId, 60 * 24 * 30); // 30 days
+                Cookie::queue('cart_cookie_id', $cookieId, 60 * 24 * 30);  // 30 days
             }
 
             $existingCart = Cart::where(array_merge($cartIdentifier, ['product_id' => $request->product_id]))->first();
@@ -37,6 +36,14 @@ class CartController extends Controller
             $save = new Cart();
             if ($userId) {
                 $save->user_id = $userId;
+            }
+
+            if (Auth::user()->can('isDistributor')) {
+                $save->cart_type = 'ap_shopping';
+            } elseif (Auth::user()->can('isCustomer')) {
+                $save->cart_type = 'shopping';
+            } else {
+                $save->cart_type = 'deals'; // deals, shopping, ap_shopping
             }
             $save->cart_cookie_id = $cookieId;
             $save->product_id = $request->product_id;
@@ -53,11 +60,10 @@ class CartController extends Controller
         }
     }
 
-
     public function cartList(Request $request)
     {
         try {
-            $query =  Cart::with('product');
+            $query = Cart::with('product');
 
             if (Auth::user()) {
                 $query->where('user_id', Auth::user()->id);
@@ -75,7 +81,6 @@ class CartController extends Controller
             abort(500, $e->getMessage());
         }
     }
-
 
     public function updateQuantity(CartRequest $request)
     {
@@ -104,7 +109,6 @@ class CartController extends Controller
             return $this->failMsg($e->getMessage());
         }
     }
-
 
     public function removeFromCart(CartRequest $request)
     {
@@ -142,7 +146,6 @@ class CartController extends Controller
         return $this->successMsg('Cart cleared successfully', ['cart_data' => $this->getCartData($request)]);
     }
 
-
     private function getCartData(Request $request)
     {
         $query = Cart::with('product');
@@ -157,7 +160,7 @@ class CartController extends Controller
         $total_mrp = 0;
         $total_items = 0;
 
-        //apply coupon discount
+        // apply coupon discount
         $couponDiscount = 0;
         if (session('applied_coupon.discount_amount')) {
             $couponDiscount = session('applied_coupon.discount_amount');
@@ -165,13 +168,13 @@ class CartController extends Controller
 
         foreach ($query->get() as $item) {
             if ($item->product) {
-               if(Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer')){
+                if (Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer')) {
                     $itemTotal = $item->product->product_sale_price * $item->quantity;
                     $price = $item->product->product_sale_price;
-               }else{
+                } else {
                     $itemTotal = $item->product->guest_price * $item->quantity;
                     $price = $item->product->guest_price;
-               }
+                }
 
                 $itemMrp = (isset($item->product->mrp) && $item->product->mrp > 0) ? $item->product->mrp * $item->quantity : $itemTotal;
 
@@ -195,7 +198,6 @@ class CartController extends Controller
             'applied_coupon' => session('applied_coupon')
         ];
     }
-
 
     public function getCartSummary(Request $request)
     {
@@ -249,14 +251,14 @@ class CartController extends Controller
                 $query->where('cart_cookie_id', $request->cookie('cart_cookie_id'));
             }
             $cartItems = $query->get();
-            
+
             $subtotal = 0;
             $total_mrp = 0;
 
             foreach ($cartItems as $item) {
-                if(Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer')){
+                if (Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer')) {
                     $subtotal += ($item->product->product_sale_price * $item->quantity);
-                }else{
+                } else {
                     $subtotal += ($item->product->guest_price * $item->quantity);
                 }
                 $total_mrp += (isset($item->product->mrp) && $item->product->mrp > 0 ? $item->product->mrp : $item->product->product_sale_price) * $item->quantity;
@@ -264,7 +266,6 @@ class CartController extends Controller
 
             if ($coupon->minimum_amount > 0 && $subtotal < $coupon->minimum_amount) {
                 return $this->failMsg('Minimum order amount of ₹' . $coupon->minimum_amount . ' required for this coupon');
-        
             }
 
             $discount = 0;
@@ -305,7 +306,6 @@ class CartController extends Controller
                     'savings' => $discount
                 ]
             ]);
-
         } catch (Exception $e) {
             return $this->failMsg($e->getMessage());
         }
@@ -315,7 +315,7 @@ class CartController extends Controller
     {
         try {
             session()->forget('applied_coupon');
-            
+
             return $this->successMsg('Coupon removed successfully');
         } catch (Exception $e) {
             return $this->failMsg($e->getMessage());
@@ -327,7 +327,7 @@ class CartController extends Controller
         try {
             $coupons = Coupon::active()->get();
             $html = '';
-            
+
             if ($coupons->count() > 0) {
                 foreach ($coupons as $coupon) {
                     $html .= '<div class="coupon-item mb-3 p-3 border rounded">';
@@ -335,7 +335,7 @@ class CartController extends Controller
                     $html .= '<div>';
                     $html .= '<h6 class="mb-1">' . $coupon->name . '</h6>';
                     $html .= '<p class="mb-1 text-muted small">' . $coupon->description . '</p>';
-                    
+
                     if ($coupon->discount_type === 'percentage') {
                         $html .= '<p class="mb-1"><strong>' . $coupon->discount_value . '% OFF</strong>';
                         if ($coupon->maximum_discount > 0) {
@@ -345,15 +345,15 @@ class CartController extends Controller
                     } else {
                         $html .= '<p class="mb-1"><strong>₹' . $coupon->discount_value . ' OFF</strong></p>';
                     }
-                    
+
                     if ($coupon->minimum_amount > 0) {
                         $html .= '<p class="mb-1 text-muted small">Min. order: ₹' . $coupon->minimum_amount . '</p>';
                     }
-                    
+
                     if ($coupon->usage_limit) {
                         $html .= '<p class="mb-1 text-muted small">Usage: ' . $coupon->used_count . '/' . $coupon->usage_limit . '</p>';
                     }
-                    
+
                     $html .= '</div>';
                     $html .= '<div class="text-end">';
                     $html .= '<button type="button" class="btn btn-sm btn-outline-primary" onclick="applyCouponCode(\'' . $coupon->code . '\')">Apply</button>';
@@ -364,7 +364,7 @@ class CartController extends Controller
             } else {
                 $html = '<p class="text-muted">No coupons available at the moment.</p>';
             }
-            
+
             return $this->successMsg('Coupons fetched successfully', ['html' => $html]);
         } catch (Exception $e) {
             return $this->failMsg($e->getMessage());

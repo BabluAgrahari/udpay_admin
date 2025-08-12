@@ -146,6 +146,10 @@
                         <option value="cashfree">Cashfree</option>
                         <option value="razorpay">Razorpay</option>
                     </select>
+                    <select name="delivery_mode" class="form-control mb-2">
+                        <option value="self_pickup">Self Pickup</option>
+                        <option value="courier">Courier</option>
+                    </select>
                     <button type="submit" class="thm-btn">Proceed to Pay</button>
                 </form>
             </div>

@@ -26,12 +26,12 @@ class PickupAddressRequest extends FormRequest
         // }
 
         return [
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|min:2|max:255',
             'email' => 'required|email|max:255',
             'phone' => 'required|integer|digits:10',
             'type' => 'required|in:pickup_address,rto_address,return_address',
             'location' => 'required|string|max:255',
-            'address' => 'required|string|max:500',
+            'address' => 'required|string|min:10|max:500',
             'city' => 'required|string|max:100',
             'state' => 'required|string|max:100',
             'pincode' => 'required|integer|digits:6',
@@ -43,6 +43,7 @@ class PickupAddressRequest extends FormRequest
     {
         return [
             'name.required' => 'Name is required',
+            'name.min' => 'Name must be at least 2 characters',
             'name.string' => 'Name must be a string',
             'name.max' => 'Name cannot exceed 255 characters',
             'email.required' => 'Email is required',
@@ -58,6 +59,7 @@ class PickupAddressRequest extends FormRequest
             'location.string' => 'Location must be a string',
             'location.max' => 'Location cannot exceed 255 characters',
             'address.required' => 'Address is required',
+            'address.min' => 'Address must be at least 10 characters',
             'address.string' => 'Address must be a string',
             'address.max' => 'Address cannot exceed 500 characters',
             'city.required' => 'City is required',
