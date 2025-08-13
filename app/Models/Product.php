@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Models\BaseModel;
+use Illuminate\Support\Facades\Auth;
+
 
 class Product extends BaseModel
 {
@@ -96,6 +98,11 @@ class Product extends BaseModel
         return $this->belongsTo(User::class, 'updated_by');
     }
 
+
+    public function wishlist()
+    {
+        return $this->hasOne(Wishlist::class, 'product_id', 'id')->where('user_id', Auth::user()->id);
+    }
    
 
 }

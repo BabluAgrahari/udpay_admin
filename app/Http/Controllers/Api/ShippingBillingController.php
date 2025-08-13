@@ -43,6 +43,7 @@ class ShippingBillingController extends Controller
             'zipcode'     => $record->user_zip_code,
             'address_type'=> $record->address_type,
             'address_for' => $record->address_for,
+            'is_default'  => $record->is_default?1:0,
             'created_at'  => $record->created_at,
         ];
     }
@@ -64,6 +65,16 @@ class ShippingBillingController extends Controller
     public function store(UserAddressValidation $request)
     {
         try {
+
+            //check if billing address is already exists then remove from record
+
+            $address = UserAddress::where('user_id', Auth::user()->user_id)->get();
+            foreach ($address as $item) {
+                $updateAddress = UserAddress::where('id', $item->id)->first();
+                $updateAddress->is_default = 0;
+                $updateAddress->save();
+            }
+
             $existBilling = UserAddress::where('user_id', Auth::user()->user_id)->where('address_type', 'billing')->count();
             if ($existBilling <= 0) {
                 $billing = new UserAddress();
@@ -80,6 +91,7 @@ class ShippingBillingController extends Controller
                 $billing->land_mark       = $request->landmark;
                 $billing->add_status      = '1';
                 $billing->address_type    = 'billing';
+                $billing->is_default      = $request->is_default?1:0;
                 $billing->save();
             }
 
@@ -97,6 +109,7 @@ class ShippingBillingController extends Controller
             $shipping->land_mark       = $request->landmark;
             $shipping->add_status      = '1';
             $shipping->address_type    = 'shipping';
+            $shipping->is_default      = $request->is_default?1:0;
             if ($shipping->save())
                 return $this->successRes('Address Added Successfully');
 
@@ -111,6 +124,14 @@ class ShippingBillingController extends Controller
     public function update(UserAddressValidation $request, $id)
     {
         try {
+
+            $address = UserAddress::where('user_id', Auth::user()->user_id)->get();
+            foreach ($address as $item) {
+                $updateAddress = UserAddress::where('id', $item->id)->first();
+                $updateAddress->is_default = 0;
+                $updateAddress->save();
+            }
+            
             $shipping = UserAddress::where('id', $id)->first();
             $shipping->user_add_name   = $request->name;
             $shipping->user_add_mobile = $request->mobile;
@@ -122,6 +143,7 @@ class ShippingBillingController extends Controller
             $shipping->address_for     = $request->add_type;
             $shipping->land_mark       = $request->landmark;
             $shipping->user_country   = 'india';
+            $shipping->is_default      = $request->is_default?1:0;
             if ($shipping->save())
                 return $this->successRes('Address Updated Successfully');
 

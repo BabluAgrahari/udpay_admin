@@ -103,7 +103,10 @@ Route::group(['middleware' => ['jwt.verify']], function () {
     Route::get('remove-address/{id}', [ShippingBillingController::class, 'remove']);
 
 
-
+    Route::post('add-to-cart', [CartController::class, 'addToCart']);
+    Route::post('update-quantity', [CartController::class, 'updateQuantity']);
+    Route::get('remove-cart-item/{cart_id}', [CartController::class, 'removeCart']);
+    Route::get('cart-items', [CartController::class, 'getCartList']);
 
 
 
@@ -143,10 +146,7 @@ Route::group(['middleware' => ['jwt.verify']], function () {
 
    
 
-    Route::post('add-to-cart', [CartController::class, 'addToCart']);
-    Route::post('update-quantity', [CartController::class, 'updateQuantity']);
-    Route::get('remove-cart-item/{cart_id}', [CartController::class, 'removeCart']);
-    Route::get('cart-items', [CartController::class, 'getCartList']);
+   
 
     Route::get('order-list', [UserOrderController::class, 'index']);
     Route::post('save-order', [UserOrderController::class, 'save']);

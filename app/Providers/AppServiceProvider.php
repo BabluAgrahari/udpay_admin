@@ -2,11 +2,11 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
+use App\Models\User;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Pagination\Paginator;
-use App\Models\User;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -25,16 +25,16 @@ class AppServiceProvider extends ServiceProvider
     {
         //
 
-        Gate::define('isAdmin', function (User $user) {
-            return $user->role == 'admin';
+        Gate::define('isGuest', function (User $user) {
+            return $user->role == 'guest';
         });
 
-        Gate::define('isSuperAdmin', function (User $user) {
-            return $user->role == 'supperadmin';
+        Gate::define('isCustomer', function (User $user) {
+            return $user->role == 'customer';
         });
 
-        Gate::define('isMerchant', function (User $user) {
-            return $user->role == 'merchant';
+        Gate::define('isDistributor', function (User $user) {
+            return $user->role == 'distributor';
         });
 
         Paginator::defaultView('Pagination');

@@ -28,8 +28,9 @@ class UserAddressValidation extends FormRequest
             'address'        => 'required|string|min:2|max:1000',
             'alternate_mobile'  => 'nullable|numeric|digits:10|not_in:0',
             'add_type'       => 'required|in:home,Work',
+            'is_default'     => 'required|in:0,1',
         ];
-        return $rules;
+        return $rules;  
     }
 
     public function messages()
@@ -55,7 +56,9 @@ class UserAddressValidation extends FormRequest
             'add_type.required'         => 'Address Type is Required.',
             'add_type.in'               => 'Address Type value should be home/office.',
             'operate_type.required'     => 'Operate type is Required.',
-            'add_id.numeric'            => "Address id Should be in Numeric Value"
+            'add_id.numeric'            => "Address id Should be in Numeric Value",
+            'is_default.required'       => 'Is default is required.',
+            'is_default.in'             => 'Is default value should be 0/1.',
         ];
     }
 

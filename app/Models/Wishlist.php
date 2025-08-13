@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Models\BaseModel;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Product;
 
 class Wishlist extends BaseModel
 {
