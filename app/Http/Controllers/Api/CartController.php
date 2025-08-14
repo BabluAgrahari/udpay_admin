@@ -19,11 +19,11 @@ class CartController extends Controller
 	public function getCartList(Request $request)
 	{
 		try {
-			$records = $this->cartItems();
-			if (empty($records))
-				return $this->failRes('Your Cart Found Empty.');
+		$records = $this->cartItems();
+		if (empty($records))
+			return $this->failRes('Your Cart Found Empty.');
 
-			return $this->recordRes($records);
+		return $this->recordRes($records);
 		} catch (Exception $e) {
 			return $this->failRes($e->getMessage());
 		}
@@ -66,7 +66,7 @@ class CartController extends Controller
 				return $this->failRes('Something Went wrong, Product not added in cart.');
 
 			$cartItems = $this->cartItems();
-			return $this->successRes($cartItems, 'Product has been added to cart.');
+			return $this->successRes('Product has been added to cart.',$cartItems);
 		} catch (Exception $e) {
 			return $this->failRes($e->getMessage());
 		}
@@ -92,7 +92,7 @@ class CartController extends Controller
 			$cartItem->quantity = $quantity;
 			if ($cartItem->save()) {
 				$cartItems = $this->cartItems();
-				return $this->successRes($cartItems, 'Cart Item Quantity updated.');
+				return $this->successRes('Cart Item Quantity updated.',$cartItems);
 			}
 			return $this->failRes('Quantity not updated');
 		} catch (Exception $e) {
@@ -113,7 +113,7 @@ class CartController extends Controller
 
 			$cartItems = $this->cartItems();
 			if (!empty($cartItems))
-				return $this->successRes($cartItems, 'Cart Item Removed Successfully.');
+				return $this->successRes('Cart Item Removed Successfully.',$cartItems);
 
 			return $this->successRes('Cart Item Removed Successfully.');
 		} catch (Exception $e) {
@@ -129,7 +129,7 @@ class CartController extends Controller
 		} elseif (Auth::user()->can('isCustomer')) {
 			$cart_type = 'shopping';
 		}
-		$records = Cart::with(['product'])->where('user_id', Auth::user()->user_id)->where('cart_type', $cart_type)->get();
+		$records = Cart::with(['product'])->where('user_id', Auth::user()->id)->where('cart_type', $cart_type)->get();
 
 		if ($records->isEmpty())
 			return [];
@@ -144,11 +144,11 @@ class CartController extends Controller
 
 		$record = [];
 		foreach ($records as $cart) {
-			$totSv += $cart->product->sv;
-			$totalQty += $cart->quantity;
-			$totalAmount += $cart->product->product_sale_price * $cart->quantity;
+			$totSv += $cart->product->sv ?? 0;
+			$totalQty += $cart->quantity ?? 0;
+			$totalAmount += $cart->product->product_sale_price ?? 0 * $cart->quantity ?? 0;
 
-			$gst = 100 / (100 + $cart->product->igst);
+			$gst = 100 / (100 + ($cart->product->igst ?? 0));
 			$gross = $totalAmount * $gst;
 			$totalGst += $totalAmount - $gross;
 			$totalNetAmt = $gross + $totalGst;
@@ -158,7 +158,7 @@ class CartController extends Controller
 				'id' => $cart->id,
 				'product_id' => $cart->product_id,
 				'quantity' => $cart->quantity,
-				'product' => $this->field($cart->product),
+				'product' => !empty($cart->product) ? $this->field($cart->product) : [],
 			];
 		}
 
@@ -166,7 +166,8 @@ class CartController extends Controller
 		if (($totalNetAmt < 649))
 			$shippingCharge = 100;
 
-		$record['calculation'] = [
+		$recordData['items'] = $record;
+		$recordData['calculation'] = [
 			'total_qty' => $totalQty,
 			'total_amount' => $totalAmount,
 			'total_gst' => $totalGst,
@@ -176,36 +177,35 @@ class CartController extends Controller
 			'total_discount' => $totDiscount,
 		];
 
-		return $record;
+		return $recordData;
 	}
-
 
 	private function field($product)
 	{
 		$field = [
-			'id' => (int) $product->id,
-			'product_name' => (string) $product->product_name,
-			'slug_url' => (string) $product->slug_url,
-			'product_category_id' => (int) $product->product_category_id,
-			'product_image' => (string) $product->product_image,
-			'brand_id' => (int) $product->brand_id,
-			'product_price' => (float) $product->product_price,
-			'product_sale_price' => (float) $product->product_sale_price,
-			'mrp' => (float) $product->mrp,
-			'product_stock' => (int) $product->product_stock,
-			'product_short_description' => (string) $product->product_short_description,
-			'product_description' => (string) $product->product_description,
+			'id' => (int) $product->id ?? 0,
+			'product_name' => (string) $product->product_name ?? '',
+			'slug_url' => (string) $product->slug_url ?? '',
+			'product_category_id' => (int) $product->product_category_id ?? 0,
+			'product_image' => (string) $product->product_image ?? '',
+			'brand_id' => (int) $product->brand_id ?? 0,
+			'product_price' => (float) $product->product_price ?? 0,
+			'product_sale_price' => (float) $product->product_sale_price ?? 0,
+			'mrp' => (float) $product->mrp ?? 0,
+			'product_stock' => (int) $product->product_stock ?? 0,
+			'product_short_description' => (string) $product->product_short_description ?? '',
+			'product_description' => (string) $product->product_description ?? '',
 			'no_of_reviews' => (int) $product->reviews->where('status', '1')->count() ?? 0,
 			'avg_rating' => (float) $product->reviews->where('status', '1')->avg('rating') ?? 0,
 			'is_wishlist' => !empty($product->wishlist) ? 1 : 0,
 			'category' => [
-				'id' => (int) $product->category->id,
-				'name' => (string) $product->category->name,
-				'slug' => (string) $product->category->slug,
-				'img' => (string) $product->category->img,
-				'description' => (string) $product->category->description,
+				'id' => (int) $product->category->id ?? 0,
+				'name' => (string) $product->category->name ?? '',
+				'slug' => (string) $product->category->slug ?? '',
+				'img' => (string) $product->category->img ?? '',
+				'description' => (string) $product->category->description ?? '',
 			],
-			'created_at' => (string) $product->created_at
+			'created_at' => (string) $product->created_at ?? ''
 		];
 		return $field;
 	}

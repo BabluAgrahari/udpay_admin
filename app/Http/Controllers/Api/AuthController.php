@@ -151,6 +151,8 @@ class AuthController extends Controller
             'pincode' => $user->userKyc->pincode ?? '',
             'address' => $user->userKyc->address ?? '',
             'role' => $user->role ?? '',
+            'udpay_user' =>in_array($user->role,['distributor','customer']) ? 1 : 0,
+            'is_active' => $user->isactive ?? '',
             'landmark' => $user->userKyc->locality ?? '',
             'created_at' => $user->created_at ?? '',
             'updated_at' => $user->updated_at ?? '',
