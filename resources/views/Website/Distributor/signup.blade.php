@@ -101,7 +101,7 @@
                                     <span class="text-danger error" id="email_error"></span>
                                 </div>
 
-                                <div class="form-group mb-3">
+                                {{-- <div class="form-group mb-3">
                                     <label for="password" class="form-label">Password<span class="text-danger">
                                             *</span></label>
                                     <input type="password" class="form-control" id="password" name="password"
@@ -116,7 +116,7 @@
                                     <input type="password" class="form-control" id="confirm_password"
                                         name="confirm_password" placeholder="Confirm your password" required>
                                     <span class="text-danger error" id="confirm_password_error"></span>
-                                </div>
+                                </div> --}}
 
                                 <button type="submit" class="btn theme-btn w-100">Create Account</button>
                             </form>

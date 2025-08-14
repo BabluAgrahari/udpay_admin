@@ -61,15 +61,15 @@
                             $subtotal = 0;
                             $total_mrp = 0;
                             $total_saving = 0;
+                            $total_sv = 0;
 
                         @endphp
                         @foreach ($cartItems as $item)
-
-                        @canany(['isDistributor', 'isCustomer'])
-                            @php $price = $item->product->product_sale_price; @endphp
-                        @else
-                            @php $price = $item->product->guest_price??0; @endphp
-                        @endcanany
+                            @canany(['isDistributor', 'isCustomer'])
+                                @php $price = $item->product->product_sale_price; @endphp
+                            @else
+                                @php $price = $item->product->guest_price??0; @endphp
+                            @endcanany
                             @php
 
                                 $item_save =
@@ -83,6 +83,13 @@
                                         ? $item->product->mrp * $item->quantity
                                         : $price * $item->quantity;
                                 $total_mrp = $total_mrp + $item_mrp;
+
+                                if (
+                                    Auth::check() &&
+                                    (Auth::user()->role == 'customer' || Auth::user()->role == 'distributor')
+                                ) {
+                                    $total_sv = $total_sv + $item->product->sv * $item->quantity;
+                                }
 
                             @endphp
 
@@ -106,12 +113,15 @@
                                             </div>
                                             <div class="price">
                                                 @canany(['isCustomer', 'isDistributor'])
-                                                    ₹{{ $item->product->product_sale_price??0 }}
+                                                    <span id="price-{{ $item->id }}">
+                                                        ₹{{ ($item->product->product_sale_price ?? 0) * $item->quantity }}</span>
                                                 @else
-                                                    ₹{{ $item->product->guest_price??0 }}
+                                                    <span id="price-{{ $item->id }}">
+                                                        ₹{{ ($item->product->guest_price ?? 0) * $item->quantity }}</span>
                                                 @endcanany
                                                 @if (isset($item->product->mrp) && $item->product->mrp > $item->product->product_sale_price)
-                                                    <span class="old-price">₹{{ $item->product->mrp }}</span>
+                                                    <span id="mrp-{{ $item->id }}"
+                                                        class="old-price">₹{{ $item->product->mrp * $item->quantity }}</span>
                                                     <!--  <span class="discount">6% OFF</span> -->
                                                 @endif
                                             </div>
@@ -144,15 +154,18 @@
                             <button class="check-btn">Check</button>
                         </div>
 
-                        <div class="pincode-check mt-3">
-                            <input type="text" id="couponCode" placeholder="Enter coupon code" maxlength="50">
-                            <button class="check-btn" type="button" onclick="applyCoupon()" id="applyCouponBtn">
-                                <span class="btn-text">Apply</span>
-                                <span class="btn-loading d-none">
-                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                </span>
-                            </button>
-                        </div>
+                        @if (empty(Auth::user()) || Auth::user()->role == 'guest')
+                            <div class="pincode-check mt-3">
+                                <input type="text" id="couponCode" placeholder="Enter coupon code" maxlength="50">
+                                <button class="check-btn" type="button" onclick="applyCoupon()" id="applyCouponBtn">
+                                    <span class="btn-text">Apply</span>
+                                    <span class="btn-loading d-none">
+                                        <span class="spinner-border spinner-border-sm" role="status"
+                                            aria-hidden="true"></span>
+                                    </span>
+                                </button>
+                            </div>
+                        @endif
                         <div id="couponMessage" class="mt-2"></div>
 
                         @if (session('applied_coupon'))
@@ -170,8 +183,16 @@
                                 </div>
                             </div>
                         @endif
-                        <a href="{{ url('checkout') }}" class="thm-btn w-100 mb-3">Proceed to Pay
-                            ₹{{ session('applied_coupon') ? $subtotal - session('applied_coupon.discount_amount') : $subtotal }}</a>
+
+                        @if (Auth::check() &&
+                                (Auth::user()->role == 'customer' || Auth::user()->role == 'distributor' || Auth::user()->role == 'guest'))
+                            <a href="{{ url('checkout') }}" class="thm-btn w-100 mb-3 proceed-to-pay">Proceed to Pay
+                                ₹{{ session('applied_coupon') ? $subtotal - session('applied_coupon.discount_amount') : $subtotal }}</a>
+                        @else
+                            <a href="javascript:void(0)" data-popup="login1"
+                                class="openPopup  thm-btn w-100 mb-3 proceed-to-pay">Proceed to Pay
+                                ₹{{ session('applied_coupon') ? $subtotal - session('applied_coupon.discount_amount') : $subtotal }}</a>
+                        @endif
                         <button class="btn btn-outline-danger w-100 mb-3" onclick="clearCart()">Clear Cart</button>
 
                         <div class="summary-box">
@@ -180,6 +201,9 @@
                             <p>Total MRP <span>₹{{ $total_mrp }}</span></p>
                             @if ($total_saving > 0)
                                 <p>Total Discounts <span class="discount">−₹{{ $total_saving }}</span></p>
+                            @endif
+                            @if (Auth::check() && (Auth::user()->role == 'customer' || Auth::user()->role == 'distributor'))
+                                <p>Total SV <span style="color: #F1624B;">{{ $total_sv }}</span></p>
                             @endif
                             @if (session('applied_coupon'))
                                 <p>Coupon Discount <span
@@ -286,7 +310,7 @@
                 }
             };
 
-    
+
             function removeFromCart(productId) {
                 showCartLoading();
 
@@ -301,19 +325,25 @@
                         hideCartLoading();
                         if (response.status) {
                             $('.cart-item[data-product-id="' + productId + '"]').fadeOut(300,
-                        function() {
-                                $(this).remove();
-                                updateCartSummary(response.record.cart_data);
-                                showSnackbar(response.msg, 'success');
+                                function() {
+                                    $(this).remove();
+                                    updateCartSummary(response.record.cart_data);
+                                    showSnackbar(response.msg, 'success');
 
-                                if (response.cart_data.total_items === 0) {
-                                    setTimeout(function() {
-                                        location.reload();
-                                    }, 1000);
-                                }
-                            });
+                                    if (response.cart_data.total_items === 0) {
+                                        setTimeout(function() {
+                                            location.reload();
+                                        }, 1000);
+                                    }
+                                });
                         } else {
                             showSnackbar(response.msg, 'error');
+                        }
+
+                        if (response.record.cart_data.total_items === 0) {
+                            setTimeout(function() {
+                                location.reload();
+                            });
                         }
                     },
                     error: function(xhr) {
@@ -327,7 +357,7 @@
                 });
             }
 
-         
+
 
             // Coupon functionality
             function applyCoupon() {

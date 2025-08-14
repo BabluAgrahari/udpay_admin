@@ -18,7 +18,22 @@ class HomeController extends Controller
             $data['categories'] = Category::status()->where('parent_id', '0')->get();
             $category = Category::status()->where('parent_id', '0')->where('pro_section', 'primary')->get();
 
-            $products = Product::status()->with('reviews')->where('pro_section', 'primary')->get();
+           $query = Product::status()->with('reviews')->where('pro_section', 'primary');
+
+            if(Auth::check() && Auth::user()->role == 'customer'){
+                $query->where('pro_type', 'primary1');
+            }
+    
+            if(Auth::check() && Auth::user()->role == 'distributor'){
+                $query->whereIn('pro_type', ['primary1', 'rp']);
+            }
+    
+            if(empty(Auth::user()) || Auth::user()->role == 'guest'){
+                $query->where('guest_status', '1');
+            }
+
+            $products = $query->get();
+
             $array = [];
             $featured = [];
             foreach ($products as $product) {

@@ -24,6 +24,7 @@ class CartController extends Controller
             $userId = Auth::user()?->id ?? '';
 
             $cartIdentifier = $userId ? ['user_id' => $userId] : ['cart_cookie_id' => $cookieId];
+           
             if (!$request->hasCookie('cart_cookie_id')) {
                 Cookie::queue('cart_cookie_id', $cookieId, 60 * 24 * 30);  // 30 days
             }
@@ -38,9 +39,9 @@ class CartController extends Controller
                 $save->user_id = $userId;
             }
 
-            if (Auth::user()->can('isDistributor')) {
+            if (!empty(Auth::user()) && Auth::user()->can('isDistributor')) {
                 $save->cart_type = 'ap_shopping';
-            } elseif (Auth::user()->can('isCustomer')) {
+            } elseif (!empty(Auth::user()) && Auth::user()->can('isCustomer')) {
                 $save->cart_type = 'shopping';
             } else {
                 $save->cart_type = 'deals'; // deals, shopping, ap_shopping
@@ -66,6 +67,7 @@ class CartController extends Controller
             $query = Cart::with('product');
 
             if (Auth::user()) {
+
                 $query->where('user_id', Auth::user()->id);
             } else {
                 $query->where('cart_cookie_id', $request->cookie('cart_cookie_id'));
@@ -102,7 +104,15 @@ class CartController extends Controller
 
             $cartItem->quantity = $quantity;
             if ($cartItem->save()) {
-                return $this->successMsg('Quantity updated successfully', ['cart_data' => $this->getCartData($request)]);
+
+                $price = $cartItem->product->guest_price;
+                $mrp = $cartItem->product->mrp;
+                if(!empty(Auth::user()) && (Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer'))){
+                    $price = $cartItem->product->product_sale_price;
+                }
+
+                return $this->successMsg('Quantity updated successfully', ['cart_data' => $this->getCartData($request),
+                'mrp' => $mrp * $quantity,'price' => $price * $quantity,'cart_id' => $cartItem->id]);
             }
             return $this->failMsg('Quantity not updated');
         } catch (\Exception $e) {
@@ -159,7 +169,7 @@ class CartController extends Controller
         $total_saving = 0;
         $total_mrp = 0;
         $total_items = 0;
-
+        $total_sv = 0;
         // apply coupon discount
         $couponDiscount = 0;
         if (session('applied_coupon.discount_amount')) {
@@ -168,7 +178,7 @@ class CartController extends Controller
 
         foreach ($query->get() as $item) {
             if ($item->product) {
-                if (Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer')) {
+                if (!empty(Auth::user()) && (Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer'))) {
                     $itemTotal = $item->product->product_sale_price * $item->quantity;
                     $price = $item->product->product_sale_price;
                 } else {
@@ -186,6 +196,10 @@ class CartController extends Controller
                     $total_saving += ($item->product->mrp - $price) * $item->quantity;
                 }
             }
+
+            if(Auth::check() && (Auth::user()->role == 'customer' || Auth::user()->role == 'distributor')){
+                $total_sv += $item->product->sv * $item->quantity;
+            }
         }
 
         return [
@@ -195,7 +209,8 @@ class CartController extends Controller
             'total_mrp' => $total_mrp,
             'coupon_discount' => $couponDiscount,
             'final_amount' => $subtotal - $couponDiscount,
-            'applied_coupon' => session('applied_coupon')
+            'applied_coupon' => session('applied_coupon'),
+            'total_sv' => $total_sv
         ];
     }
 
@@ -256,7 +271,7 @@ class CartController extends Controller
             $total_mrp = 0;
 
             foreach ($cartItems as $item) {
-                if (Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer')) {
+                if (!empty(Auth::user()) && (Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer'))) {
                     $subtotal += ($item->product->product_sale_price * $item->quantity);
                 } else {
                     $subtotal += ($item->product->guest_price * $item->quantity);

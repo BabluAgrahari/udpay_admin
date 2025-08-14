@@ -3,29 +3,33 @@
 namespace App\Http\Controllers\Website;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\UserAddress;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class AddressController extends Controller
 {
-
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'user_add_name' => 'required|string|max:255',
-            'user_add_mobile' => 'required|string|max:15',
-            'alternate_mob' => 'nullable|string|max:15',
-            'user_add_1' => 'required|string',
+            'user_add_name' => 'required|string|min:2|max:255',
+            'user_add_mobile' => 'required|numeric|digits:10|not_in:0|regex:/^[6-9]\d{9}$/',
+            'alternate_mob' => 'nullable|numeric|digits:10|not_in:0|regex:/^[6-9]\d{9}$/',
+            'user_add_1' => 'required|string|min:10|max:500',
             'user_add_2' => 'nullable|string',
-            'user_zip_code' => 'required|string|max:10',
+            'user_zip_code' => 'required|numeric|digits:6|not_in:0',
             'land_mark' => 'nullable|string|max:255',
             'user_state' => 'required|string|max:100',
             'user_city' => 'required|string|max:100',
             'user_country' => 'nullable|string|max:100',
-            'address_for' => 'nullable|string|max:50',
+            'address_for' => 'nullable|string',
             'address_type' => 'required|in:Home,Office,Others',
+        ], [
+            'user_add_mobile.regex' => 'Please enter a valid mobile number starting with 6, 7, 8, or 9.',
+            'user_add_mobile.not_in' => 'Please enter a valid mobile number starting with 6, 7, 8, or 9.',
+            'alternate_mob.regex' => 'Please enter a valid mobile number starting with 6, 7, 8, or 9.',
+            'alternate_mob.not_in' => 'Please enter a valid mobile number starting with 6, 7, 8, or 9.',
         ]);
 
         if ($validator->fails()) {
@@ -59,22 +63,25 @@ class AddressController extends Controller
         }
     }
 
-
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
-            'user_add_name' => 'required|string|max:255',
-            'user_add_mobile' => 'required|string|max:15',
-            'alternate_mob' => 'nullable|string|max:15',
-            'user_add_1' => 'required|string',
+            'user_add_name' => 'required|string|min:2|max:255',
+            'user_add_mobile' => 'required|numeric|digits:10|not_in:0|regex:/^[6-9]\d{9}$/',
+            'alternate_mob' => 'nullable|numeric|digits:10|not_in:0|regex:/^[6-9]\d{9}$/',
+            'user_add_1' => 'required|string|min:10|max:500',
             'user_add_2' => 'nullable|string',
-            'user_zip_code' => 'required|string|max:10',
+            'user_zip_code' => 'required|numeric|digits:6|not_in:0',
             'land_mark' => 'nullable|string|max:255',
             'user_state' => 'required|string|max:100',
             'user_city' => 'required|string|max:100',
             'user_country' => 'nullable|string|max:100',
-            'address_for' => 'nullable|string|max:50',
+            'address_for' => 'nullable|string',
             'address_type' => 'required|in:Home,Office,Others',
+        ], [
+            'user_add_mobile.regex' => 'Please enter a valid mobile number starting with 6, 7, 8, or 9.',
+            'alternate_mob.regex' => 'Please enter a valid mobile number starting with 6, 7, 8, or 9.',
+            'alternate_mob.not_in' => 'Please enter a valid mobile number starting with 6, 7, 8, or 9.',
         ]);
 
         if ($validator->fails()) {
@@ -112,6 +119,27 @@ class AddressController extends Controller
         }
     }
 
+    public function remove($id)
+    {
+        try {
+            $user = Auth::user();
+            $address = UserAddress::where('id', $id)
+                ->where('user_id', $user->id)
+                ->where('add_status', 1)
+                ->first();
+            if (!$address) {
+                return $this->failMsg('Address not found');
+            }
+
+            $address->add_status = '0';
+            if ($address->save())
+                return $this->successMsg('Address removed successfully');
+
+            return $this->failMsg('Failed to remove address');
+        } catch (\Exception $e) {
+            return $this->failMsg($e->getMessage());
+        }
+    }
 
     public function setDefault($id)
     {

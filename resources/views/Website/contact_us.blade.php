@@ -15,10 +15,13 @@
                             <p>Say something to start a live chat!</p>
                         </div>
                         <ul class="contact-list">
-                            <li class="contact-item"><i class="fa-solid fa-phone-volume"></i> +1012 3456 789</li>
-                            <li class="contact-item"><i class="fa-solid fa-envelope"></i> demo@gmail.com</li>
-                            <li class="contact-item"><i class="fa-solid fa-location-dot"></i>132 Dartmouth Street Boston, Massachusetts 02156 United States</li>
-                        </ul>
+                            <li class="contact-item"><i class="fa-solid fa-phone-volume"></i> +919549899933</li>
+                            <li class="contact-item"><i class="fa-solid fa-envelope"></i> enquiry@uni-pay.in</li>
+							<li class="contact-item"><i class="fa-solid fa-office"></i>UniPay Digital Pvt. Ltd.
+							</li>
+                            <li class="contact-item"><i class="fa-solid fa-location-dot"></i>Add 1 : Office Number 2 First Floor Ganga Tower Khatipura Road, near S D Aggarwal Jhotwara Jaipur<br>Rajasthan- 302012</li>
+                         <li class="contact-item"><i class="fa-solid fa-location-dot"></i>Add 2 : Plot no 130 OFFICER ENCLAV KALWAR ROAD JHOTWARA, JAIPUR Rajasthan- 302012</li>
+						</ul>
                         <ul class="ft-social-icon">
                             <li><a href="#"><i class="fa-brands fa-facebook-f"></i></a></li>
                             <li><a href="#"><i class="fa-solid fa-paper-plane"></i></a></li>

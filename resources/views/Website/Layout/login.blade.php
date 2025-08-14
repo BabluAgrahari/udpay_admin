@@ -60,7 +60,7 @@
                                 <div id="otpError" class="text-danger mt-1" style="display: none;"></div>
                             </div>
                             <input type="hidden" id="verifyMobileInput" value="" />
-                            <p>Didn't get the OTP? <a href="#" id="resendOtpLink">Resend SMS</a> in <strong class="text-black" id="resendTimer">02:00</strong></p>
+                            <p>Didn't get the OTP? <a href="#" id="resendOtpLink">Resend SMS</a> in <strong class="text-black" id="resendTimer">01:00</strong></p>
                             <button id="verifyOtpBtn" class="openPopup thm-btn w-100">Continue</button>
                         </form>
                     </div>
@@ -250,7 +250,7 @@
     }
 
     function startResendTimer() {
-        let timeLeft = 120; 
+        let timeLeft = 60; 
         const timerElement = $('#resendTimer');
         const resendLink = $('#resendOtpLink');
 

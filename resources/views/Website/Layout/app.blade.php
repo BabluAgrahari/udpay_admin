@@ -355,7 +355,7 @@
 
                                 @if (auth()->check())
                                     <div class="profile-main">
-                                        <a href="#" class="profile-icon">{{ auth()->user()->name }} <i
+                                        <a href="#" class="profile-icon">{{ auth()->user()->name??'Guest User' }} <i
                                                 class="fa-solid fa-chevron-down"></i></a>
                                         <div class="profile-dropdown">
                                             <ul class="user-list-header">
@@ -663,12 +663,15 @@
                 success: function(response) {
                     hideCartLoading();
                     if (response.status) {
+                        $('#price-'+response.record.cart_id).text('₹'+response.record.price);
+                        $('#mrp-'+response.record.cart_id).text('₹'+response.record.mrp);   
                         updateCartSummary(response.record.cart_data);
                         showSnackbar(response.msg, 'success');
                     } else {
                         showSnackbar(response.msg, 'error');
                         var input = $('input[data-product-id="' + productId + '"]');
                         var currentQty = parseInt(input.val());
+                         
                         if (quantity > currentQty) {
                             input.val(currentQty - 1);
                         } else {
@@ -695,12 +698,17 @@
                     ' Items)');
                 $('.summary-box p:contains("Total MRP") span').text('₹' + cartData.total_mrp);
 
+                $('.summary-box p:contains("Total Discounts") span').text('-₹ 0');
                 if (cartData.total_saving > 0) {
                     $('.summary-box p:contains("Total Discounts") span').text('-₹' + cartData.total_saving);
                 }
 
+                if(cartData.total_sv > 0 && cartData.total_sv != null){
+                    $('.summary-box p:contains("Total SV") span').text(cartData.total_sv);
+                }
+
                 $('.summary-box p:contains("Payable Amount") span').text('₹' + cartData.subtotal);
-                $('.thm-btn').text('Proceed to Pay ₹' + cartData.subtotal);
+                $('.proceed-to-pay').text('Proceed to Pay ₹' + cartData.subtotal);
 
                 $('.total-cart-count').text(cartData.total_items);
             }

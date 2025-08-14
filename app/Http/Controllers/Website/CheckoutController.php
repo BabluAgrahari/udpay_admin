@@ -38,6 +38,15 @@ class CheckoutController extends Controller
                 return $item->product ? $item->product->guest_price * $item->quantity : 0;
             }
         });
+
+        $totalSv = $cartItems->sum(function ($item) {
+            if(Auth::check() && (Auth::user()->role == 'customer' || Auth::user()->role == 'distributor')){
+                return $item->product ? $item->product->sv * $item->quantity : 0;
+            }else{
+                return 0;
+            }
+        });
+
         $total_mrp = $cartItems->sum(function ($item) {
             return $item->product && isset($item->product->mrp) ? $item->product->mrp * $item->quantity : 0;
         });
@@ -46,6 +55,7 @@ class CheckoutController extends Controller
 
         $data['subtotal'] = $subtotal;
         $data['total_mrp'] = $total_mrp;
+        $data['total_sv'] = $totalSv;
         $data['total_saving'] = $total_saving;
         $data['total_items'] = $total_items;
 
@@ -132,7 +142,7 @@ class CheckoutController extends Controller
 
     private function DealOrder($request, $cartItems)
     {
-        try {
+        // try {
             DB::beginTransaction();
 
             $subtotal = 0;
@@ -145,9 +155,10 @@ class CheckoutController extends Controller
             }
             $coupon_id = session('applied_coupon.id') ?? null;
 
+            $user = Auth::user();
             $order = new Order();
             $order->uid = $user->id;
-            $order->order_id = 'DEAL-' . time() . '-' . $user->id;
+            $order->order_id = 'NUTRA-' . time() . '-' . $user->id;
             $order->address_id = $request->address_id;
             $order->coupon_id = $coupon_id;
             $order->amount = $subtotal;
@@ -189,10 +200,10 @@ class CheckoutController extends Controller
             DB::commit();
 
             return ['status' => true, 'msg' => 'Order placed successfully!'];
-        } catch (\Exception $e) {
-            DB::rollback();
-            return ['status' => false, 'msg' => 'Failed to process order: ' . $e->getMessage()];
-        }
+        // } catch (\Exception $e) {
+        //     DB::rollback();
+        //     return ['status' => false, 'msg' => 'Failed to process order: ' . $e->getMessage()];
+        // }
     }
 
     private function ApOrder($request, $cartItems)

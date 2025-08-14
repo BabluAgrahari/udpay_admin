@@ -45,6 +45,7 @@ Route::prefix('address')->group(function () {
     Route::post('/', [AddressController::class, 'store']);
     Route::put('/{id}', [AddressController::class, 'update']);
     Route::post('/{id}/set-default', [AddressController::class, 'setDefault']);
+    Route::get('/{id}/remove', [AddressController::class, 'remove']);
 });
 
 Route::post('/checkout', [CheckoutController::class, 'checkout']);

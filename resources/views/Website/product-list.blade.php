@@ -50,7 +50,7 @@
                               @endcanany
                             </span>
                             @canany(['isDistributor', 'isCustomer'])
-                            <span class="price-bg"><small>Sv: {{ $product->sv }}</small></span>
+                            <span class="price-bg"><small>SV: {{ $product->sv }}</small></span>
                             @endcanany
                         </div>
                         <a href="javascript:void(0)" data-id="{{$product->id}}" class="thm-btn cart-btn">+</a>

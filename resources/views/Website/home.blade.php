@@ -82,7 +82,7 @@
                                                 @endcanany
                                             </span>
                                             @canany(['isDistributor', 'isCustomer'])
-                                                <span class="price-bg"><small>Sv: {{ $product->sv }}</small></span>
+                                                <span class="price-bg"><small>SV: {{ $product->sv }}</small></span>
                                             @endcanany
                                         </div>
                                         <a href="javascript:void(0)" data-id="{{ $product->id }}"
@@ -149,7 +149,7 @@
                                                 @endcanany
                                                 </span>
                                                 @canany(['isDistributor', 'isCustomer'])
-                                                    <span class="price-bg"><small>Sv: {{ $product->sv }}</small></span>
+                                                    <span class="price-bg"><small>SV: {{ $product->sv }}</small></span>
                                                 @endcanany
                                             </div>
                                             <a href="javascript:void(0)" data-id="{{ $product->id ?? 0 }}"
@@ -318,7 +318,7 @@
                     <img src="{{ asset('front_assets') }}/images/download-bg.png" alt="img">
                 </div>
                 <div class="download-content">
-                    <h2>Download our app And get 100 uNI points free!</h2>
+                    <h2>Download our app And get 100 Bonus points free!</h2>
                     <div class="d-flex align-items-center gap-3">
                         <img src="{{ asset('front_assets') }}/images/download-play.png" alt="img">
                         <img src="{{ asset('front_assets') }}/images/app-store.png" alt="img">

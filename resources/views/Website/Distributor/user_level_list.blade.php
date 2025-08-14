@@ -16,6 +16,7 @@
                         <th>User ID</th>
                         <th>Name</th>
                         <th>Upgrade Date</th>
+						<th>Month SV</th>
                         <th>Status</th>
                         <th>Action</th>
                     </tr>
@@ -24,10 +25,11 @@
                     @foreach ($records as $record)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td>{{ $record->user_id }}</td>
+                            <td>UNI{{ $record->user_num }}</td>
                             <td>{{ $record->name }}</td>
                             <td>{{ date('d-m-Y', strtotime($record->upgrade_date)) }}</td>
-                            <td>{{ $record->is_active ? 'Active' : 'Inactive' }}</td>
+                            <td>{{ $record->month_sv??0 }}</td>
+							<td style="color: {{ $record->is_active ? 'green' : 'red' }}"><i class="fa-solid fa-circle"></i></td>
                             <td>
                                 <a href="{{ url('distributor/user-level-list/'.$record->lvl) }}" class="thm-btn">View</a>
                             </td>

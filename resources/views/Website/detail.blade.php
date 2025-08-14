@@ -462,7 +462,7 @@
                             </span>
                             <span class="old-price">Price: ₹{{ number_format($product->mrp, 2) }}</span>
                             @canany(['isDistributor', 'isCustomer'])
-                            <span class="price-bg">Sv: {{ $product->sv }}</span>
+                            <span class="price-bg">SV: {{ $product->sv }}</span>
                             @endcanany
                         </div>
                         <div class="price-box mt-0">
@@ -572,7 +572,7 @@
                                 ₹{{ number_format($product->mrp, 2) }}
                             </span>
                             @canany(['isDistributor', 'isCustomer'])
-                            <span class="price-bg"><small>Sv: {{ $product->sv }}</small></span>
+                            <span class="price-bg"><small>SV: {{ $product->sv }}</small></span>
                             @endcanany
                         </div>
                     </div>
@@ -688,7 +688,7 @@
                             </span>
                             <span class="price-bg">₹{{ number_format($product->mrp, 2) }}</span>
                             @canany(['isDistributor', 'isCustomer'])
-                            <span class="price-bg"><small>Sv: {{ $product->sv }}</small></span>
+                            <span class="price-bg"><small>SV: {{ $product->sv }}</small></span>
                             @endcanany
                         </div>
                         <a href="javascript:void(0)" class="thm-btn cart-btn" data-id="{{ $product->id }}">+</a>
@@ -890,7 +890,7 @@
                 <img src="{{ asset('front_assets') }}/images/download-bg.png" alt="img">
             </div>
             <div class="download-content">
-                <h2>Download our app And get 100 uNI points free!</h2>
+                <h2>Download our app And get 100 Bonus points free!</h2>
                 <div class="d-flex align-items-center gap-3">
                     <img src="{{ asset('front_assets') }}/images/download-play.png" alt="img">
                     <img src="{{ asset('front_assets') }}/images/app-store.png" alt="img">

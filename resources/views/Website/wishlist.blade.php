@@ -28,7 +28,7 @@
                             ₹{{ number_format($item->product->guest_price, 2) }}
                         @endcanany
                         @canany(['isDistributor', 'isCustomer'])
-                            <span class="price-bg"><small>Sv: {{ $item->product->sv }}</small></span>
+                            <span class="price-bg"><small>SV: {{ $item->product->sv }}</small></span>
                         @endcanany
                       </h5>
                       <div class="wishlist-bottom">

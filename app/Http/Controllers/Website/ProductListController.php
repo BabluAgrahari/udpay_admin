@@ -32,6 +32,10 @@ class ProductListController extends Controller
 			$query->whereIn('pro_type', ['primary1', 'rp']);
 		}
 
+		if(empty(Auth::user()) || Auth::user()->role == 'guest'){
+			$query->where('guest_status', '1');
+		}
+
 		$data['products'] = $query->paginate(20);
 		$data['category_data'] = $category_data;
 

@@ -127,8 +127,8 @@ class SignupController extends Controller
             'mobile' => 'required|digits:10|unique:users_lvl,mobile',
             'full_name' => 'required|string|max:255',
             'email' => 'required|email|unique:users_lvl,email',
-            'password' => 'required|string|min:8',
-            'confirm_password' => 'required|same:password',
+            // 'password' => 'required|string|min:8',
+            // 'confirm_password' => 'required|same:password',
             'referral_id' => 'required|string|max:255',
         ], [
             'mobile.required' => 'Phone number is required',
@@ -177,8 +177,8 @@ class SignupController extends Controller
             $customer->name = $request->full_name;
             $customer->email = $request->email;
             $customer->mobile = $request->mobile;
-            $customer->password = Hash::make($request->password);
-            $customer->pwd = $request->password;
+            // $customer->password = Hash::make($request->password);
+            // $customer->pwd = $request->password;
             $customer->role = 'customer';
             $customer->type = 'customer';
             if ($customer->save()) {

@@ -21,7 +21,7 @@
                         <tbody>
                             @foreach ($referrals as $item)
                                 <tr>
-                                    <td>{{ $item->user_id }}</td>
+                                    <td>UNI{{ $item->user_num }}</td>
                                     <td>{{ $item->name }}</td>
                                     <td>{{ $item->mobile }}</td>
                                     <td>@if(!empty($item->rank->diamond))
@@ -49,7 +49,9 @@
                                         </span>
                                         @endif
                                     </td>
-                                    <td>{{ $item->isactive ? 'Active' : 'Inactive' }}</td>
+                                    <td style="color: {{ $item->isactive ? 'green' : 'red' }}">
+										<i class="fa-solid fa-circle"></i>
+									</td>
                                 </tr>
                             @endforeach
                         </tbody>
