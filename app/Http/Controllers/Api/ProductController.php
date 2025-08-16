@@ -62,6 +62,13 @@ class ProductController extends Controller
 
 	private function field($product)
 	{
+		$sv = 0;
+		if(Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer')){
+			$price = $product->product_sale_price;
+			$sv = $product->sv;
+		}else{
+			$price = $product->guest_price;
+		}
 		$field = [
 			'id' => (int) $product->id,
 			'product_name' => (string) $product->product_name,
@@ -70,7 +77,8 @@ class ProductController extends Controller
 			'product_image' => (string) $product->product_image,
 			'brand_id' => (int) $product->brand_id,
 			'product_price' => (float) $product->product_price,
-			'product_sale_price' => (float) $product->product_sale_price,
+			'sv' => (float) $sv,
+			'product_sale_price' => (float) $price,
 			'mrp' => (float) $product->mrp,
 			'product_stock' => (int) $product->product_stock,
 			'product_short_description' => (string) $product->product_short_description,
@@ -98,6 +106,12 @@ class ProductController extends Controller
 			$skip = ($page - 1) * $limit;
 
 			$query = Product::with(['category', 'reviews', 'wishlist'])->status();
+
+			if(!empty($request->category_name)){
+				$query->whereHas('category', function($query) use ($request){
+					$query->where('name', $request->category_name);
+				});
+			}
 
 			if (!empty($request->category_id)) {
 				$query->where('product_category_id', $request->category_id);
@@ -163,6 +177,11 @@ class ProductController extends Controller
 
 	private function productField($product)
 	{
+		if(Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer')){
+			$price = $product->product_sale_price;
+		}else{
+			$price = $product->guest_price;
+		}
 		$field = [
 			'id' => (int) $product->id ?? 0,
 			'product_name' => (string) $product->product_name ?? '',
@@ -173,7 +192,7 @@ class ProductController extends Controller
 			'product_image' => (string) $product->product_image ?? '',
 			'brand_id' => (int) $product->brand_id ?? 0,
 			'product_price' => (float) $product->product_price ?? 0,
-			'product_sale_price' => (float) $product->product_sale_price ?? 0,
+			'product_sale_price' => (float) $price,
 			'mrp' => (float) $product->mrp ?? 0,
 			'product_stock' => (int) $product->product_stock ?? 0,
 			'product_short_description' => (string) $product->product_short_description ?? '',

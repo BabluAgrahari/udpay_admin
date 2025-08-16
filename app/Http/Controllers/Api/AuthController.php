@@ -150,6 +150,7 @@ class AuthController extends Controller
             'state' => $user->userKyc->state ?? '',
             'pincode' => $user->userKyc->pincode ?? '',
             'address' => $user->userKyc->address ?? '',
+            'profile_pic' => $user->profile_pic ?? '',
             'role' => $user->role ?? '',
             'udpay_user' =>in_array($user->role,['distributor','customer']) ? 1 : 0,
             'is_active' => $user->isactive ?? '',
@@ -182,16 +183,18 @@ class AuthController extends Controller
 
     public function updateProfile(Request $request){
         try {
+            
             $validator = Validator::make($request->all(), [
-                'full_name' => 'required|string',
+                'full_name' => 'required|string|min:2|max:255',
                 'gender' => 'required|string|in:male,female,other',
-                'dob' => 'required|date',
-                'email' => 'required|email',
-                'city' => 'required|string',
-                'state' => 'required|string',
-                'pincode' => 'required|digits:6',
-                'address' => 'required|string',
-                'landmark' => 'required|string',
+                'dob' => 'required|date_format:Y-m-d',
+                'email' => 'required|email|unique:users,email,'.Auth::user()->id,
+                'city' => 'required|string|min:2|max:255',
+                'state' => 'required|string|min:2|max:255',
+                'pincode' => 'required|digits:6|not_in:000000',
+                'address' => 'required|string|min:2|max:500',
+                'landmark' => 'required|string|min:2|max:500',
+                'profile_pic' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             ],[
                 'full_name.required' => 'Full name is required.',
                 'gender.required' => 'Gender is required.',
@@ -218,6 +221,18 @@ class AuthController extends Controller
             $user->name = $request->full_name;
             $user->gender = $request->gender;
             $user->email = $request->email;
+
+            if($request->hasFile('profile_pic')){
+                    if($user->profile_pic){
+                        $oldImage = public_path('profile/'.$user->profile_pic);
+                        if(file_exists($oldImage)){
+                            unlink($oldImage);
+                        }
+                    }
+                    $image = singleFile($request->profile_pic, 'profile');
+                    $user->profile_pic = $image;
+                }
+            
             if(!$user->save()){
                 DB::rollBack();
                 return $this->failRes('Something went wrong, Profile not updated.');

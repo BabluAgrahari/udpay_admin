@@ -29,6 +29,16 @@ class WishListController extends Controller
             'created_at' => (string) $wishlist->created_at
         ];
         if (!empty($wishlist->product)) {
+            $price = 0;
+            $sv = 0;
+            if(Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer')){
+                $sv = $wishlist->product->sv;
+                $price = $wishlist->product->product_sale_price;
+            }else{
+                $price = $wishlist->product->guest_price;
+                $sv = 0;
+            }
+            
             $field['product'] = [
                 'id' => (int) $wishlist->product->id,
                 'product_name' => (string) $wishlist->product->product_name,
@@ -37,7 +47,8 @@ class WishListController extends Controller
                 'product_image' => (string) $wishlist->product->product_image,
                 'brand_id' => (int) $wishlist->product->brand_id,
                 'product_price' => (float) $wishlist->product->product_price,
-                'product_sale_price' => (float) $wishlist->product->product_sale_price,
+                'sv' => (float) $sv,
+                'product_sale_price' => (float) $price,
                 'mrp' => (float) $wishlist->product->mrp,
                 'product_stock' => (int) $wishlist->product->product_stock,
                 'product_short_description' => (string) $wishlist->product->product_short_description,

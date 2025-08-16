@@ -13,10 +13,10 @@ class CategoryController extends Controller
     public function index()
     {
         try {
-            $categories = Category::where('status', 1)->get()->map(function($category){
+            $categories = Category::where('status', 1)->where('pro_section','primary')->get()->map(function($category){
                  return $this->field($category);                    
             });
-            return $this->recordRes($categories);
+            return $this->recordsRes($categories);
         } catch (Exception $e) {
             return $this->failRes($e->getMessage());
         }

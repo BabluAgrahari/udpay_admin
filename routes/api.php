@@ -31,6 +31,8 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\WishListController;
 use App\Http\Controllers\Api\CouponController;
 use App\Http\Controllers\Api\ReviewController;
+use App\Http\Controllers\Api\AccountController;
+use App\Http\Controllers\Api\OrderController;
 
 
 /*
@@ -91,6 +93,7 @@ Route::group(['middleware' => ['jwt.verify']], function () {
 
     //coupon
     Route::get('coupon-list', [CouponController::class, 'index']);
+    Route::post('apply-coupon', [CouponController::class, 'applyCoupon']);
 
     //review
     Route::post('add-review', [ReviewController::class, 'store']);
@@ -101,12 +104,31 @@ Route::group(['middleware' => ['jwt.verify']], function () {
     Route::post('address-save', [ShippingBillingController::class, 'store']);
     Route::post('address-update/{id}', [ShippingBillingController::class, 'update']);
     Route::get('remove-address/{id}', [ShippingBillingController::class, 'remove']);
-
+    Route::post('set-default-address', [ShippingBillingController::class, 'setDefaultAddress']);
 
     Route::post('add-to-cart', [CartController::class, 'addToCart']);
     Route::post('update-quantity', [CartController::class, 'updateQuantity']);
     Route::get('remove-cart-item/{cart_id}', [CartController::class, 'removeCart']);
     Route::get('cart-items', [CartController::class, 'getCartList']);
+
+    //account
+    Route::get('contact-us', [AccountController::class, 'contactUs']);
+    Route::get('faq', [AccountController::class, 'faq']);
+    Route::get('privacy-policy', [AccountController::class, 'privacyPolicy']);
+    Route::get('download', [AccountController::class, 'download']);
+
+
+    //order
+    Route::get('order-list', [OrderController::class, 'index']);
+    Route::get('order-detail/{id}', [OrderController::class, 'show']);
+
+
+
+
+
+
+
+
 
 
 
@@ -148,8 +170,8 @@ Route::group(['middleware' => ['jwt.verify']], function () {
 
    
 
-    Route::get('order-list', [UserOrderController::class, 'index']);
-    Route::post('save-order', [UserOrderController::class, 'save']);
+    // Route::get('order-list', [UserOrderController::class, 'index']);
+    // Route::post('save-order', [UserOrderController::class, 'save']);
 
     //deleteAc
     Route::get('delete-account', [DeleteUserAcController::class, 'index']);

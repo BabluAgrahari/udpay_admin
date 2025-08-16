@@ -137,22 +137,30 @@ class CartController extends Controller
 		$totalQty = 0;
 		$totalAmount = 0;
 		$totalGst = 0;
-		$totSv = 0;
+		$totalSv = 0;
 		$totDiscount = 0;
 		$totalNetAmt = 0;
 		$totalGross = 0;
 
 		$record = [];
 		foreach ($records as $cart) {
-			$totSv += $cart->product->sv ?? 0;
+
+			$price = 0;
+			if(Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer')){
+				$totSv = ($cart->product->sv ?? 0) * ($cart->quantity ?? 0);
+				$price = $cart->product->product_sale_price ?? 0;
+			}else{
+				$price = $cart->product->guest_price ?? 0;
+			}
 			$totalQty += $cart->quantity ?? 0;
-			$totalAmount += $cart->product->product_sale_price ?? 0 * $cart->quantity ?? 0;
+			$totalAmount += $price * $cart->quantity ?? 0;
 
 			$gst = 100 / (100 + ($cart->product->igst ?? 0));
 			$gross = $totalAmount * $gst;
 			$totalGst += $totalAmount - $gross;
 			$totalNetAmt = $gross + $totalGst;
 			$totalGross += $gross;
+			$totalSv += $totSv ?? 0;
 
 			$record[] = [
 				'id' => $cart->id,
@@ -169,12 +177,13 @@ class CartController extends Controller
 		$recordData['items'] = $record;
 		$recordData['calculation'] = [
 			'total_qty' => $totalQty,
-			'total_amount' => $totalAmount,
+			'total_sv' => $totalSv,
+			'sub_total' => $totalAmount,
 			'total_gst' => $totalGst,
 			'total_gross' => $totalGross,
-			'shipping_charge' => $shippingCharge,
-			'total_net_amt' => $totalNetAmt,
-			'total_discount' => $totDiscount,
+			'shipping_amount' => $shippingCharge,
+			'total_net_amount' => $totalNetAmt + $shippingCharge,
+			'discount_amount' => $totDiscount,
 		];
 
 		return $recordData;
@@ -182,6 +191,13 @@ class CartController extends Controller
 
 	private function field($product)
 	{
+		$sv = 0;
+		if(Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer')){
+			$price = $product->product_sale_price;
+			$sv = $product->sv;
+		}else{
+			$price = $product->guest_price;
+		}
 		$field = [
 			'id' => (int) $product->id ?? 0,
 			'product_name' => (string) $product->product_name ?? '',
@@ -190,7 +206,8 @@ class CartController extends Controller
 			'product_image' => (string) $product->product_image ?? '',
 			'brand_id' => (int) $product->brand_id ?? 0,
 			'product_price' => (float) $product->product_price ?? 0,
-			'product_sale_price' => (float) $product->product_sale_price ?? 0,
+			'product_sale_price' => (float) $price,
+			'sv' => (float) $sv,
 			'mrp' => (float) $product->mrp ?? 0,
 			'product_stock' => (int) $product->product_stock ?? 0,
 			'product_short_description' => (string) $product->product_short_description ?? '',
