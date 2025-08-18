@@ -1,4 +1,4 @@
-Adress set defautl Api - Done
+Address set defautl Api - Done
 under profile image filed update also - Done
 coupun apply with copun code - Done
 Product filter basis of category_id -issue -Done
@@ -14,6 +14,19 @@ Faq - title description -done
 Privacy Policy - title description - Done
 
 Order Creation Part - demo Api 
+
+
+Today Work
+Make Address set defautl Api
+Add profile in Profile update Api
+Make a coupon Apply api
+Product list filter basis of category add in api
+Category List api image issue fix
+Order history list and detils Api
+Make contact_us, Api
+download certificat Api
+Faq and Privacy Policy Api
+address default issue fixed
 
 
 
