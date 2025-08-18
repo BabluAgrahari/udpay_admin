@@ -65,7 +65,9 @@
                                                     @endforeach
                                                 </tbody>
                                             </table>
+                                            {{ $redeemTransactions->links('pagination::bootstrap-4') }}
                                         </div>
+                                        
                                     @else
                                         <div class="text-center py-5">
                                             <div class="alert alert-info">

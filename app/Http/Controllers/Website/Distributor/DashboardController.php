@@ -38,6 +38,8 @@ class DashboardController extends Controller
                 ->groupBy('level_count.level')
                 ->limit(15)
                 ->get();
+
+               
         }
         if ($type == 'my-acheivements') {
             $data['achievement'] = Royalty::where('userId', auth()->user()->user_num)->first();

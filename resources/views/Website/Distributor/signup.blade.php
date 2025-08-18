@@ -20,9 +20,12 @@
                                     <label for="referral_id" class="form-label">Referral ID<span class="text-danger">
                                             *</span></label>
                                     <input type="text" class="form-control" id="referral_id" name="referral_id"
-                                        placeholder="Enter referral ID" value="{{ old('referral_id') }}" required>
+                                        placeholder="Enter referral ID" value="{{ $user->ref_id ?? '' }}" readonly required>
                                     <span class="text-danger error" id="referral_id_error"></span>
-                                    <small class="form-text text-muted">Enter your referral ID to continue</small>
+                                    <span class="text-muted " id="referral_id_error"> <b>Username :</b>
+                                        <span class="text-success">{{ $user->name ?? '' }}</span></span>
+                                        <br>
+                                    {{-- <small class="form-text text-muted">Enter your referral ID to continue</small> --}}
                                 </div>
 
                                 <div class="form-group mb-3">
@@ -79,7 +82,8 @@
                         <!-- Step 3: Complete Registration -->
                         <div id="registration-step" class="signup-step" style="display: none;">
                             <div id="messageError"></div>
-                            <form id="registration-form" method="POST" action="{{ url('distributor/signup/complete') }}">
+                            <form id="registration-form" method="POST"
+                                action="{{ url('distributor/signup/complete') }}">
                                 @csrf
                                 <input type="hidden" name="mobile" id="reg-mobile">
                                 <input type="hidden" name="otp_verified" value="1">
@@ -425,16 +429,16 @@
                 // Registration form submission
                 $('#registration-form').on('submit', function(e) {
                     e.preventDefault();
-                    var password = $('#password').val();
-                    var confirmPassword = $('#confirm_password').val();
-                    if (password !== confirmPassword) {
-                        $('#confirm_password_error').html('Passwords do not match');
-                        return;
-                    }
-                    if (password.length < 8) {
-                        $('#confirm_password_error').html('Password must be at least 8 characters long');
-                        return;
-                    }
+                    // var password = $('#password').val();
+                    // var confirmPassword = $('#confirm_password').val();
+                    //if (password !== confirmPassword) {
+                    //  $('#confirm_password_error').html('Passwords do not match');
+                    //return;
+                    // }
+                    //if (password.length < 8) {
+                    //  $('#confirm_password_error').html('Password must be at least 8 characters long');
+                    //return;
+                    // }
                     var submitBtn = $(this).find('button[type="submit"]');
                     var originalText = submitBtn.text();
                     submitBtn.text('Creating Account...').prop('disabled', true);
@@ -447,7 +451,9 @@
                             if (data.status) {
                                 alertMsg(true, 'Account created successfully! You can now login.');
                                 setTimeout(function() {
-                                    window.location.href = '{{ url('distributor/signin') }}';
+                                    window.location.href =
+                                        '{{ url('distributor/welcome/') }}' + data
+                                        .alpha_num_id;
                                 }, 1200);
                             } else {
                                 alertMsg(false, data.msg ||

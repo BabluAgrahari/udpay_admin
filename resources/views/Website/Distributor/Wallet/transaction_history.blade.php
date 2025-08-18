@@ -50,7 +50,7 @@
                                                 <tbody>
                                                     @foreach($transactions as $index => $tnx)
                                                         <tr>
-                                                            <td>{{ $index + 1 }}</td>
+                                                            <td>{{ ($transactions->currentPage() - 1) * $transactions->perPage() + $index + 1 }}</td>
                                                             <td>{{ $tnx->created_at ? date('d-m-Y H:i', strtotime($tnx->created_at)) : 'N/A' }}</td>
                                                             <td>{{ $tnx->order_id ?? 'N/A' }}</td>
                                                             <td>{{ $tnx->transaction_id ?? '' }}</td>
@@ -60,6 +60,7 @@
                                                     @endforeach
                                                 </tbody>
                                             </table>
+                                            {{ $transactions->links('pagination::bootstrap-4') }}
                                         </div>
                                     @else
                                         <div class="text-center py-5">

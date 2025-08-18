@@ -2,36 +2,47 @@
 namespace App\Http\Controllers\Website\Distributor;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\RegisterJob;
 use App\Models\Category;
 use App\Models\Customer;
 use App\Models\Product;
 use App\Models\User;
+use App\Models\Wallet;
 use App\Services\SmsService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\DB;
-use App\Jobs\RegisterJob;
-use App\Models\Wallet;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class SignupController extends Controller
 {
-    public function index()
+    public function index($referral_id = null)
     {
-        return view('Website.Distributor.signup');
+        if (empty($referral_id)) {
+            abort(500, 'Referral ID is required');
+        }
+        $data['user'] = User::where('ref_id', $referral_id)->whereIn('role', ['distributor', 'customer'])->first();
+        if (empty($data['user'])) {
+            abort(500, 'Referral ID is not valid');
+        }
+        return view('Website.Distributor.signup', $data);
     }
 
     public function verifyPhone(Request $request)
     {
+        //not allow 0 in start of mobile number
         $validator = Validator::make($request->all(), [
-            'mobile' => 'required|digits:10|unique:users_lvl,mobile',
+            'mobile' => 'required|digits:10|unique:users_lvl,mobile|numeric|not_in:0|regex:/^[1-9][0-9]{9}$/',
         ], [
             'mobile.required' => 'Phone number is required',
             'mobile.digits' => 'Phone number must be exactly 10 digits',
             'mobile.unique' => 'This phone number is already registered',
+            'mobile.numeric' => 'Phone number must be a number',
+            'mobile.not_in' => 'Phone number must not start with 0',
+            'mobile.regex' => 'Phone number must not start with 0',
         ]);
 
         if ($validator->fails()) {
@@ -56,8 +67,12 @@ class SignupController extends Controller
     public function verifyOtp(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'mobile' => 'required|digits:10',
+            'mobile' => 'required|digits:10|numeric|not_in:0|regex:/^[1-9][0-9]{9}$/',
             'otp' => 'required|digits:6',
+        ],[
+            'mobile.numeric' => 'Phone number must be a number',
+            'mobile.not_in' => 'Phone number must not start with 0',
+            'mobile.regex' => 'Phone number must not start with 0',
         ]);
 
         if ($validator->fails()) {
@@ -94,7 +109,11 @@ class SignupController extends Controller
     public function resendOtp(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'mobile' => 'required|digits:10',
+            'mobile' => 'required|digits:10|numeric|not_in:0|regex:/^[1-9][0-9]{9}$/',
+        ],[
+            'mobile.numeric' => 'Phone number must be a number',
+            'mobile.not_in' => 'Phone number must not start with 0',
+            'mobile.regex' => 'Phone number must not start with 0',
         ]);
 
         if ($validator->fails()) {
@@ -124,13 +143,16 @@ class SignupController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'mobile' => 'required|digits:10|unique:users_lvl,mobile',
-            'full_name' => 'required|string|max:255',
+            'mobile' => 'required|digits:10|unique:users_lvl,mobile|numeric|not_in:0|regex:/^[1-9][0-9]{9}$/',
+            'full_name' => 'required|string|min:2|max:255',
             'email' => 'required|email|unique:users_lvl,email',
             // 'password' => 'required|string|min:8',
             // 'confirm_password' => 'required|same:password',
             'referral_id' => 'required|string|max:255',
         ], [
+            'mobile.numeric' => 'Phone number must be a number',
+            'mobile.not_in' => 'Phone number must not start with 0',
+            'mobile.regex' => 'Phone number must not start with 0',
             'mobile.required' => 'Phone number is required',
             'mobile.digits' => 'Phone number must be exactly 10 digits',
             'mobile.unique' => 'This phone number is already registered',
@@ -158,14 +180,18 @@ class SignupController extends Controller
             DB::beginTransaction();
             $user = User::select('id', 'user_id')->orderBy('id', 'DESC')->first();
             $user_id = !empty($user->id) ? $user->user_id + 1 : 1;
-            $user_num = rand(10000000, 99999999);//should be unique
-            
+            $user_num = rand(10000000, 99999999);  // should be unique
 
-            if(User::where('user_id', $user_id)->exists()){
+            //check user_num is unique then again generate user_num
+            while (User::where('user_num', $user_num)->exists()) {
+                $user_num = rand(10000000, 99999999);
+            }
+
+            if (User::where('user_id', $user_id)->exists()) {
                 return $this->failMsg('User ID Already Exists, Please try again.');
             }
 
-            if(User::where('user_num', $user_num)->exists()){
+            if (User::where('user_num', $user_num)->exists()) {
                 return $this->failMsg('User Num ID Already Exists, Please try again.');
             }
 
@@ -182,7 +208,6 @@ class SignupController extends Controller
             $customer->role = 'customer';
             $customer->type = 'customer';
             if ($customer->save()) {
-               
                 $res = $this->saveUserDetail($customer->ref_id, $customer->user_num, $user_id,
                     $customer->alpha_num_uid, $customer->pwd, $customer->email, $customer->name, $customer->mobile);
                 if (!$res['status']) {
@@ -252,5 +277,17 @@ class SignupController extends Controller
             return true;
 
         return false;
+    }
+
+    public function welcome($id)
+    {
+        $user = User::where('alpha_num_uid', $id)->first();
+        if (empty($user)) {
+            return redirect()->to('/');
+        }
+
+        $data['user'] = $user;
+
+        return view('Website.Distributor.welcome_signup', $data);
     }
 }

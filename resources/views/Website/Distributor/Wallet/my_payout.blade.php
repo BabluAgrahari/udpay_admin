@@ -49,7 +49,7 @@
                                                 <tbody>
                                                     @foreach($payouts as $index => $payout)
                                                         <tr>
-                                                            <td>{{ $index + 1 }}</td>
+                                                            <td>{{ ($payouts->currentPage() - 1) * $payouts->perPage() + $index + 1 }}</td>
                                                             <td>{{ $payout->for_date ? date('d-m-Y H:i', strtotime($payout->for_date)) : 'N/A' }}</td>
                                                             <td>{{ $payout->description ?? 'Payout Transaction' }}</td>
                                                             <td class="text-success">₹{{ number_format($payout->amount, 2) }}</td>
@@ -63,6 +63,7 @@
                                                     @endforeach
                                                 </tbody>
                                             </table>
+                                            {{ $payouts->links('pagination::bootstrap-4') }}
                                         </div>
                                     @else
                                         <div class="text-center py-5">

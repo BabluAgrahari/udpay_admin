@@ -27,7 +27,7 @@ class WalletController extends Controller
         // Get payout transactions from wallet history
         $payouts = PayoutTransaction::where('uid', $currentUser->user_id)
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(20);
 
         return view('Website.Distributor.Wallet.my_payout', compact('payouts'));
     }
@@ -63,7 +63,7 @@ class WalletController extends Controller
         $earnings = WalletHistory::where('user_id', $currentUser->user_id)
             ->where('earning', '>', 0)
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(20);
 
         return view('Website.Distributor.Wallet.my_earning', compact('earnings'));
     }
@@ -74,7 +74,7 @@ class WalletController extends Controller
         
         $data['redeemTransactions'] = ReedemWallet::where('uid', $currentUser->user_id)
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(20);
 
         return view('Website.Distributor.Wallet.redeem_transaction', $data);
     }

@@ -9,7 +9,8 @@ use App\Http\Controllers\Website\Distributor\SignupController;
 use Illuminate\Support\Facades\Route;
 
 
-Route::get('/distributor/signup', [SignupController::class, 'index']);
+Route::get('/distributor/signup/{referral_id}', [SignupController::class, 'index']);
+Route::get('/distributor/welcome/{id}', [SignupController::class, 'welcome']);
 Route::post('/distributor/signup/verify-phone', [SignupController::class, 'verifyPhone']);
 Route::post('/distributor/signup/verify-otp', [SignupController::class, 'verifyOTP']);
 Route::post('/distributor/signup/complete', [SignupController::class, 'completeRegistration']);

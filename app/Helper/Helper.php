@@ -11,6 +11,7 @@ use App\Models\UserWallet;
 use App\Models\WalletHistory;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
+use App\Models\Wallet;
 use Illuminate\Support\Str;
 
 if (!function_exists('getCookieData')) {
@@ -72,6 +73,16 @@ if (!function_exists('multiFile')) {
     }
 }
 
+
+//function for wallet balance
+if (!function_exists('walletBalance')) {
+    function walletBalance($user_id)
+    {
+        $wallet = Wallet::where('userid',$user_id)->first();
+        return $wallet->amount + $wallet->earning + $wallet->unicash;
+    }
+}
+
 if (!function_exists('pr')) {
     function pr($data)
     {
@@ -81,6 +92,8 @@ if (!function_exists('pr')) {
         die;
     }
 }
+
+
 
 function ip_address()
 {

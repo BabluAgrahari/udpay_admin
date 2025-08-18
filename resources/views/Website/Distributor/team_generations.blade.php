@@ -9,35 +9,36 @@
 
         <div class="table-responsive">
             <form action="" method="get">
-            <div class="row">
-                <div class="col-md-3">
-                    <select name="level" id="level" class="form-control">
-                        <option value="">Select Level</option>
-                        @foreach ($team_generation as $item)
-                            <option value="{{ $item->lvl }}">{{ $item->lvl }}</option>
-                        @endforeach
-                    </select>
+                <div class="row">
+                    <div class="col-md-3">
+                        <select name="level" id="level" class="form-control">
+                            <option value="">Select Level</option>
+                            @foreach ($team_generation as $item)
+                                <option value="{{ $item->lvl }}">{{ $item->lvl }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select name="rank" id="rank" class="form-control">
+                            <option value="">Select Rank</option>
+                            <option value="diamond">Diamond</option>
+                            <option value="gold">Gold</option>
+                            <option value="silver">Silver</option>
+                            <option value="bronze">Bronze</option>
+                            <option value="none">None</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex gap-2">
+                        <button type="submit" class="thm-btn">Search</button>
+                        <a href="{{ url('distributor/team-generation') }}" class="thm-btn">Reset</a>
+                    </div>
                 </div>
-                <div class="col-md-3">
-                    <select name="rank" id="rank" class="form-control">
-                        <option value="">Select Rank</option>
-                        <option value="diamond">Diamond</option>
-                        <option value="gold">Gold</option>
-                        <option value="silver">Silver</option>
-                        <option value="bronze">Bronze</option>
-                        <option value="none">None</option>
-                    </select>
-                </div>
-                <div class="col-md-3 d-flex gap-2">
-                    <button type="submit" class="thm-btn">Search</button>
-                    <a href="{{ url('distributor/team-generation') }}" class="thm-btn">Reset</a>
-                </div>
-            </div>
             </form>
             <table class="table table-bordered">
                 <thead class="table-light">
                     <tr>
                         <th>Level</th>
+                        <th>Active/Inactive</th>
                         <th>Total Team</th>
                         <th>Month SV</th>
                         <th>Total SV</th>
@@ -46,15 +47,35 @@
                     </tr>
                 </thead>
                 <tbody>
+                    <?php ?>
                     @foreach ($team_generation as $item)
+                        <?php
+                        //convert into laravel query
+                        $monthAp = DB::table('payout')
+                            ->select(DB::raw('sum(sv) as totalAp'))
+                            ->where('parent_id', auth()->user()->user_num)
+                            ->where('level', $item->lvl)
+                            ->where('cur_date', 'like', date('Y-m') . '%')
+                            ->first();
+                        $monthSv = $monthAp->totalAp ?? 0;
+                        
+                        $totAp = DB::table('payout')
+                            ->select(DB::raw('sum(sv) as totalAp'))
+                            ->where('parent_id', auth()->user()->user_num)
+                            ->where('level', $item->lvl)
+                            ->first();
+                        $totSv = $totAp->totalAp ?? 0;
+                        ?>
                         <tr>
                             <td>{{ $item->lvl }}</td>
+                            <td><span class="text-success">{{ $item->Tgreen }}</span>/<span
+                                    class="text-danger">{{ $item->Tred }}</span></td>
                             <td>{{ $item->Tcnt }}</td>
-                            <td>{{ $item->Tgreen }}</td>
-                            <td>{{ $item->Tred }}</td>
+                            <td>{{ $monthSv }}</td>
+                            <td>{{ $totSv }}</td>
                             {{-- <td>{{ $item->isactive > 0 ? 'Active' : 'Inactive' }}</td> --}}
                             <td>
-                                <a href="{{ url('distributor/user-level-list/'.$item->lvl) }}" class="thm-btn">View</a>
+                                <a href="{{ url('distributor/user-level-list/' . $item->lvl) }}" class="thm-btn">View</a>
                             </td>
                         </tr>
                     @endforeach
@@ -64,4 +85,3 @@
 
     </div>
 </div>
-

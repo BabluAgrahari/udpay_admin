@@ -123,11 +123,11 @@
                                                         <i class="fas fa-edit"></i>
                                                     </button>
                                                     @if ($addresses->count() > 1)
-                                                    <button class="btn btn-sm btn-outline-primary remove-address"
-                                                        style="margin-right: 15px;" data-address-id="{{ $address->id }}"
-                                                        title="Remove Address">
-                                                        <i class="fas fa-trash" style="color: red;"></i>
-                                                    </button>
+                                                        <button class="btn btn-sm btn-outline-primary remove-address"
+                                                            style="margin-right: 15px;"
+                                                            data-address-id="{{ $address->id }}" title="Remove Address">
+                                                            <i class="fas fa-trash" style="color: red;"></i>
+                                                        </button>
                                                     @endif
                                                     <div class="default-checkbox-wrapper">
                                                         <label class="default-checkbox-label">
@@ -146,7 +146,8 @@
                                                     @csrf
                                                     <input type="hidden" name="address_id" value="{{ $address->id }}">
                                                     @if ($addresses->count() > 1)
-                                                        <button type="button" class="thm-btn btn-small">Select Address</button>
+                                                        <button type="button" class="thm-btn btn-small">Select
+                                                            Address</button>
                                                     @endif
                                                 </form>
                                                 <label class="select-add">
@@ -168,21 +169,48 @@
                         <div class="summary-box">
                             <span><strong class="text-black">Order Summary</strong> ({{ $total_items }} Items)</span>
                             <p>Total MRP <span>₹{{ $total_mrp }}</span></p>
-                            <p>Total Discounts <span class="discount">−₹{{ $total_saving }}</span></p>
-                            @if (session('applied_coupon'))
-                                <p>Coupon Discount <span class="discount">-₹{{ session('applied_coupon.discount_amount') }}</span></p>
+                            @if ($total_saving > 0)
+                                <p>Total Discounts <span class="discount">−₹{{ $total_saving }}</span></p>
                             @endif
-                            @if(Auth::check() && (Auth::user()->role == 'customer' || Auth::user()->role == 'distributor'))
-                            <p>Total SV <span style="color: #F1624B;">{{ $total_sv }}</span></p>
+                            @if (session('applied_coupon') && Auth::user()->can('isGuest'))
+                                <p>Coupon Discount <span
+                                        class="discount">-₹{{ session('applied_coupon.discount_amount') }}</span></p>
+                            @endif
+                            @if (Auth::check() && (Auth::user()->role == 'customer' || Auth::user()->role == 'distributor'))
+                                <p>Total SV <span style="color: #F1624B;">{{ $total_sv }}</span></p>
                             @endif
                             <hr />
-                            <p class="total text-black">Payable Amount <span>₹{{ $subtotal }}</span></p>
+                            <input type="hidden" id="net_amount" value="{{ $net_amount }}">
+                            <p class="total text-black">Payable Amount <span>₹{{ $net_amount }}</span></p>
                         </div>
                     </div>
-                    <div class="cart-items mt-2 p-3">
-                        <h6 class="mb-2">Payment Method</h6>
-                        <form method="post" id="saveOrder" action="{{ url('checkout') }}">
-                            @csrf
+
+                    <form method="post" id="saveOrder" action="{{ url('checkout') }}">
+                        @csrf
+                        <div class="cart-items mt-2 p-3">
+                            <h6 class="mb-2">Payment Method</h6>
+                            <div class="d-flex gap-2 align-items-center">
+                                <input type="radio" name="payment_mode" class="payment_mode" value="wallet"
+                                    id="wallet">
+                                <label for="wallet">Wallet</label>
+                                <input type="radio" name="payment_mode" class="payment_mode" value="online"
+                                    id="online">
+                                <label for="online">Online Payment</label>
+                            </div>
+                        </div>
+                        <?php
+                        $wallet_balance = walletBalance(Auth::user()->user_id);
+                        ?>
+                        @if ($wallet_balance > 0)
+                            <div class="cart-items mt-2 p-3 d-none" id="wallet_balance">
+                                <h6 class="mb-2">Wallet Balance</h6>
+                                <input type="hidden" id="wallet_balance_amount" value="{{ $wallet_balance }}">
+                                <p>Available Balance <span>₹{{ number_format($wallet_balance, 2) }}</span></p>
+                            </div>
+                        @endif
+                        <div class="cart-items mt-2 p-3 d-none" id="online_payment">
+                            <h6 class="mb-2">Payment Method</h6>
+
                             <input type="hidden" name="address_id" id="address_id"
                                 value="{{ $addresses->count() == 1 ? $addresses->first()->id : '' }}">
                             <select name="payment_gateway" class="form-control mb-2">
@@ -193,9 +221,9 @@
                                 <option value="self_pickup">Self Pickup</option>
                                 <option value="courier">Courier</option>
                             </select>
-                            <button type="submit" class="thm-btn">Proceed to Pay</button>
-                        </form>
-                    </div>
+                        </div>
+                        <button type="submit" class="thm-btn" id="proceed_to_pay">Proceed to Pay</button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -388,6 +416,33 @@
     </style>
 
     @push('scripts')
+        <script>
+            $(document).ready(function() {
+                $('.payment_mode').on('change', function() {
+                    var net_amount = $('#net_amount').val();
+                    if ($(this).val() == 'wallet') {
+                        $('#wallet_balance').removeClass('d-none');
+                        $('#online_payment').addClass('d-none');
+
+                        var wallet_balance = $('#wallet_balance_amount').val();
+                        console.log(net_amount, wallet_balance);
+                        if (parseFloat(net_amount) > parseFloat(wallet_balance)) {
+                            $('#online_payment').removeClass('d-none').addClass('d-block');
+                            $('#proceed_to_pay').text('Proceed to Pay (₹' + (parseFloat(net_amount) -
+                                parseFloat(wallet_balance)).toFixed(2) + ')');
+                        } else {
+                            $('#proceed_to_pay').text('Proceed to Pay (₹' + parseFloat(net_amount).toFixed(2) +
+                                ')');
+                        }
+                    } else {
+                        console.log('online', net_amount);
+                        $('#wallet_balance').addClass('d-none');
+                        $('#online_payment').removeClass('d-none');
+                        $('#proceed_to_pay').text('Proceed to  (₹' + parseFloat(net_amount).toFixed(2) + ')');
+                    }
+                });
+            });
+        </script>
         <script>
             $(document).ready(function() {
 

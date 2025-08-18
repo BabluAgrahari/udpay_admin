@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use App\Models\ApOrder;
+use App\Models\Wallet;
 
 class CheckoutController extends Controller
 {
@@ -53,12 +54,18 @@ class CheckoutController extends Controller
         $total_saving = $total_mrp - $subtotal;
         $total_items = $cartItems->sum('quantity');
 
+        $discount =0;
+        if(session('applied_coupon.discount_amount') && Auth::user()->can('isGuest')){
+            $discount = session('applied_coupon.discount_amount');
+        }
+
         $data['subtotal'] = $subtotal;
         $data['total_mrp'] = $total_mrp;
         $data['total_sv'] = $totalSv;
         $data['total_saving'] = $total_saving;
+        $data['net_amount'] = $subtotal - $discount;
         $data['total_items'] = $total_items;
-
+       
         return view('Website.checkout', $data);
     }
 
