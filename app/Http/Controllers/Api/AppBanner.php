@@ -20,8 +20,7 @@ class AppBanner extends Controller
                 $q = Sliders::where('status', 1)->where('slider_type', $v)->orderBy('id', 'desc')->get();
                 if ($q)
                     foreach ($q as $s) {
-                        //$arr['slider_type'][] = $v;
-                        $url = 'https://uni-pay.in/uploads/slider/' . $s->slider_image;
+                        $url = $s->slider_image;
                         $arr[$v][] = array('img_url' => $url, 'cat_id' => $s->cat_id);
                     }
             }

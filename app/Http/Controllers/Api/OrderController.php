@@ -13,7 +13,7 @@ class OrderController extends Controller
     {
         //  try {
         // ->where('uid', Auth::user()->user_id)
-        $orders = DealOrder::with('products', 'products.product', 'address')->get()->map(function ($row) {
+        $orders = DealOrder::with('products', 'products.product', 'address', 'products.product.reviews')->get()->map(function ($row) {
             return $this->field($row);
         });
         return $this->recordsRes($orders);
@@ -52,6 +52,8 @@ class OrderController extends Controller
                     'image' => (string) !empty($product->product->image) ? $product->product->image :'',
                     'price' => (float) $product->price ?? 0,
                     'gst' => (float) $product->gst ?? 0,
+                    'no_of_reviews' => !$product->product->reviews->isEmpty() ? (int) $product->product->reviews->where('status', '1')->count() : 0,
+                    'avg_rating' => !$product->product->reviews->isEmpty() ? (float) $product->product->reviews->where('status', '1')->avg('rating') : 0,
                 ];
             }),
             'created_at' => (string) $record->created_at ?? '',
@@ -84,7 +86,8 @@ class OrderController extends Controller
     {
         try {
             // ->where('uid', Auth::user()->user_id)
-            $order = DealOrder::with('products', 'products.product', 'address')->where('id', $id)->first();
+            $order = DealOrder::with('products', 'products.product', 'address', 'products.product.reviews')->where('id', $id)->first();
+          
             if (!$order)
                 return $this->notFoundRes();
 

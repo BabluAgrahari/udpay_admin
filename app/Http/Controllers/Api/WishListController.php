@@ -93,7 +93,7 @@ class WishListController extends Controller
     public function removeWishlist(Request $request)
     {
         try {
-            $wishlist = Wishlist::where('id', $request->id)->where('user_id', Auth::user()->id)->first();
+            $wishlist = Wishlist::where('product_id', $request->product_id)->where('user_id', Auth::user()->id)->first();
             if (!$wishlist) {
                 return $this->failRes('Wishlist not found');
             }
