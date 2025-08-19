@@ -6,6 +6,7 @@ use App\Http\Controllers\Website\Distributor\AddMoneyController;
 use App\Http\Controllers\Website\Distributor\MoneyTransferController;
 use App\Http\Controllers\Website\Distributor\WalletController;
 use App\Http\Controllers\Website\Distributor\SignupController;
+use App\Http\Controllers\Website\Distributor\EarningController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -18,7 +19,7 @@ Route::post('/distributor/signup/resend-otp', [SignupController::class, 'resendO
 
 
 Route::group(['prefix' => 'distributor', 'middleware' => 'customer.auth'], function () {
-    Route::get('/{type}', [DashboardController::class, 'index']);
+    Route::get('/{type}', [DashboardController::class, 'index'])->where('type', 'dashboard|kyc|my-direct-referral|team-generation|my-acheivements');
     Route::get('/user-level-list/{level}', [DashboardController::class, 'userLeavelList']);
     
     // KYC Routes
@@ -41,7 +42,11 @@ Route::group(['prefix' => 'distributor', 'middleware' => 'customer.auth'], funct
     Route::get('wallet/my-payout', [WalletController::class, 'myPayout']);
     Route::get('wallet/transaction-history', [WalletController::class, 'transactionHistory']);
     Route::get('wallet/wallet-balance', [WalletController::class, 'walletBalance']);
-    Route::get('wallet/my-earning', [WalletController::class, 'myEarning']);
     Route::get('wallet/redeem-transaction', [WalletController::class, 'redeemTransaction']);
+
+
+    Route::get('payout-generation', [EarningController::class, 'payoutGeneration']);
+    Route::get('royalty-payout', [EarningController::class, 'royaltyPayout']);
+    Route::get('payout-slip', [EarningController::class, 'payoutSlip']);
 
 });

@@ -52,7 +52,7 @@
                                                 <tbody>
                                                     @foreach($redeemTransactions as $index => $payout)
                                                         <tr>
-                                                            <td>{{ $index + 1 }}</td>
+                                                            <td>{{ ($redeemTransactions->currentPage() - 1) * $redeemTransactions->perPage() + $index + 1 }}</td>
                                                             <td>{{ $payout->created_at ? date('d-m-Y H:i', strtotime($payout->created_at)) : 'N/A' }}</td>
                                                             <td class="text-success">₹{{ number_format($payout->amount, 2) }}</td>
                                                             <td>{{ $payout->ac_holder ?? 'N/A' }}</td>

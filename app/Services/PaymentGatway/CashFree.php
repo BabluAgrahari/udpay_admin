@@ -43,10 +43,13 @@ class CashFree
             ];
             echo $this->baseUrl . '/orders';
 
+            //add ssl verification
             $response = Http::withHeaders([
                 'X-Client-Secret' => $this->clientSecret,
                 'X-Client-Id' => $this->clientId,
                 'x-api-version' => $this->apiVersion,
+                'ssl_verification' => false,
+                'verify' => false,
                 'Content-Type' => 'application/json',
                 'Accept' => 'application/json'
             ])->post($this->baseUrl . '/orders', $orderData);

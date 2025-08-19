@@ -60,6 +60,7 @@ Route::get('/order-detail/{id}', [OrderHistoryController::class, 'orderDetail'])
 Route::get('/my-account', [DashboardController::class, 'myAccount']);
 Route::post('/save-profile', [DashboardController::class, 'saveProfile']);
 Route::get('/order-history', [DashboardController::class, 'orderHistory']);
+Route::get('/invoice/{id}', [OrderHistoryController::class, 'invoice']);
 Route::get('/address-book', [DashboardController::class, 'addressBook']);
 Route::get('/wishlist', [DashboardController::class, 'wishlist']);
 Route::get('/logout', [DashboardController::class, 'logout']);
