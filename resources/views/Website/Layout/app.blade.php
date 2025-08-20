@@ -317,35 +317,25 @@
                                 <li class="menu-item"><a href="{{ url('download') }}">Downloads</a></li>
                                 <li class="menu-item"><a href="{{ url('about-us') }}">About Us</a></li>
                                 <li class="menu-item"><a href="{{ url('contact-us') }}">Contact Us</a></li>
-                            </ul>
-
-
-                           @can('isCustomer')
-
-                           <div class="profile-main">
-                            <a href="#" class="profile-icon">Business<i class="fa-solid fa-chevron-down"></i></a>
-                            <div class="profile-dropdown">
-                                <ul class="user-list-header">
-
-                                    <li><a href="{{ url('distributor/kyc') }}"><i class="fa-solid fa-plus"></i> KYC</a></li>
-                                    <li><a href="{{ url('distributor/team-generation') }}"><i class="fa-solid fa-exchange-alt"></i> Team Generation</a></li>
-                                    <li><a href="{{ url('distributor/my-direct-referral') }}"><i class="fa-solid fa-exchange-alt"></i> My Direct Referral</a></li>
-                                    <li><a href="{{ url('distributor/my-acheivements') }}"><i class="fa-solid fa-exchange-alt"></i> My Acheivements</a></li>
-                                </ul>
-                            </div>
-                        </div>
-
-                            <div class="profile-main">
-                                <a href="#" class="profile-icon">Wallet<i class="fa-solid fa-chevron-down"></i></a>
-                                <div class="profile-dropdown">
-                                    <ul class="user-list-header">
-
-                                        <li><a href="{{ url('distributor/wallet/add-money') }}"><i class="fa-solid fa-plus"></i> Add Money</a></li>
-                                        <li><a href="{{ url('distributor/wallet/money-transfer') }}"><i class="fa-solid fa-exchange-alt"></i> Money Transfer</a></li>
+                                @can('isCustomer')
+                                <li class="menu-item menu-item-has-children">
+                                    <a href="#">Business</a>
+                                    <ul class="sub-menu">
+                                        <li class="menu-item"><a href="{{ url('distributor/kyc') }}"><i class="fa-solid fa-plus"></i> KYC</a></li>
+                                        <li class="menu-item"><a href="{{ url('distributor/team-generation') }}"><i class="fa-solid fa-exchange-alt"></i> Team Generation</a></li>
+                                        <li class="menu-item"><a href="{{ url('distributor/my-direct-referral') }}"><i class="fa-solid fa-exchange-alt"></i> My Direct Referral</a></li>
+                                        <li class="menu-item"><a href="{{ url('distributor/my-acheivements') }}"><i class="fa-solid fa-exchange-alt"></i> My Acheivements</a></li>
                                     </ul>
-                                </div>
-                            </div>
-                            @endcan
+                                </li>
+                                <li class="menu-item menu-item-has-children">
+                                    <a href="#">Wallet</a>
+                                    <ul class="sub-menu">
+                                        <li class="menu-item"><a href="{{ url('distributor/wallet/add-money') }}"><i class="fa-solid fa-plus"></i> Add Money</a></li>
+                                        <li class="menu-item"><a href="{{ url('distributor/wallet/money-transfer') }}"><i class="fa-solid fa-exchange-alt"></i> Money Transfer</a></li>
+                                    </ul>
+                                </li>
+                                @endcan
+                            </ul>
 
                             <div class="header-right">
                                 @if (!auth()->check())
@@ -497,7 +487,7 @@
     <script src="{{ asset('front_assets') }}/js/custom.js"></script>
     <script src="{{ asset('front_assets') }}/js/scripts.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+    @stack('my-scripts')
     @include('Website.Layout.login')
     <script>
         //for cart functionality

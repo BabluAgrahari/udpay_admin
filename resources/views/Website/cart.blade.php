@@ -94,10 +94,10 @@
                             @endphp
 
 
-                            <div class="cart-item" data-product-id="{{ $item->product_id }}">
+                            <div class="cart-item cart-list" data-product-id="{{ $item->product_id }}">
                                 <div class="row">
                                     <div class="col-xl-2 col-md-3">
-                                        <a href="#" class="product-img w-100 h-100">
+                                        <a href="#" class="product-img">
                                             <img src="{{ getImageWithFallback($item->product->product_image) }}"
                                                 alt="Product" />
                                         </a>
@@ -193,7 +193,7 @@
                                 class="openPopup  thm-btn w-100 mb-3 proceed-to-pay">Proceed to Pay
                                 ₹{{ session('applied_coupon') ? $subtotal - session('applied_coupon.discount_amount') : $subtotal }}</a>
                         @endif
-                        <button class="btn btn-outline-danger w-100 mb-3" onclick="clearCart()">Clear Cart</button>
+                        <button class="thm-btn btn btn-outline-danger w-100 mb-3" style="background: red" onclick="clearCart()">Clear Cart</button>
 
                         <div class="summary-box">
                             <h6 class="mb-2"><span class="text-black">Order Summary</span> ({{ cartCount() }} Items)

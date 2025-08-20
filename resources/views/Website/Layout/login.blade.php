@@ -2,15 +2,15 @@
     <div class="popup-content">
         <button class="close-btn">&times;</button>
         <div class="bg-popup">
-            <div class="row h-100 align-items-center">
-                <div class="col-6 h-100">
+            <div class="row login-main align-items-center">
+                <div class="col-md-6 h-100">
                     <div class="back-image">
                         <div class="login-image">
                             <img src="{{ asset('front_assets') }}/images/logo.png" alt="img" class="login-logo" />
                         </div>
                     </div>
                 </div>
-                <div class="col-6">
+                <div class="col-md-6">
                     <div class="login-box">
                         {{-- <p class="skip-text">Skip</p> --}}
                         <h2 class="login-title">Login/Signup</h2>
@@ -33,15 +33,15 @@
     <div class="popup-content">
         <button class="close-btn">&times;</button>
         <div class="bg-popup">
-            <div class="row h-100 align-items-center">
-                <div class="col-6 h-100">
+            <div class="row login-main align-items-center">
+                <div class="col-md-6 h-100">
                     <div class="back-image">
                         <div class="login-image">
                             <img src="{{ asset('front_assets') }}/images/logo.png" alt="img" class="login-logo" />
                         </div>
                     </div>
                 </div>
-                <div class="col-6">
+                <div class="col-md-6">
                     <div class="login-box">
                         {{-- <p class="skip-text">Skip</p> --}}
                         <h4 class="mb-2">Enter code</h4>
@@ -75,26 +75,29 @@
     $(document).ready(function() {
 
         document.querySelectorAll(".openPopup").forEach(button => {
-            button.addEventListener("click", (e) => {
-                e.preventDefault();
+    button.addEventListener("click", (e) => {
+      // Prevent default form submission if inside a form
+      e.preventDefault();
 
-                const popupId = button.getAttribute("data-popup");
-                const popup = document.getElementById(popupId);
-                if (popup) popup.style.display = "flex";
-            });
-        });
+      const popupId = button.getAttribute("data-popup");
+      const popup = document.getElementById(popupId);
+      if (popup) popup.style.display = "flex";
+    });
+  });
 
-        document.querySelectorAll(".popup-overlay").forEach(popup => {
-            popup.querySelector(".close-btn").addEventListener("click", () => {
-                popup.style.display = "none";
-            });
+  // Close any popup
+  document.querySelectorAll(".popup-overlay").forEach(popup => {
+    popup.querySelector(".close-btn").addEventListener("click", () => {
+      popup.style.display = "none";
+    });
 
-            popup.addEventListener("click", (e) => {
-                if (e.target === popup) {
-                    popup.style.display = "none";
-                }
-            });
-        });
+    // Close when clicking outside the popup content
+    popup.addEventListener("click", (e) => {
+      if (e.target === popup) {
+        popup.style.display = "none";
+      }
+    });
+  });
 
         $('#sendOtpBtn').on('click', function(e) {
             e.preventDefault();
@@ -106,14 +109,14 @@
             verifyOtp();
         });
 
-        
+
         $('#resendOtpLink').on('click', function(e) {
             e.preventDefault();
             if ($(this).hasClass('disabled')) return;
             sendOtp(true);
         });
 
-        
+
         $('#logoutLink').on('click', function(e) {
             e.preventDefault();
             logout();
@@ -125,7 +128,7 @@
             }
         });
 
-        
+
         $(document).on('click', '.close-btn', function() {
             $(this).closest('.popup-overlay').hide();
         });
@@ -250,7 +253,7 @@
     }
 
     function startResendTimer() {
-        let timeLeft = 60; 
+        let timeLeft = 60;
         const timerElement = $('#resendTimer');
         const resendLink = $('#resendOtpLink');
 
@@ -286,7 +289,7 @@
                 messageElement.textContent = message;
                 snackbar.className = `snackbar ${type}`;
                 snackbar.classList.add('show');
-                
+
                 setTimeout(() => {
                     closeSnackbar();
                 }, 3000);
@@ -320,12 +323,12 @@
         const index = parseInt($(this).data('index'));
 
         if (value.length === 1) {
-           
+
             if (index < 5) {
                 $('.otp-box[data-index="' + (index + 1) + '"]').focus();
             }
         } else if (value.length === 0) {
-           
+
             if (index > 0) {
                 $('.otp-box[data-index="' + (index - 1) + '"]').focus();
             }
@@ -340,7 +343,7 @@
         $('#' + elementId).hide();
     }
 
-    
+
     $(document).ready(function() {
         $('<style>')
             .prop('type', 'text/css')

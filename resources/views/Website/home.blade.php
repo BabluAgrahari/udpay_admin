@@ -265,7 +265,7 @@
     @endif
 
 
-    <section class="section-padding">
+    <section class="section-padding pt-0">
         <div class="container">
             <div class="text-center">
                 <h2 class="mb-0">Refer & Earn</h2>

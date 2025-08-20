@@ -1,22 +1,13 @@
 <style>
     /* KYC Multi-Step Form Styles */
-    .step-indicator {
-        text-align: center;
-        padding: 1rem;
-        border-radius: 8px;
-        transition: all 0.3s ease;
-        cursor: pointer;
-    }
-
-    .form-label {
+    /* .form-label {
         margin-bottom: .1rem !important;
+    } */
+    .kyc-form-container .form-label {
+        font-size: 13px;
+        margin-top: 5px;
+        margin-bottom: 4px;
     }
-
-    .step-indicator.active {
-        background-color: rgba(1, 96, 56, 0.1);
-        color: var(--brand-green);
-    }
-
     .step-indicator.completed {
         background-color: rgba(241, 97, 74, 0.1);
         color: var(--brand-orange);
@@ -121,7 +112,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding-top: 2rem;
+        padding-top: 1rem;
         border-top: 1px solid #dee2e6;
     }
 
@@ -150,6 +141,36 @@
         border-color: #dc3545;
         box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
     }
+    .progress-bar {
+        background-color: var(--thm-color-one);
+    }
+    .step-box {
+    background: #C9FFE9;
+    border-radius: 10px;
+    border: 1px solid #a1dfc6;
+    margin-bottom: 20px;
+}
+.step-indicator.active {
+    background-color: rgb(1 96 56 / 80%);
+    color: #fff !important;
+}
+.step-indicator {
+    text-align: center;
+    padding: 7px 15px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+.kyc-user {
+    width: 30px;
+    height: 30px;
+    background: var(--thm-color-two);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--thm-color-one);
+}
 </style>
 <div class="tab-panel active edit-form-open" id="kyc">
     <h3 class="tab-title account-top">KYC Verification Process</h3>
@@ -162,23 +183,25 @@
             </div>
 
             <!-- Step Indicators -->
-            <div class="row mb-4">
-                <div class="col-md-4">
-                    <div class="step-indicator active" data-step="1">
-                        <div class="step-number">1</div>
-                        <div class="step-title">Personal Information</div>
+            <div class="step-box">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="step-indicator active" data-step="1">
+                            <div class="step-number">1</div>
+                            <div class="step-title">Personal Information</div>
+                        </div>
                     </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="step-indicator" data-step="2">
-                        <div class="step-number">2</div>
-                        <div class="step-title">Bank Details</div>
+                    <div class="col-md-4">
+                        <div class="step-indicator" data-step="2">
+                            <div class="step-number">2</div>
+                            <div class="step-title">Bank Details</div>
+                        </div>
                     </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="step-indicator" data-step="3">
-                        <div class="step-number">3</div>
-                        <div class="step-title">Upload KYC Docs</div>
+                    <div class="col-md-4">
+                        <div class="step-indicator" data-step="3">
+                            <div class="step-number">3</div>
+                            <div class="step-title">Upload KYC Docs</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -189,7 +212,7 @@
             <div id="messageError" style="display: none;"></div>
             <!-- Step 1: Personal Information -->
             <div class="form-step active" id="step1">
-                <h6 class="text-brand-green mb-3"><i class="fa-solid fa-user me-2"></i>Personal Information</h6>
+                <h6 class="text-brand-green mb-3"><i class="kyc-user fa-solid fa-user me-2"></i>Personal Information</h6>
                 <form id="personalInfoForm" enctype="multipart/form-data"
                     action="{{ url('distributor/kyc/personal-details') }}" method="post">
                     @csrf
@@ -310,9 +333,11 @@
                             <span class="text-danger error" id="gender_error"></span>
                         </div>
                     </div>
-                    <div class="form-navigation mt-4">
-
-                        <button type="submit" class="btn btn-brand-green" form="personalInfoForm">
+                    <div class="form-navigation text-end mt-4">
+                        <button type="button" class="thm-btn " id="prevBtn">
+                            <i class="fa-solid fa-arrow-left me-2"></i>Previous
+                        </button>
+                        <button type="submit" class="thm-btn " form="personalInfoForm">
                             Save & Continue<i class="fa-solid fa-arrow-right ms-2"></i>
                         </button>
                     </div>
@@ -321,7 +346,7 @@
 
             <!-- Step 2: Bank Details -->
             <div class="form-step" id="step2">
-                <h6 class="text-brand-green mb-3"><i class="fa-solid fa-university me-2"></i>Bank Details</h6>
+                <h6 class="text-brand-green mb-3"><i class="kyc-user fa-solid fa-university me-2"></i>Bank Details</h6>
                 <form id="bankInfoForm" enctype="multipart/form-data">
                     @csrf
                     <div class="row">
@@ -365,7 +390,7 @@
                     </div>
                     <div class="form-navigation mt-4">
                         <div></div>
-                        <button type="submit" class="btn btn-brand-green" form="bankInfoForm">
+                        <button type="submit" class="thm-btn" form="bankInfoForm">
                             Save & Continue<i class="fa-solid fa-arrow-right ms-2"></i>
                         </button>
                     </div>
@@ -374,10 +399,59 @@
 
             <!-- Step 3: Upload KYC Documents -->
             <div class="form-step" id="step3">
-                <h6 class="text-brand-green mb-3"><i class="fa-solid fa-file-upload me-2"></i>Upload KYC Documents
+                <h6 class="text-brand-green mb-3"><i class="kyc-user fa-solid fa-file-upload me-2"></i>Upload KYC Documents
                 </h6>
                 <form id="kycDocsForm" enctype="multipart/form-data">
                     @csrf
+                    <!-- new ui code upload doc -->
+                    <!-- <div class="row">
+                        <div class="col-lg-6">
+                            <div class="kyc-upload-card">
+                                <div class="upload-header">Pan & Selfie Verification</div>
+                                <div class="upload-details p-3">
+                                    <p class="color-one">PAN Uploded Successfully.....</p>
+                                    <form>
+                                        <div class="form-group">
+                                            <label>Pan Number</label>
+                                            <input type="text" class="form-control" value="AFRPY7349N9">
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="file" class="form-control" value="Choose File Browse">
+                                        </div>
+                                        <div class="mb-3"><img src="assets/images/kyc/pan.png" alt="img" class="kyc-image-pan"></div>
+                                        <p class="color-one">Selfie Uploded Successfully.....</p>
+                                        <div class="form-group">
+                                            <label>Selfie Upload</label>
+                                            <input type="file" class="form-control" value="Choose File Browse">
+                                        </div>
+                                        <div class="text-center"><img src="assets/images/kyc/user.png" alt="img" class="kyc-image-selfie"></div>
+                                    
+                                        
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="kyc-upload-card">
+                                <div class="upload-header">Aadhar Verification</div>
+                                <div class="upload-details p-3">
+                                    <p class="color-one">Aadhar Uploded Successfully.....</p>
+                                    <form>
+                                        <div class="form-group">
+                                            <label>Aadhar/Any Govt.Proof Number</label>
+                                            <input type="text" class="form-control" value="38344386063900">
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="file" class="form-control" value="Choose File Browse">
+                                        </div>
+                                        <div><img src="assets/images/kyc/aadhar1.png" alt="img" class="kyc-image-pan"></div>
+                                        <div><img src="assets/images/kyc/aadhar2.png" alt="img" class="kyc-image-pan"></div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div> -->
+
                     <div class="row">
                         <div class="col-md-6 mb-2">
                             <label class="form-label">PAN Number <span class="text-danger">*</span></label>
@@ -432,19 +506,13 @@
                     </div>
                     <div class="form-navigation mt-4">
                         <div></div>
-                        <button type="submit" class="btn btn-brand-orange" form="kycDocsForm">
+                        <button type="submit" class="thm-btn" form="kycDocsForm">
                             <i class="fa-solid fa-paper-plane me-2"></i>Submit KYC
                         </button>
                     </div>
                 </form>
             </div>
-            <!-- Step Navigation Buttons -->
-            <div class="form-navigation mt-4">
-                <button type="button" class="btn btn-outline-brand-green" id="prevBtn">
-                    <i class="fa-solid fa-arrow-left me-2"></i>Previous
-                </button>
-                <div></div>
-            </div>
+        
             </form>
         </div>
     </div>
