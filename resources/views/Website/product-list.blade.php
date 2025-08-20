@@ -12,9 +12,22 @@
             	</h6>
         </div>
         <div class="filter-right">
-            <p class="color-two filter-text mb-0">FILTER  <i class="fa-solid fa-filter"></i></p>
+          <div>
+            <select class="color-two">
+              <option>Filter</option>
+              <option>Category</option>
+              <option>Price</option>
+              <option>SV Point</option>
+            </select>
+          </div>
+            <!-- <p class="color-two filter-text mb-0">FILTER  <i class="fa-solid fa-filter"></i></p> -->
             <div class="color-two">
-                <p class="product-sort mb-0 color-two">Sort By<i class="fa-solid fa-arrow-right-arrow-left"></i></p>
+            <select class="color-two">
+              <option>Sort By</option>
+              <option>A to Z</option>
+              <option>Z to A</option>
+            </select>
+                <!-- <p class="product-sort mb-0 color-two">Sort By<i class="fa-solid fa-arrow-right-arrow-left"></i></p> -->
             </div>
         </div>
     </div>

@@ -9,14 +9,14 @@
                         <div class="sidebar">
                             <a href="{{ url('distributor/dashboard') }}"
                                 class="tab-btn {{ $type == 'dashboard' ? 'active' : '' }}"><i
-                                    class="fa-solid fa-home me-3"></i> Dashboard</a>
+                                    class="fa-solid fa-home me-1"></i> Dashboard</a>
 
                             <a href="{{ url('distributor/kyc') }}" class="tab-btn {{ $type == 'kyc' ? 'active' : '' }}"><i
-                                    class="fa-solid fa-id-card me-3"></i>
+                                    class="fa-solid fa-id-card me-1"></i>
                                 KYC Verification</a>
                             <a href="{{ url('distributor/my-direct-referral') }}"
                                 class="tab-btn {{ $type == 'my-direct-referral' ? 'active' : '' }}"><i
-                                    class="fa-solid fa-tree me-3"></i> My Direct Referral</a>
+                                    class="fa-solid fa-tree me-1"></i> My Direct Referral</a>
                             <a href="{{ url('distributor/team-generation') }}"
                                 class="tab-btn {{ $type == 'team-generation' ? 'active' : '' }}"><i
                                     class="fa-solid fa-tree me-3"></i> Team Generation</a>

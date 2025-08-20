@@ -317,7 +317,7 @@
                                 <li class="menu-item"><a href="{{ url('download') }}">Downloads</a></li>
                                 <li class="menu-item"><a href="{{ url('about-us') }}">About Us</a></li>
                                 <li class="menu-item"><a href="{{ url('contact-us') }}">Contact Us</a></li>
-                                @if(!empty(Auth::user()) && (Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer')))
+                                @can('isCustomer')
                                 <li class="menu-item menu-item-has-children">
                                     <a href="#">Business</a>
                                     <ul class="sub-menu">
@@ -332,10 +332,9 @@
                                     <ul class="sub-menu">
                                         <li class="menu-item"><a href="{{ url('distributor/wallet/add-money') }}"><i class="fa-solid fa-plus"></i> Add Money</a></li>
                                         <li class="menu-item"><a href="{{ url('distributor/wallet/money-transfer') }}"><i class="fa-solid fa-exchange-alt"></i> Money Transfer</a></li>
-                                        <li class="menu-item"><a href="{{ url('distributor/payout-generation') }}"><i class="fa-solid fa-exchange-alt"></i> My Earning</a></li>
                                     </ul>
                                 </li>
-                                @endif
+                                @endcan
                             </ul>
 
                             <div class="header-right">

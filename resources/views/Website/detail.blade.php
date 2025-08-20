@@ -709,15 +709,16 @@
             <p>Just have a look at how happy our customers are</p>
         </div>
     </div>
+    
     <div class="client-slider">
         @foreach($product->reviews as $review)
         <div class="testimonial-card">
            <div class="testi-header">
              <img src="https://randomuser.me/api/portraits/men/1.jpg" alt="Leo" class="testimonial-avatar">
              <div class="testi-content">
-                <h4>{{ !empty($review->user->name) ? $review->user->name : 'Anonymous' }}</h4>
+                <h5>{{ !empty($review->user->name) ? $review->user->name : 'Anonymous' }}</h5>
                 <div class="position-main"> 
-                    <p class="position">{{ !empty($review->user->role) ? $review->user->role : 'Customer' }}</p>
+                    <h4 class="position">{{ !empty($review->user->role) ? $review->user->role : 'Customer' }}</h4>
                     <div class="rating">
                         @for($i = 1; $i <= 5; $i++)
                             @if($i <= $review->rating)
@@ -730,11 +731,10 @@
                 </div>
              </div>
            </div>
-            <p>{{ $review->review }}</p>
+            <h5>{{ $review->review }}</h5>
             <p>{{ date('M d, Y', strtotime($review->created_at)) }}</p>
         </div>
         @endforeach
-       
     </div>
   </div>
 </section>
