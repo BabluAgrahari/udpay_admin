@@ -2,8 +2,8 @@
 
 namespace App\Services\PaymentGatway;
 
-use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
 class CashFree
 {
@@ -14,12 +14,13 @@ class CashFree
 
     public function __construct()
     {
-        $this->baseUrl = env('CASHFREE_ENV') === 'production' 
-            ? 'https://api.cashfree.com/pg' 
-            : 'https://sandbox.cashfree.com/pg';
-        $this->clientId = env('CASHFREE_CLIENT_ID');
-        $this->clientSecret = env('CASHFREE_CLIENT_SECRET');
-        $this->apiVersion = '2023-08-01';
+        $this->baseUrl = 'https://api.cashfree.com/pg/orders/sessions';  // env('CASHFREE_ENV') === 'production'
+        // ? 'https://api.cashfree.com/pg'
+        // : 'https://sandbox.cashfree.com/pg';
+       
+        $this->clientId = '';
+        $this->clientSecret = '';
+        $this->apiVersion = '2025-01-01';
     }
 
     /**
@@ -28,44 +29,44 @@ class CashFree
     public function createOrder($amount, $currency = 'INR', $customerData = [])
     {
         // try {
-            $orderData = [
-                'order_amount' => $amount,
-                'order_currency' => $currency,
-                'customer_details' => [
-                    'customer_id' => $customerData['customer_id'] ?? 'USER' . uniqid(),
-                    'customer_name' => $customerData['customer_name'] ?? 'Customer',
-                    'customer_email' => $customerData['customer_email'] ?? 'customer@example.com',
-                    'customer_phone' => $customerData['customer_phone'] ?? '+919876543210'
-                ],
-                'order_meta' => [
-                    'return_url' => $customerData['return_url'] ?? url('payment') . '?order_id={order_id}'
-                ]
+        $orderData = [
+            'order_amount' => $amount,
+            'order_currency' => $currency,
+            'customer_details' => [
+                'customer_id' => $customerData['customer_id'] ?? 'USER' . uniqid(),
+                'customer_name' => $customerData['customer_name'] ?? 'Customer',
+                'customer_email' => $customerData['customer_email'] ?? 'customer@example.com',
+                'customer_phone' => $customerData['customer_phone'] ?? '+919876543210'
+            ],
+            'order_meta' => [
+                'return_url' => url('/')
+            ]
+        ];
+        // print_r(json_encode($orderData));
+        // echo $this->baseUrl . '/orders';
+
+        $response = Http::withHeaders([
+            'X-Client-Secret' => $this->clientSecret,
+            'X-Client-Id' => $this->clientId,
+            'x-api-version' => $this->apiVersion,
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json'
+        ])->post($this->baseUrl . '/orders', $orderData);
+
+        if ($response->successful()) {
+print_r($response->json());
+            $this->getPaymentLink($response->json()['data']['payment_session_id']);
+            return [
+                'success' => true,
+                'data' => $response->json()
             ];
-            echo $this->baseUrl . '/orders';
-
-            //add ssl verification
-            $response = Http::withHeaders([
-                'X-Client-Secret' => $this->clientSecret,
-                'X-Client-Id' => $this->clientId,
-                'x-api-version' => $this->apiVersion,
-                'ssl_verification' => false,
-                'verify' => false,
-                'Content-Type' => 'application/json',
-                'Accept' => 'application/json'
-            ])->post($this->baseUrl . '/orders', $orderData);
-
-            if ($response->successful()) {
-                return [
-                    'success' => true,
-                    'data' => $response->json()
-                ];
-            } else {
-                return [
-                    'success' => false,
-                    'error' => $response->body(),
-                    'status' => $response->status()
-                ];
-            }
+        } else {
+            return [
+                'success' => false,
+                'error' => $response->body(),
+                'status' => $response->status()
+            ];
+        }
 
         // } catch (\Exception $e) {
         //     return [
@@ -75,48 +76,44 @@ class CashFree
         // }
     }
 
-    /**
-     * Get order details
-     */
-    public function getOrder($orderId)
-    {
-        try {
-            $response = Http::withHeaders([
-                'X-Client-Secret' => $this->clientSecret,
-                'X-Client-Id' => $this->clientId,
-                'x-api-version' => $this->apiVersion,
-                'Content-Type' => 'application/json',
-                'Accept' => 'application/json'
-            ])->get($this->baseUrl . '/orders/' . $orderId);
 
-            if ($response->successful()) {
-                return [
-                    'success' => true,
-                    'data' => $response->json()
-                ];
-            } else {
-                return [
-                    'success' => false,
-                    'error' => $response->body(),
-                    'status' => $response->status()
-                ];
-            }
+    private function getPaymentLink(){
+        $orderData = [
+            'payment_session_id' => 'session__someidwhichislongandhasnumbers1232132andcharacterscn',
+            'payment_method' => [
+                'upi' => [
+                    'channel' => 'link'
+                ]
+            ]
+        ];
+        $response = Http::withHeaders([
+            'X-Client-Secret' => $this->clientSecret,
+            'X-Client-Id' => $this->clientId,
+            'x-api-version' => $this->apiVersion,
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json'
+        ])->post($this->baseUrl . '/orders/sessions', $orderData);
 
-        } catch (\Exception $e) {
+        print_r($response->json());
+        die;
+        if ($response->successful()) {
+            return [
+                'success' => true,
+                'data' => $response->json()
+            ];
+        } else {
             return [
                 'success' => false,
-                'error' => $e->getMessage()
+                'error' => $response->body(),
+                'status' => $response->status()
             ];
         }
     }
 
-    /**
-     * Handle payment callback
-     */
     public function handleCallback(Request $request)
     {
         $orderId = $request->get('order_id');
-        
+
         if (!$orderId) {
             return [
                 'success' => false,
@@ -125,15 +122,15 @@ class CashFree
         }
 
         $orderResponse = $this->getOrder($orderId);
-        
+
         if (!$orderResponse['success']) {
             return $orderResponse;
         }
 
         $order = $orderResponse['data'];
-        
+
         // Check payment status
-        if ($order['order_status'] === "PAID") {
+        if ($order['order_status'] === 'PAID') {
             return [
                 'success' => true,
                 'message' => 'Payment Successful!',

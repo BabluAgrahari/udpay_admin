@@ -67,12 +67,11 @@ class CartController extends Controller
             $query = Cart::with('product');
 
             if (Auth::user()) {
-
                 $query->where('user_id', Auth::user()->id);
             } else {
                 $query->where('cart_cookie_id', $request->cookie('cart_cookie_id'));
             }
-            $cartItems = $query->get();
+            $cartItems = $query->cartType()->get();
 
             $cart_view = 'Website.cart';
             if ($cartItems->isEmpty()) {
@@ -164,6 +163,8 @@ class CartController extends Controller
         } else {
             $query->where('cart_cookie_id', $request->cookie('cart_cookie_id'));
         }
+
+        $query->cartType();
 
         $subtotal = 0;
         $total_saving = 0;
@@ -265,7 +266,8 @@ class CartController extends Controller
             } else {
                 $query->where('cart_cookie_id', $request->cookie('cart_cookie_id'));
             }
-            $cartItems = $query->get();
+
+            $cartItems = $query->cartType()->get();
 
             $subtotal = 0;
             $total_mrp = 0;

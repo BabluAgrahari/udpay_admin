@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\BaseModel;
+use Illuminate\Support\Facades\Auth;
 
 class Cart extends BaseModel
 {
@@ -30,6 +31,19 @@ class Cart extends BaseModel
         'variant_id' => 'integer',
         'attribute_id' => 'integer'
     ];
+
+
+
+    public function scopeCartType($query)
+    {
+        if (!empty(Auth::user()) && Auth::user()->can('isDistributor')) {
+            return $query->where('cart_type', 'ap_shopping');
+        } elseif (!empty(Auth::user()) && Auth::user()->can('isCustomer')) {
+            return $query->where('cart_type', 'shopping');
+        }
+        return $query->where('cart_type', 'deals');
+    }
+
      public function user()
     {
         return $this->belongsTo(User::class);

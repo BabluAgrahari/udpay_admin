@@ -317,7 +317,7 @@
                                 <li class="menu-item"><a href="{{ url('download') }}">Downloads</a></li>
                                 <li class="menu-item"><a href="{{ url('about-us') }}">About Us</a></li>
                                 <li class="menu-item"><a href="{{ url('contact-us') }}">Contact Us</a></li>
-                                @can('isCustomer')
+                                @if(!empty(Auth::user()) && (Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer')))
                                 <li class="menu-item menu-item-has-children">
                                     <a href="#">Business</a>
                                     <ul class="sub-menu">
@@ -335,7 +335,7 @@
                                         <li class="menu-item"><a href="{{ url('distributor/payout-generation') }}"><i class="fa-solid fa-exchange-alt"></i> My Earning</a></li>
                                     </ul>
                                 </li>
-                                @endcan
+                                @endif
                             </ul>
 
                             <div class="header-right">
@@ -350,9 +350,9 @@
                                                 class="fa-solid fa-chevron-down"></i></a>
                                         <div class="profile-dropdown">
                                             <ul class="user-list-header">
-                                                @can('isCustomer')
+                                              @if(!empty(Auth::user()) && (Auth::user()->can('isCustomer')||Auth::user()->can('isDistributor')))
                                                 <li><a href="{{ url('/product') }}"><i class="fa-solid fa-user"></i> Become a Distributor</a></li>
-                                                @endcan
+                                                @endif
                                                 <li><a href="{{ url('my-account') }}"><i class="fa-solid fa-user"></i>
                                                         My Account</a></li>
                                                 <li><a href="{{ url('order-history') }}"><i

@@ -74,5 +74,6 @@ class Kernel extends HttpKernel
         'crm.auth' => \App\Http\Middleware\CRMAuth::class,
         'distributor.auth' => \App\Http\Middleware\DistributorAuth::class,
         'guest.auth' => \App\Http\Middleware\GuestAuth::class,
+        'customer.or.distributor' => \App\Http\Middleware\CustomerOrDistributorMiddleware::class,
     ];
 }

@@ -187,23 +187,25 @@
                                     id="totalNetPayableAmountText">₹{{ $net_amount }}</span></p>
                         </div>
                     </div>
-
+                    <?php
+                    $wallet_balance = walletBalance(Auth::user()->user_id);
+                    ?>
                     <form method="post" id="saveOrder" action="{{ url('checkout') }}">
                         @csrf
                         <div class="cart-items mt-2 p-3">
                             <h6 class="mb-2">Payment Method</h6>
                             <div class="d-flex gap-2 align-items-center">
+                               @if($wallet_balance > 0)
                                 <input type="radio" name="payment_mode" class="payment_mode" value="wallet"
                                     id="wallet">
                                 <label for="wallet">Wallet</label>
+                                @endif
                                 <input type="radio" name="payment_mode" class="payment_mode" value="online"
-                                    id="online">
+                                    id="online" {{ $wallet_balance<= 0 ? 'checked' : '' }}>
                                 <label for="online">Online Payment</label>
                             </div>
                         </div>
-                        <?php
-                        $wallet_balance = walletBalance(Auth::user()->user_id);
-                        ?>
+                       
                         @if ($wallet_balance > 0)
                             <div class="cart-items mt-2 p-3 d-none" id="wallet_balance">
                                 <h6 class="mb-2">Wallet Balance</h6>
@@ -211,7 +213,7 @@
                                 <p>Available Balance <span>₹{{ number_format($wallet_balance, 2) }}</span></p>
                             </div>
                         @endif
-                        <div class="cart-items mt-2 p-3 d-none" id="online_payment">
+                        <div class="cart-items mt-2 p-3 {{ $wallet_balance > 0 ? 'd-none' : '' }}" id="online_payment">
                             <h6 class="mb-2">Payment Method</h6>
 
                             <input type="hidden" name="address_id" id="address_id"
@@ -451,17 +453,24 @@
                 $(document).on('change', '#delivery_mode', function() {
                     var val = $(this).val();
 
+                    var totalNetAmount = $('#net_amount_shipping').val();
                     if (val == 'courier') {
-                        $('#shipping_charge').addClass('d-none').text('');
-                        var totalNetAmount = $('#net_amount_shipping').val();
-
+                        $('#shipping_charge').addClass('d-none').html('');
+                    
                         if (parseFloat(totalNetAmount) > 649) {
-                            $('#shipping_charge').removeClass('d-none').text(
+                            $('#shipping_charge').removeClass('d-none').html(
                                 'Shipping Charge <span>₹100</span>');
-                            $('#totalNetPayableAmountText').text('₹' + (parseFloat(totalNetAmount) + 100)
+                            $('#totalNetPayableAmountText').html('₹' + (parseFloat(totalNetAmount) + 100)
                                 .toFixed(2));
                             $('#net_amount').val(parseFloat(totalNetAmount) + 100);
+                            $('#proceed_to_pay').text('Proceed to Pay (₹' + (parseFloat(totalNetAmount) + 100)
+                                .toFixed(2) + ')');
                         }
+                    }else{
+                        $('#shipping_charge').addClass('d-none').html('');
+                        $('#totalNetPayableAmountText').html('₹' + totalNetAmount);
+                        $('#net_amount').val(totalNetAmount);
+                        $('#proceed_to_pay').text('Proceed to Pay (₹' + totalNetAmount + ')');
                     }
                 });
 

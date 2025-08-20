@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Log;
 
 class OrderService
 {
-    private function distributePayout($totalAmount, $orderId)
+    public function distributePayout($totalAmount, $orderId)
     {
         $bv = 1;
         $levelRules = [

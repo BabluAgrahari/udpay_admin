@@ -18,7 +18,7 @@ Route::post('/distributor/signup/complete', [SignupController::class, 'completeR
 Route::post('/distributor/signup/resend-otp', [SignupController::class, 'resendOTP']);
 
 
-Route::group(['prefix' => 'distributor', 'middleware' => 'customer.auth'], function () {
+Route::group(['prefix' => 'distributor', 'middleware' => 'customer.or.distributor'], function () {
     Route::get('/{type}', [DashboardController::class, 'index'])->where('type', 'dashboard|kyc|my-direct-referral|team-generation|my-acheivements');
     Route::get('/user-level-list/{level}', [DashboardController::class, 'userLeavelList']);
     

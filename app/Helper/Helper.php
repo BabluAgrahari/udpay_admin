@@ -7,6 +7,9 @@ use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\Stock;
 use App\Models\User;
+use App\Services\OrderService;
+use App\Models\Payout;
+use App\Models\WalletTransition;
 use App\Models\UserWallet;
 use App\Models\WalletHistory;
 use Illuminate\Support\Facades\Auth;
@@ -79,7 +82,7 @@ if (!function_exists('walletBalance')) {
     function walletBalance($user_id)
     {
         $wallet = Wallet::where('userid',$user_id)->first();
-        return $wallet->amount + $wallet->earning + $wallet->unicash;
+        return ($wallet->amount??0) + ($wallet->earning??0) + ($wallet->unicash??0);
     }
 }
 
@@ -300,11 +303,11 @@ if (!function_exists('viewCart')) {
         $cartItems = [];
 
         if ($request->user()) {
-            $cartItems = Cart::where('user_id', $request->user()->id)->get();
+            $cartItems = Cart::where('user_id', $request->user()->id)->cartType()->get();
         } else {
             $cookieId = $request->cookie('cart_cookie_id');
             if ($cookieId) {
-                $cartItems = Cart::where('cookie_id', $cookieId)->get();
+                $cartItems = Cart::where('cookie_id', $cookieId)->cartType()->get();
             }
         }
 
@@ -318,11 +321,11 @@ if (!function_exists('cartCount')) {
         $cartCount = 0;
 
         if (Auth::user()) {
-            $cartCount = Cart::where('user_id', Auth::user()->id)->sum('quantity');
+            $cartCount = Cart::where('user_id', Auth::user()->id)->cartType()->sum('quantity');
         } else {
             $cookieId = Cookie::get('cart_cookie_id');
             if ($cookieId) {
-                $cartCount = Cart::where('cart_cookie_id', $cookieId)->sum('quantity');
+                $cartCount = Cart::where('cart_cookie_id', $cookieId)->cartType()->sum('quantity');
             }
         }
         return (int) $cartCount;
@@ -338,6 +341,7 @@ if (!function_exists('total_cart_amount')) {
             $totalAmount = DB::table('uni_cart')
                 ->join('uni_products', 'uni_cart.product_id', '=', 'uni_products.id')
                 ->where('uni_cart.user_id', $userId)
+                ->cartType()
                 ->sum(DB::raw('uni_products.price * uni_cart.quantity'));
         } else {
             $cookieId = Cookie::get('cart_cookie_id');  // $request->cookie('');
@@ -345,6 +349,7 @@ if (!function_exists('total_cart_amount')) {
                 $totalAmount = DB::table('uni_cart')
                     ->join('uni_products', 'uni_cart.product_id', '=', 'uni_products.id')
                     ->where('uni_cart.cart_cookie_id', $cookieId)
+                    ->cartType()
                     ->sum(DB::raw('uni_products.price * uni_cart.quantity'));
             }
         }
@@ -417,12 +422,11 @@ if (!function_exists('addWallet1')) {
         $save1->balance = $walletBal->amount + $walletBal->earning + $walletBal->unicash;
         $save1->transition_type = $tp;
         $save1->in_type = 'Your Wallet is Creditd ' . $payout . ' as Performance Bonus from Unipay';
-        $save1->ord_id = $order_id;
+        $save1->order_id = $order_id;
         $save1->unicash = 0;
         $save1->earning = $payout;
         $save1->amount = 0;
         $save1->unipoint = 0;
-        $save1->created_on = date('Y-m-d H:i:s');
         $save1->description = '';
         $save1->save();
 
@@ -485,7 +489,7 @@ if (!function_exists('addWallet1')) {
             $save->earning     = $request->earning ?? 0;
             $save->amount      = $request->amount ?? 0;
             $save->unipoint    = $request->unipoint ?? 0;
-            $save->ord_id      = $request->order_id ?? '';
+            $save->order_id      = $request->order_id ?? '';
             if ($save->save())
                 return true;
     

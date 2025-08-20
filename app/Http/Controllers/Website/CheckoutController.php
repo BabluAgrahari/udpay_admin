@@ -31,10 +31,10 @@ class CheckoutController extends Controller
 
         $data['user'] = $user;
 
-        $cartItems = Cart::with('product')->where('user_id', $user->id)->get();
+        $cartItems = Cart::with('product')->where('user_id', $user->id)->cartType()->get();
 
         if($cartItems->isEmpty()){
-            return redirect()->back()->with('error', 'Cart is empty');
+            return redirect()->to('/')->with('error', 'Cart is empty');
         }
 
         $subtotal = $cartItems->sum(function ($item) {
@@ -139,13 +139,8 @@ class CheckoutController extends Controller
             return $this->failMsg('Invalid Address Id.');
         }
 
-        $cart_type = 'deals';
-        if (Auth::user()->can('isDistributor')) {
-            $cart_type = 'ap_shopping';
-        } elseif (Auth::user()->can('isCustomer')) {
-            $cart_type = 'shopping';
-        }
-        $cartItems = Cart::with('product')->where('user_id', $user->id)->where('cart_type', $cart_type)->get();
+
+        $cartItems = Cart::with('product')->where('user_id', $user->id)->cartType()->get();
         if ($cartItems->isEmpty()) {
             return $this->failMsg('Cart is Empty.');
         }
@@ -370,8 +365,8 @@ class CheckoutController extends Controller
             } else {
                 $userLvl = User::where('user_id', $user_id)->first();
                 $userLvl->isactive = 1;
-                $userLvl->isactive1 = 1;
-                $userLvl->sv = $userLvl->sv + $totSv;
+                // $userLvl->isactive1 = 1;
+                // $userLvl->sv = $userLvl->sv + $totSv;
                 $userLvl->role = 'distributor';
                 $userLvl->upgrade_date = date('Y-m-d');
                 if (!$userLvl->save())
