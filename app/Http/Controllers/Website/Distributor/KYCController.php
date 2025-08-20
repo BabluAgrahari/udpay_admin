@@ -186,10 +186,16 @@ class KYCController extends Controller
 
             $kyc->userId = $user->user_id;
             $kyc->pan_number = $request->pan_numer;
-            $kyc->pan = $panDocPath;
+            if (!empty($panDocPath)) {
+                $kyc->pan = $panDocPath;
+            }
             $kyc->aadhar1 = $request->aadhar_no;
-            $kyc->aadhar2 = $aadharDocPath;
-            $kyc->self = $selfiePath;
+            if (!empty($aadharDocPath)) {
+                $kyc->aadhar2 = $aadharDocPath;
+            }
+            if (!empty($selfiePath)) {
+                $kyc->self = $selfiePath;
+            }
             $kyc->status = 0;
             $kyc->kyc_flag = 1;
             if ($kyc->save()) {

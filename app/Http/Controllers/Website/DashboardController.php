@@ -16,6 +16,7 @@ use App\Models\UserAddress;
 use App\Models\Order;
 use App\Models\Wishlist;
 use App\Models\Address;
+use App\Models\ApOrder;
 
 class DashboardController extends Controller
 {
@@ -64,7 +65,11 @@ class DashboardController extends Controller
 
     public function orderHistory(Request $request) {
         try {
-            $data['orders'] = Order::where('uid', Auth::user()->id)->get();
+            if(Auth::user()->role == 'distributor' || Auth::user()->role == 'customer'){
+                $data['orders'] = ApOrder::where('uid', Auth::user()->user_id)->get();
+            }else{
+                $data['orders'] = Order::where('uid', Auth::user()->user_id)->get();
+            }
             return view('Website.Dashboard.order_history', $data);
         } catch (\Exception $e) {
             abort(500, $e->getMessage());

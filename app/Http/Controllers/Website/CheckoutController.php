@@ -3,20 +3,20 @@
 namespace App\Http\Controllers\Website;
 
 use App\Http\Controllers\Controller;
+use App\Models\ApOrder;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderToProduct;
 use App\Models\Product;
 use App\Models\User;
 use App\Models\UserAddress;
+use App\Models\Wallet;
 use App\Services\PaymentGatway\CashFree;
 use App\Services\OrderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use App\Models\ApOrder;
-use App\Models\Wallet;
 
 class CheckoutController extends Controller
 {
@@ -32,6 +32,11 @@ class CheckoutController extends Controller
         $data['user'] = $user;
 
         $cartItems = Cart::with('product')->where('user_id', $user->id)->get();
+
+        if($cartItems->isEmpty()){
+            return redirect()->back()->with('error', 'Cart is empty');
+        }
+
         $subtotal = $cartItems->sum(function ($item) {
             if (Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer')) {
                 return $item->product ? $item->product->product_sale_price * $item->quantity : 0;
@@ -41,9 +46,9 @@ class CheckoutController extends Controller
         });
 
         $totalSv = $cartItems->sum(function ($item) {
-            if(Auth::check() && (Auth::user()->role == 'customer' || Auth::user()->role == 'distributor')){
+            if (Auth::check() && (Auth::user()->role == 'customer' || Auth::user()->role == 'distributor')) {
                 return $item->product ? $item->product->sv * $item->quantity : 0;
-            }else{
+            } else {
                 return 0;
             }
         });
@@ -54,8 +59,8 @@ class CheckoutController extends Controller
         $total_saving = $total_mrp - $subtotal;
         $total_items = $cartItems->sum('quantity');
 
-        $discount =0;
-        if(session('applied_coupon.discount_amount') && Auth::user()->can('isGuest')){
+        $discount = 0;
+        if (session('applied_coupon.discount_amount') && Auth::user()->can('isGuest')) {
             $discount = session('applied_coupon.discount_amount');
         }
 
@@ -65,7 +70,7 @@ class CheckoutController extends Controller
         $data['total_saving'] = $total_saving;
         $data['net_amount'] = $subtotal - $discount;
         $data['total_items'] = $total_items;
-       
+
         return view('Website.checkout', $data);
     }
 
@@ -91,18 +96,26 @@ class CheckoutController extends Controller
         return view('Website.checkout', $data);
     }
 
+    private function checkWalletBalance($amount)
+    {
+        $wallet_balance = walletBalance(Auth::user()->user_id);
+    }
+
     public function checkout(Request $request)
     {
-        $payment = new CashFree();
-        $res = $payment->createOrder(100, 'INR', ['customer_id' => '1234567890', 'customer_name' => 'John Doe', 'customer_email' => 'john.doe@example.com', 'customer_phone' => '+919876543210']);
+        // $payment = new CashFree();
+        // $res = $payment->createOrder(100, 'INR', ['customer_id' => '1234567890', 'customer_name' => 'John Doe', 'customer_email' => 'john.doe@example.com', 'customer_phone' => '+919876543210']);
 
-        print_r($res);
-        die;
+        // print_r($res);
+        // die;
 
         $rules = [
             'address_id' => 'required|exists:user_address,id',
-            'payment_gateway' => 'required|in:cashfree,razorpay,wallet',
+            'payment_mode' => 'required|in:wallet,online',
         ];
+        if ($request->payment_mode == 'online') {
+            $rules['payment_gateway'] = 'required|in:cashfree,razorpay';
+        }
         if (Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer')) {
             $rules['delivery_mode'] = 'required|in:self_pickup,courier';
         }
@@ -112,6 +125,8 @@ class CheckoutController extends Controller
             'payment_gateway.in' => 'Invalid payment gateway.',
             'delivery_mode.required' => 'Delivery mode is required.',
             'delivery_mode.in' => 'Invalid delivery mode.',
+            'payment_mode.required' => 'Payment mode is required.',
+            'payment_mode.in' => 'Invalid payment mode.',
         ]);
 
         if ($validator->fails()) {
@@ -150,63 +165,73 @@ class CheckoutController extends Controller
     private function DealOrder($request, $cartItems)
     {
         // try {
-            DB::beginTransaction();
+        DB::beginTransaction();
 
-            $subtotal = 0;
-            $total_gst = 0;
-            $total_discount = 0;
-            foreach ($cartItems as $cartItem) {
-                $subtotal += $cartItem->product->guest_price * $cartItem->quantity;
-                $total_gst += $cartItem->product->igst * $cartItem->quantity;
-                $total_discount += $cartItem->product->discount * $cartItem->quantity;
-            }
-            $coupon_id = session('applied_coupon.id') ?? null;
+        $subtotal = 0;
+        $total_gst = 0;
+        $total_discount = 0;
+        foreach ($cartItems as $cartItem) {
+            $subtotal += $cartItem->product->guest_price * $cartItem->quantity;
+            $total_gst += $cartItem->product->igst * $cartItem->quantity;
+            $total_discount += $cartItem->product->discount * $cartItem->quantity;
+        }
+        $coupon_id = session('applied_coupon.id') ?? null;
 
-            $user = Auth::user();
-            $order = new Order();
-            $order->uid = $user->id;
-            $order->order_id = 'NUTRA-' . time() . '-' . $user->id;
-            $order->address_id = $request->address_id;
-            $order->coupon_id = $coupon_id;
-            $order->amount = $subtotal;
-            $order->total_qty = $cartItems->sum('quantity');
-            $order->total_gst = $total_gst;
-            $order->total_amount = $subtotal + $total_gst;
-            $order->total_gross = $subtotal + $total_gst;
-            $order->total_discount = $total_discount;
-            $order->total_net_amount = ($subtotal + $total_gst) - $total_discount;
-            $order->payment_method = 'prepaid';
-            $order->payment_status = 'pending';
-            $order->payment_gateway = $request->payment_gateway;
-            $order->txn_id = '';
-            $order->payment_response = json_encode([]);
-            $order->status = 'pending';
-            if (!$order->save()) {
-                DB::rollBack();
-                return ['status' => false, 'msg' => 'Failed to create order.'];
-            }
+        $total_net_amount = ($subtotal + $total_gst) - $total_discount;
 
-            foreach ($cartItems as $cartItem) {
-                if ($cartItem->product) {
-                    $orderToProduct = new OrderToProduct();
-                    $orderToProduct->order_id = $order->id;
-                    $orderToProduct->product_id = $cartItem->product_id;
-                    $orderToProduct->variant_id = $cartItem->variant_id;
-                    $orderToProduct->attribute_id = null;
-                    $orderToProduct->quantity = $cartItem->quantity;
-                    $orderToProduct->price = $cartItem->product->guest_price;
-                    $orderToProduct->gst = $cartItem->product->igst;
-                    if (!$orderToProduct->save()) {
-                        DB::rollBack();
-                        return ['status' => false, 'msg' => 'Failed to create order to product.'];
-                    }
+        $online_payable_amount = $total_net_amount;
+        // if($request->payment_mode == 'wallet'){
+        //     $wallet_balance = walletBalance(Auth::user()->user_id);
+        //     if($wallet_balance < $total_net_amount){
+        //         $online_payable_amount = $total_net_amount - $wallet_balance;
+        //     }
+        // }
+
+        $user = Auth::user();
+        $order = new Order();
+        $order->uid = $user->user_id;
+        $order->order_id = 'NUTRA-' . time() . '-' . $user->id;
+        $order->address_id = $request->address_id;
+        $order->coupon_id = $coupon_id;
+        $order->amount = $subtotal;
+        $order->total_qty = $cartItems->sum('quantity');
+        $order->total_gst = $total_gst;
+        $order->total_amount = $subtotal + $total_gst;
+        $order->total_gross = $subtotal + $total_gst;
+        $order->total_discount = $total_discount;
+        $order->total_net_amount = $total_net_amount;
+        $order->payment_method = 'prepaid';
+        $order->payment_status = 'pending';
+        $order->payment_gateway = $request->payment_gateway;
+        $order->txn_id = '';
+        $order->payment_response = json_encode([]);
+        $order->status = 'pending';
+        if (!$order->save()) {
+            DB::rollBack();
+            return ['status' => false, 'msg' => 'Failed to create order.'];
+        }
+
+        foreach ($cartItems as $cartItem) {
+            if ($cartItem->product) {
+                $orderToProduct = new OrderToProduct();
+                $orderToProduct->order_id = $order->id;
+                $orderToProduct->product_id = $cartItem->product_id;
+                $orderToProduct->variant_id = $cartItem->variant_id;
+                $orderToProduct->attribute_id = null;
+                $orderToProduct->quantity = $cartItem->quantity;
+                $orderToProduct->price = $cartItem->product->guest_price;
+                $orderToProduct->gst = $cartItem->product->igst;
+                if (!$orderToProduct->save()) {
+                    DB::rollBack();
+                    return ['status' => false, 'msg' => 'Failed to create order to product.'];
                 }
             }
-            Cart::where('user_id', $user->id)->delete();
+        }
+        Cart::where('user_id', $user->id)->delete();
 
-            DB::commit();
+        DB::commit();
 
-            return ['status' => true, 'msg' => 'Order placed successfully!'];
+        return ['status' => true, 'msg' => 'Order placed successfully!'];
         // } catch (\Exception $e) {
         //     DB::rollback();
         //     return ['status' => false, 'msg' => 'Failed to process order: ' . $e->getMessage()];
@@ -246,7 +271,7 @@ class CheckoutController extends Controller
             $gst = 100 / (100 + $cart->product->igst);
             $gross = $totalAmount * $gst;
             $totalGst += $totalAmount - $gross;
-            $totalNetAmt = $gross + $totalGst;
+            $totalNetAmt += $gross + $totalGst;
             $totalGross += $gross;
         }
 
@@ -254,11 +279,25 @@ class CheckoutController extends Controller
         if (($totalNetAmt < 649) && $delivery_mode != 'self_pickup')
             $shippingCharge = 100;
 
-        if (in_array($request->payment_gateway, ['wallet'])) {
+        $payment_mode = $request->payment_mode;
+        $onlinePayableAmount = $totalNetAmt + $shippingCharge;
+        $walletPayableAmount = $totalNetAmt + $shippingCharge;
+        if (in_array($request->payment_mode, ['wallet'])) {
+            $applicableAmt = walletBalance(Auth::user()->user_id);
+            if ($applicableAmt < $walletPayableAmount) {
+                $onlinePayableAmount = $walletPayableAmount - $applicableAmt;
+                $walletPayableAmount = $applicableAmt;
+            } else {
+                $onlinePayableAmount = $applicableAmt - $walletPayableAmount;
+            }
             $orderService = new OrderService();
-            $checkWallet = $orderService->checkWallet(($totalNetAmt + $shippingCharge), $order_id, $ord_tp, $totDiscount, true);
+            $checkWallet = $orderService->checkWallet($walletPayableAmount, $order_id, $ord_tp, $totDiscount, true);
             if (!$checkWallet['status'])
                 return ['status' => false, 'msg' => $checkWallet['msg']];
+
+            if ($onlinePayableAmount > 0) {
+                $payment_mode = 'wallet_online';
+            }
         }
 
         $save = new ApOrder();
@@ -270,7 +309,7 @@ class CheckoutController extends Controller
         $save->discount_amt = 0;
         $save->gst_amt = $totalGst;
         $save->total_gross = $totalGross;
-        $save->total_net_amt = $totalNetAmt;
+        $save->total_net_amt = ($totalNetAmt + $shippingCharge);
         $save->address_id = $request->address_id;
         $save->shipping_charge = $shippingCharge;
         $save->unique_order_id = $uniqueOd;
@@ -297,16 +336,15 @@ class CheckoutController extends Controller
             }
         }
 
-        if (in_array($request->payment_gateway, ['wallet'])) {
+        if (in_array($request->payment_mode, ['wallet']) && $walletPayableAmount > 0) {
             $orderService = new OrderService();
-            $checkWallet = $orderService->checkWallet(($totalNetAmt + $shippingCharge), $order_id, $ord_tp, $totDiscount, false);
+            $checkWallet = $orderService->checkWallet($walletPayableAmount, $order_id, $ord_tp, $totDiscount, false);
             if (!$checkWallet['status'])
                 return ['status' => false, 'msg' => ($checkWallet['msg'])];
         }
-
-        if (($request->payment_gateway == 'wallet' ||
-            (in_array($request->payment_gateway, ['razorpay'])) &&
-                $request->payment_gateway['status'] == 'success')) {
+//  &&
+                // $request->payment_mode['status'] == 'success'
+        if ((in_array($request->payment_mode, ['online', 'wallet_online']))) {
             $orderService = new OrderService();
             $orderService->distributePayout($totSv, $order_id);
 

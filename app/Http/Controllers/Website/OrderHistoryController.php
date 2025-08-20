@@ -14,24 +14,32 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use App\Services\PaymentGatway\CashFree;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\ApOrder;
 
 class OrderHistoryController extends Controller
 {
 
-    public function index(Request $request)
-    {
-        try {
-            $data['orders'] = Order::with([ 'orderToProducts', 'orderToProducts.product', 'orderToProducts.variant']   )->where('uid', Auth::user()->id)->orderBy('created_at', 'desc')->paginate(10);
-            return view('Website.order_history', $data);
-        } catch (\Exception $e) {
-            abort(500, $e->getMessage());
-        }
-    }
+    // public function index(Request $request)
+    // {
+    //     try {
+    //         if(Auth::user()->role == 'distributor' || Auth::user()->role == 'customer'){
+    //        $data['orders'] = ApOrder::with([ 'orderToProducts', 'orderToProducts.product', 'orderToProducts.variant'])
+    //         ->where('uid', Auth::user()->id)->orderBy('created_at', 'desc')->paginate(10);
+    //         }else{
+    //             $data['orders'] = Order::with([ 'orderToProducts', 'orderToProducts.product', 'orderToProducts.variant'])
+    //         ->where('uid', Auth::user()->id)->orderBy('created_at', 'desc')->paginate(10);
+           
+    //         }
+    //         // return view('Website.order_history', $data);
+    //     } catch (\Exception $e) {
+    //         abort(500, $e->getMessage());
+    //     }
+    // }
 
     public function orderDetail($id)
-    {
+    {   
         try {
-            $data['order'] = Order::with([  'orderToProducts', 'orderToProducts.product', 'orderToProducts.variant'])->where('id', $id)->first();
+            $data['order'] = Order::with(['orderToProducts', 'orderToProducts.product', 'orderToProducts.variant'])->where('id', $id)->first();
             return view('Website.order_detail', $data);
         } catch (\Exception $e) {
             abort(500, $e->getMessage());

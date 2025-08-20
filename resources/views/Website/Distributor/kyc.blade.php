@@ -201,7 +201,7 @@
                         </div>
                         <div class="col-md-6 mb-2">
                             <label class="form-label">Referral ID <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" value="{{ $user->ref_id ?? '' }}" readonly
+                            <input type="text" class="form-control" value="{{ $user->user_num ?? '' }}" readonly
                                 required>
                             <span class="text-danger error" id="ref_id_error"></span>
                         </div>
@@ -274,7 +274,7 @@
                         <div class="col-md-6 mb-2">
                             <label class="form-label">Date of Birth <span class="text-danger">*</span></label>
                             <input type="date" class="form-control" name="dob" required
-                                value="{{ $kyc->dob ?? '' }}" max="{{ date('Y-m-d') }}"
+                                value="{{ !empty($kyc->dob)?date('Y-m-d', strtotime($kyc->dob)) : '' }}" max="{{ date('Y-m-d') }}"
                                 min="{{ date('Y-m-d', strtotime('-100 years')) }}">
                             <span class="text-danger error" id="dob_error"></span>
                         </div>
@@ -392,16 +392,19 @@
                                 </div>
                                 <h6 class="mt-3">PAN Document</h6>
                                 <p class="text-muted small">Upload clear image of your PAN card</p>
-                                <input type="file" class="form-control" name="pan_docs" accept="image/*"
+                                <input type="file" class="form-control" name="pan_docs" accept="image/*,application/pdf,document/*"
                                     required>
                                 <div class="upload-preview mt-2" id="panDocsPreview"></div>
                             </div>
                             <span class="text-danger error" id="pan_docs_error"></span>
+                            @if(!empty($kyc->pan))
+                                <a href="{{ $kyc->pan }}" target="_blank" class="btn btn-sm btn-primary">View PAN</a>
+                            @endif
                         </div>
                         <div class="col-md-6 mb-2">
                             <label class="form-label">Aadhaar Number <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" name="aadhar_no" placeholder="1234 5678 9012"
-                                value="{{ $kyc->aadhaar_no ?? '' }}" required>
+                                value="{{ $kyc->aadhar1 ?? '' }}" required>
                             <span class="text-danger error" id="aadhar_no_error"></span>
                         </div>
                         <div class="col-md-6 mb-2">
@@ -411,11 +414,14 @@
                                 </div>
                                 <h6 class="mt-3">Aadhaar Document</h6>
                                 <p class="text-muted small">Upload front and back of Aadhaar card</p>
-                                <input type="file" class="form-control" name="aadhar_docs" accept="image/*"
+                                <input type="file" class="form-control" name="aadhar_docs" accept="image/*,application/pdf,document/*"
                                     required>
                                 <div class="upload-preview mt-2" id="aadharDocsPreview"></div>
                             </div>
                             <span class="text-danger error" id="aadhar_docs_error"></span>
+                            @if(!empty($kyc->aadhar2))
+                                <a href="{{ $kyc->aadhar2 }}" target="_blank" class="btn btn-sm btn-primary">View Aadhaar</a>
+                            @endif
                         </div>
                         <div class="col-md-6 mb-2">
                             <div class="upload-card">
@@ -428,6 +434,9 @@
                                 <div class="upload-preview mt-2" id="selfiPreview"></div>
                             </div>
                             <span class="text-danger error" id="selfi_error"></span>
+                            @if(!empty($kyc->self))
+                                <img src="{{ $kyc->self }}" alt="Selfie" class="img-fluid">
+                            @endif
                         </div>
                     </div>
                     <div class="form-navigation mt-4">

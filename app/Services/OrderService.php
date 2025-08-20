@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\LevelCount;
 use App\Models\User;
+use App\Models\Wallet;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -87,7 +88,7 @@ class OrderService
         }
     }
 
-    private function checkWallet($amount, $orderId, $types, $totDiscount, $checkBalance = false)
+    public function checkWallet($amount, $orderId, $types, $totDiscount, $checkBalance = false)
     {
         $wallet = Wallet::where('userid', Auth::user()->user_id)->first();
         if (!$wallet) {

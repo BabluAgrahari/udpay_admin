@@ -12,6 +12,7 @@ use App\Http\Controllers\Website\OrderHistoryController;
 use App\Http\Controllers\Website\DashboardController;
 use App\Http\Controllers\Website\ReviewController;
 use App\Http\Controllers\Website\ProductListController;
+use App\Http\Controllers\Website\CentralFunctionController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -29,6 +30,11 @@ Route::get('/cart-summary', [CartController::class, 'getCartSummary']);
 Route::post('/apply-coupon', [CartController::class, 'applyCoupon']);
 Route::post('/remove-coupon', [CartController::class, 'removeCoupon']);
 Route::get('/available-coupons', [CartController::class, 'getAvailableCoupons']);
+
+// Central Function Routes
+Route::get('/pincode/{pincode}', [CentralFunctionController::class, 'getPincode']);
+Route::get('/ifsc/{ifsc}', [CentralFunctionController::class, 'getIFSC']);
+
 
 // Review Routes
 Route::post('/review/store', [ReviewController::class, 'store']);

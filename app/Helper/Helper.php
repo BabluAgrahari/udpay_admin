@@ -469,9 +469,9 @@ if (!function_exists('addWallet1')) {
         {
             
             $request = (object)$request;
-            $userData = User::where('user_num',$request->num)->first();
+            $userData = User::where('user_num',$request->unm)->first();
             $save = new WalletTransition();
-            $save->unm	   = $request->num;
+            $save->unm	   = $request->unm;
             $save->user_id     = $request->user_id;
             $save->transition_type  = $request->transition_type ?? '';
             $save->credit      = $request->credit ?? 0;

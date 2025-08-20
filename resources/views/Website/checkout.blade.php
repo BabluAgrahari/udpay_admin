@@ -179,9 +179,12 @@
                             @if (Auth::check() && (Auth::user()->role == 'customer' || Auth::user()->role == 'distributor'))
                                 <p>Total SV <span style="color: #F1624B;">{{ $total_sv }}</span></p>
                             @endif
+                            <p id="shipping_charge" class="d-none">Shipping Charge <span></span></p>
                             <hr />
+                            <input type="hidden" id="net_amount_shipping" value="{{ $net_amount }}">
                             <input type="hidden" id="net_amount" value="{{ $net_amount }}">
-                            <p class="total text-black">Payable Amount <span>₹{{ $net_amount }}</span></p>
+                            <p class="total text-black">Payable Amount <span
+                                    id="totalNetPayableAmountText">₹{{ $net_amount }}</span></p>
                         </div>
                     </div>
 
@@ -217,7 +220,10 @@
                                 <option value="cashfree">Cashfree</option>
                                 <option value="razorpay">Razorpay</option>
                             </select>
-                            <select name="delivery_mode" class="form-control mb-2">
+                        </div>
+
+                        <div class="cart-items mt-2 p-3">
+                            <select name="delivery_mode" id="delivery_mode" class="form-control mb-2">
                                 <option value="self_pickup">Self Pickup</option>
                                 <option value="courier">Courier</option>
                             </select>
@@ -441,6 +447,25 @@
                         $('#proceed_to_pay').text('Proceed to  (₹' + parseFloat(net_amount).toFixed(2) + ')');
                     }
                 });
+
+                $(document).on('change', '#delivery_mode', function() {
+                    var val = $(this).val();
+
+                    if (val == 'courier') {
+                        $('#shipping_charge').addClass('d-none').text('');
+                        var totalNetAmount = $('#net_amount_shipping').val();
+
+                        if (parseFloat(totalNetAmount) > 649) {
+                            $('#shipping_charge').removeClass('d-none').text(
+                                'Shipping Charge <span>₹100</span>');
+                            $('#totalNetPayableAmountText').text('₹' + (parseFloat(totalNetAmount) + 100)
+                                .toFixed(2));
+                            $('#net_amount').val(parseFloat(totalNetAmount) + 100);
+                        }
+                    }
+                });
+
+                
             });
         </script>
         <script>
@@ -479,7 +504,12 @@
                         },
                         error: function(xhr) {
                             hideCartLoading();
-                            showSnackbar(xhr.responseJSON.msg, 'error');
+                            if (xhr.status === 422) {
+                                const errors = xhr.responseJSON.validation;
+                                showSnackbar(errors, 'error');
+                            } else {
+                                showSnackbar(xhr.responseJSON.msg, 'error');
+                            }
                         }
                     });
                 });
@@ -673,6 +703,7 @@
                     } else {
                         $(this).removeClass('is-invalid');
                         $('#user_zip_code_error').html('');
+                        getPincode();
                         return true;
                     }
                 });
@@ -728,6 +759,26 @@
                 //         $field.next('.error-message').remove();
                 //     }
                 // });
+
+                function getPincode() {
+                    var pincode = $('#user_zip_code').val();
+                    $.ajax({
+                        url: `{{ url('pincode') }}/${pincode}`,
+                        method: 'GET',
+                        dataType: 'json',
+                        success: function(response) {
+                            if(response.status){
+                                if(response.record.office_name){
+                                    $('#land_mark').val(response.record.office_name);
+                                }
+                                $('#user_state').val(response.record.state);
+                                $('#user_city').val(response.record.district);    
+                            }else{
+                                showSnackbar('Pincode not found', 'error');
+                            }
+                        }
+                    });
+                }
 
                 $('.form-control').on('input', function() {
                     $(this).removeClass('is-invalid');
