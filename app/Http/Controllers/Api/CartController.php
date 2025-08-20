@@ -100,10 +100,10 @@ class CartController extends Controller
 		}
 	}
 
-	public function removeCart($cart_id)
+	public function removeCart($product_id)
 	{
 		try {
-			$cart = Cart::find($cart_id);
+			$cart = Cart::where('product_id',$product_id);
 			if (empty($cart))
 				return $this->failRes('Invaliad Cart id.');
 
