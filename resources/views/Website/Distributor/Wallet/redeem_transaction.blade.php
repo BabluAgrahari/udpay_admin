@@ -23,8 +23,8 @@
                                     class="fa-solid fa-heart"></i> Redeem Transaction</a>
                             <a href="{{ url('distributor/wallet/transaction-history') }}" class="tab-btn"><i
                                     class="fa-solid fa-book"></i> Transaction History</a>
-                            <a href="{{ url('distributor/wallet/my-earning') }}" class="tab-btn"><i
-                                    class="fa-solid fa-heart"></i> My Earning</a>
+                            {{-- <a href="{{ url('distributor/wallet/my-earning') }}" class="tab-btn"><i
+                                    class="fa-solid fa-heart"></i> My Earning</a> --}}
                             <a href="{{ url('distributor/wallet/logout') }}" class="tab-btn logout"><i
                                     class="fa-solid fa-right-from-bracket"></i> Logout</a>
                         </div>

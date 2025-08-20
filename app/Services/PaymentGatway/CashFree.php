@@ -55,7 +55,7 @@ class CashFree
 
         if ($response->successful()) {
 print_r($response->json());
-            $this->getPaymentLink($response->json()['data']['payment_session_id']);
+            $this->getPaymentLink($response->json()['payment_session_id']);
             return [
                 'success' => true,
                 'data' => $response->json()
@@ -77,9 +77,9 @@ print_r($response->json());
     }
 
 
-    private function getPaymentLink(){
+    private function getPaymentLink($payment_session_id){
         $orderData = [
-            'payment_session_id' => 'session__someidwhichislongandhasnumbers1232132andcharacterscn',
+            'payment_session_id' => $payment_session_id,
             'payment_method' => [
                 'upi' => [
                     'channel' => 'link'
