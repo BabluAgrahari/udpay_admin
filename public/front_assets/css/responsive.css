@@ -103,7 +103,7 @@
 }
 /* ------------new css---------------------------- */
 .dashboard {
-    display: grid !important;
+    display: block !important;
     gap: 20px;
 }
 .tab-content {
@@ -273,9 +273,10 @@
 .product-top {
     display: grid !important;
 }
-/* .sidebar {
+.sidebar {
     width: 100% !important;
-} */
+    margin-bottom: 20px;
+}
 .address-list {
     display: grid !important;
 }
@@ -307,7 +308,7 @@
     font-size: 35px !important;
 }
 .popup-content {
-    width: auto !important;
+    width: 300px!important;
     height: 380px !important;
     margin: 10px;
 }

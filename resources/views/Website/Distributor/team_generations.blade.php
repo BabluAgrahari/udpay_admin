@@ -13,16 +13,16 @@
     <div class="tab-content-body">
         <form action="" method="get">
             <div class="row m-0">
-                <div class="col-md-3">
-                    <select name="level" id="level" class="form-control mb-2">
+                <div class="col-md-3 mb-2">
+                    <select name="level" id="level" class="form-control">
                         <option value="">Select Level</option>
                         @foreach ($team_generation as $item)
                             <option value="{{ $item->lvl }}">{{ $item->lvl }}</option>
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-3">
-                    <select name="rank" id="rank" class="form-control mb-2">
+                <div class="col-md-3 mb-2">
+                    <select name="rank" id="rank" class="form-control">
                         <option value="">Select Rank</option>
                         <option value="diamond">Diamond</option>
                         <option value="gold">Gold</option>
@@ -31,9 +31,9 @@
                         <option value="none">None</option>
                     </select>
                 </div>
-                <div class="col-md-3 d-flex gap-2">
-                    <button type="submit" class="thm-btn">Search</button>
-                    <a href="{{ url('distributor/team-generation') }}" class="thm-btn">Reset</a>
+                <div class="col-md-3 mb-2 d-flex gap-2 align-items-center">
+                    <button type="submit" class="thm-btn py-1 px-3">Search</button>
+                    <a href="{{ url('distributor/team-generation') }}" class="thm-btn py-1 px-3">Reset</a>
                 </div>
             </div>
         </form>

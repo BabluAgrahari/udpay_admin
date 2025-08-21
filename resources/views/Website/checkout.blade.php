@@ -198,11 +198,11 @@
                                @if($wallet_balance > 0)
                                 <input type="radio" name="payment_mode" class="payment_mode" value="wallet"
                                     id="wallet">
-                                <label for="wallet">Wallet</label>
+                                <label class="mb-0" for="wallet">Wallet</label>
                                 @endif
                                 <input type="radio" name="payment_mode" class="payment_mode" value="online"
                                     id="online" {{ $wallet_balance<= 0 ? 'checked' : '' }}>
-                                <label for="online">Online Payment</label>
+                                <label class="mb-0" for="online">Online Payment</label>
                             </div>
                         </div>
                        
@@ -210,7 +210,7 @@
                             <div class="cart-items mt-2 p-3 d-none" id="wallet_balance">
                                 <h6 class="mb-2">Wallet Balance</h6>
                                 <input type="hidden" id="wallet_balance_amount" value="{{ $wallet_balance }}">
-                                <p>Available Balance <span>₹{{ number_format($wallet_balance, 2) }}</span></p>
+                                <p class="mb-0">Available Balance <span>₹{{ number_format($wallet_balance, 2) }}</span></p>
                             </div>
                         @endif
                         <div class="cart-items mt-2 p-3 {{ $wallet_balance > 0 ? 'd-none' : '' }}" id="online_payment">
@@ -218,17 +218,53 @@
 
                             <input type="hidden" name="address_id" id="address_id"
                                 value="{{ $addresses->count() == 1 ? $addresses->first()->id : '' }}">
-                            <select name="payment_gateway" class="form-control mb-2">
+                            
+                            <!-- <select name="payment_gateway" class="form-control mb-2">
                                 <option value="cashfree">Cashfree</option>
                                 <option value="razorpay">Razorpay</option>
-                            </select>
+                            </select> -->
+                            <div class="d-flex payment-option gap-4 align-items-center flex-wrap">
+                                <div class="d-flex gap-1 align-items-center">
+                                    <input type="radio" name="cashfree" class="payment_mode" value="cashfree"
+                                        id="cashfree">
+                                    <label class="mb-0" for="cashfree">
+                                        <img src="../front_assets/images/payment/1.png" alt="img" class="payment-image"> Cashfree</label>
+                                </div>
+                                <div class="d-flex gap-1 align-items-center">
+                                    <input type="radio" name="cashfree" class="payment_mode" value="razorpay"
+                                        id="razorpay">
+                                    <label class="mb-0" for="razorpay"> 
+                                        <img src="../front_assets/images/payment/2.png" alt="img" class="payment-image"> Razorpay</label>
+                                </div>
+                                <div class="d-flex gap-1 align-items-center">
+                                    <input type="radio" name="cashfree" class="payment_mode" value="debit"
+                                        id="debit">
+                                    <label class="mb-0" for="debit">
+                                    <img src="../front_assets/images/payment/3.png" alt="img" class="payment-image"> PhonePe</label>
+                                </div>
+                                <div class="d-flex gap-1 align-items-center">
+                                    <input type="radio" name="cashfree" class="payment_mode" value="upi"
+                                        id="payu">
+                                    <label class="mb-0" for="payu">
+                                    <img src="../front_assets/images/payment/4.png" alt="img" class="payment-image"> PayU</label>
+                                </div>
+                                
+                            </div>
                         </div>
 
                         <div class="cart-items mt-2 p-3">
-                            <select name="delivery_mode" id="delivery_mode" class="form-control mb-2">
+                            <!-- <select name="delivery_mode" id="delivery_mode" class="form-control mb-2">
                                 <option value="self_pickup">Self Pickup</option>
                                 <option value="courier">Courier</option>
-                            </select>
+                            </select> -->
+                            <div class="d-flex gap-2 align-items-center">
+                                <input type="radio" name="pickup" class="payment_mode" value="pickup"
+                                    id="pickup">
+                                <label class="mb-0" for="pickup">Self Pickup</label>
+                                <input type="radio" name="pickup" class="payment_mode" value="courier"
+                                    id="courier">
+                                <label class="mb-0" for="courier">Courier</label>
+                            </div>
                         </div>
                         <button type="submit" class="thm-btn" id="proceed_to_pay">Proceed to Pay</button>
                     </form>

@@ -1,6 +1,13 @@
 <style>
-    .table-light th {
+     .table-light th {
         color: #000 !important;
+    }
+    thead.table-light tr th {
+        white-space: nowrap;
+        font-size: 14px;
+    }
+    thead.table-light tr th {
+        background: var(--thm-color-two);
     }
 </style>
 <div class="tab-panel active edit-form-open" id="my-direct-referal">
