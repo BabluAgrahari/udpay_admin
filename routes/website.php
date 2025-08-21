@@ -15,6 +15,10 @@ use App\Http\Controllers\Website\ProductListController;
 use App\Http\Controllers\Website\CentralFunctionController;
 use Illuminate\Support\Facades\Route;
 
+
+Route::get('/checkout/payment-response/cashfree/{type}', [CheckoutController::class, 'paymentResponse']);
+Route::post('/checkout/payment-webhook/{payment_getaway}', [CheckoutController::class, 'paymentWebhook'])->name('payment-webhook');
+
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/product', [ProductListController::class, 'index']);
 Route::get('/product/{category?}', [ProductListController::class, 'index']);

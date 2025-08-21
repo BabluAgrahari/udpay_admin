@@ -15,4 +15,14 @@ class ApOrder extends BaseModel
         return $this->hasMany(ApOrderToProduct::class, 'order_id', 'id');
     }
 
+    public function user()
+    {
+        return $this->hasOne(User::class, 'id', 'uid');
+    }
+
+    public function shipping_address()
+    {
+        return $this->hasOne(UserAddress::class, 'id', 'address_id');
+    }
+
 } 

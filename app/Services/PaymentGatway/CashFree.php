@@ -4,6 +4,8 @@ namespace App\Services\PaymentGatway;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class CashFree
 {
@@ -14,37 +16,34 @@ class CashFree
 
     public function __construct()
     {
-        $this->baseUrl = 'https://api.cashfree.com/pg/orders/sessions';  // env('CASHFREE_ENV') === 'production'
+        $this->apiVersion = '2025-01-01';
+        //$this->baseUrl = 'https://api.cashfree.com/pg';  // env('CASHFREE_ENV') === 'production'
         // ? 'https://api.cashfree.com/pg'
         // : 'https://sandbox.cashfree.com/pg';
-       
-        $this->clientId = '';
-        $this->clientSecret = '';
-        $this->apiVersion = '2025-01-01';
+
+        $this->baseUrl = 'https://sandbox.cashfree.com/pg';
+        $this->clientId = env('CASHFREE_CLIENT_ID');
+        $this->clientSecret = env('CASHFREE_CLIENT_SECRET');
     }
 
-    /**
-     * Create a new payment order
-     */
     public function createOrder($amount, $currency = 'INR', $customerData = [])
     {
-        // try {
         $orderData = [
-            'order_amount' => $amount,
+            'order_amount' => number_format($amount, 2, '.', ''),
             'order_currency' => $currency,
+            'order_id' => $customerData['order_id']??'',
             'customer_details' => [
-                'customer_id' => $customerData['customer_id'] ?? 'USER' . uniqid(),
-                'customer_name' => $customerData['customer_name'] ?? 'Customer',
-                'customer_email' => $customerData['customer_email'] ?? 'customer@example.com',
-                'customer_phone' => $customerData['customer_phone'] ?? '+919876543210'
+                'customer_id' => (string)$customerData['customer_id'] ?? '',
+                'customer_name' => $customerData['customer_name'] ?? '',
+                'customer_email' => $customerData['customer_email'] ?? '',
+                'customer_phone' => $customerData['customer_phone'] ?? ''
             ],
             'order_meta' => [
-                'return_url' => url('/')
+                'return_url' => $customerData['return_url'] ?? '',
+                'notify_url' => $customerData['webhook_url'] ?? ''
             ]
         ];
-        // print_r(json_encode($orderData));
-        // echo $this->baseUrl . '/orders';
-
+        Log::info('CashFree Payment Request -'.$customerData['order_id'], $orderData);
         $response = Http::withHeaders([
             'X-Client-Secret' => $this->clientSecret,
             'X-Client-Id' => $this->clientId,
@@ -53,96 +52,71 @@ class CashFree
             'Accept' => 'application/json'
         ])->post($this->baseUrl . '/orders', $orderData);
 
-        if ($response->successful()) {
-print_r($response->json());
-            $this->getPaymentLink($response->json()['payment_session_id']);
+        Log::info('CashFree Payment Response -'.$customerData['order_id'], $response->json());
+        if ($response->successful() && !empty($response->json()['order_status']) && $response->json()['order_status'] == 'ACTIVE') {
+            $res = $response->json();
             return [
-                'success' => true,
-                'data' => $response->json()
+                'status' => true,
+                'order_amount' => $res['order_amount'] ?? '',
+                'cashfree_order_id' => $res['cf_order_id'] ?? '',
+                'order_status' => $res['order_status'] ?? '',
+                'payment_session_id' => $res['payment_session_id'] ?? '',
+                // 'data' => $response->json()
+            ];
+        } elseif ($response->successful() && !empty($response->json()['error'])) {
+            $res = $response->json();
+            return [
+                'status' => false,
+                'msg' => $res['error'] ?? '',
+                'code' => $response->status()
             ];
         } else {
+            $res = $response->json();
             return [
-                'success' => false,
-                'error' => $response->body(),
-                'status' => $response->status()
+                'status' => false,
+                'msg' => $response->json()['message'] ?? 'Something went wrong in CashFree Side',
+                'code' => $response->status()
             ];
         }
-
-        // } catch (\Exception $e) {
-        //     return [
-        //         'success' => false,
-        //         'error' => $e->getMessage()
-        //     ];
-        // }
     }
 
-
-    private function getPaymentLink($payment_session_id){
-        $orderData = [
-            'payment_session_id' => $payment_session_id,
-            'payment_method' => [
-                'upi' => [
-                    'channel' => 'link'
-                ]
-            ]
-        ];
+    public function getPayment($order_id)
+    {
         $response = Http::withHeaders([
             'X-Client-Secret' => $this->clientSecret,
             'X-Client-Id' => $this->clientId,
             'x-api-version' => $this->apiVersion,
             'Content-Type' => 'application/json',
             'Accept' => 'application/json'
-        ])->post($this->baseUrl . '/orders/sessions', $orderData);
+        ])->get($this->baseUrl . '/orders/' . $order_id . '/payments');
+        Log::info('Get Payment Response -'.$order_id, [$response->json()]);
 
-        print_r($response->json());
-        die;
-        if ($response->successful()) {
+        if ($response->successful() && !empty($response->json()[0]['payment_status']) && $response->json()[0]['payment_status'] == 'SUCCESS') {
+            $res = $response->json();
             return [
-                'success' => true,
-                'data' => $response->json()
+                'status' => true,
+                'bank_reference' => !empty($res[0]['bank_reference']) ? $res[0]['bank_reference'] : '',
+                'cf_payment_id' => !empty($res[0]['cf_payment_id']) ? $res[0]['cf_payment_id'] : '',
+                'is_captured' => !empty($res[0]['is_captured']) ? $res[0]['is_captured'] : false,
+                'order_id' => !empty($res[0]['order_id']) ? $res[0]['order_id'] : '',
+                'payment_status' => !empty($res[0]['payment_status']) ? $res[0]['payment_status'] : '',
+                'payment_time' => !empty($res[0]['payment_time']) ? $res[0]['payment_time'] : '',
+                'payment_method' => !empty($res[0]['payment_method']) ? $res[0]['payment_method'] : '',
+                'code' => $response->status()
+            ];
+        } elseif ($response->successful() && $response->status() != '200') {
+            $res = $response->json();
+            return [
+                'status' => false,
+                'msg' => $res['message'] ?? 'Something went wrong in CashFree Side',
+                'code' => $response->status()
             ];
         } else {
+            $res = $response->json();
             return [
-                'success' => false,
-                'error' => $response->body(),
-                'status' => $response->status()
-            ];
-        }
-    }
-
-    public function handleCallback(Request $request)
-    {
-        $orderId = $request->get('order_id');
-
-        if (!$orderId) {
-            return [
-                'success' => false,
-                'error' => 'Order ID not provided'
-            ];
-        }
-
-        $orderResponse = $this->getOrder($orderId);
-
-        if (!$orderResponse['success']) {
-            return $orderResponse;
-        }
-
-        $order = $orderResponse['data'];
-
-        // Check payment status
-        if ($order['order_status'] === 'PAID') {
-            return [
-                'success' => true,
-                'message' => 'Payment Successful!',
-                'order_status' => $order['order_status'],
-                'data' => $order
-            ];
-        } else {
-            return [
-                'success' => false,
-                'message' => 'Payment Pending or Failed.',
-                'order_status' => $order['order_status'],
-                'data' => $order
+                'status' => false,
+                'msg' => $response->json()['message'] ?? 'Something went wrong in CashFree Side',
+                'code' => $response->status()
             ];
         }
     }

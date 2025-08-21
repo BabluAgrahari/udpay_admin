@@ -10,13 +10,16 @@ use App\Models\OrderToProduct;
 use App\Models\Product;
 use App\Models\User;
 use App\Models\UserAddress;
+use App\Models\ApOrderToProduct;
 use App\Models\Wallet;
+
 use App\Services\PaymentGatway\CashFree;
 use App\Services\OrderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 
 class CheckoutController extends Controller
 {
@@ -33,7 +36,7 @@ class CheckoutController extends Controller
 
         $cartItems = Cart::with('product')->where('user_id', $user->id)->cartType()->get();
 
-        if($cartItems->isEmpty()){
+        if ($cartItems->isEmpty()) {
             return redirect()->to('/')->with('error', 'Cart is empty');
         }
 
@@ -104,7 +107,7 @@ class CheckoutController extends Controller
     public function checkout(Request $request)
     {
         // $payment = new CashFree();
-        // $res = $payment->createOrder(100, 'INR', ['customer_id' => '1234567890', 'customer_name' => 'John Doe', 'customer_email' => 'john.doe@example.com', 'customer_phone' => '+919876543210']);
+        //  $res = $payment->createOrder(100, 'INR', ['customer_id' => '1234567890', 'customer_name' => 'John Doe', 'customer_email' => 'john.doe@example.com', 'customer_phone' => '+919876543210']);
 
         // print_r($res);
         // die;
@@ -159,78 +162,98 @@ class CheckoutController extends Controller
 
     private function DealOrder($request, $cartItems)
     {
-        // try {
-        DB::beginTransaction();
+        try {
+            DB::beginTransaction();
 
-        $subtotal = 0;
-        $total_gst = 0;
-        $total_discount = 0;
-        foreach ($cartItems as $cartItem) {
-            $subtotal += $cartItem->product->guest_price * $cartItem->quantity;
-            $total_gst += $cartItem->product->igst * $cartItem->quantity;
-            $total_discount += $cartItem->product->discount * $cartItem->quantity;
-        }
-        $coupon_id = session('applied_coupon.id') ?? null;
+            $subtotal = 0;
+            $total_gst = 0;
+            $total_discount = 0;
+            foreach ($cartItems as $cartItem) {
+                $subtotal += $cartItem->product->guest_price * $cartItem->quantity;
+                $total_gst += $cartItem->product->igst * $cartItem->quantity;
+                $total_discount += $cartItem->product->discount * $cartItem->quantity;
+            }
+            $coupon_id = session('applied_coupon.id') ?? null;
 
-        $total_net_amount = ($subtotal + $total_gst) - $total_discount;
+            $total_net_amount = ($subtotal + $total_gst) - $total_discount;
 
-        $online_payable_amount = $total_net_amount;
-        // if($request->payment_mode == 'wallet'){
-        //     $wallet_balance = walletBalance(Auth::user()->user_id);
-        //     if($wallet_balance < $total_net_amount){
-        //         $online_payable_amount = $total_net_amount - $wallet_balance;
-        //     }
-        // }
+            $user = Auth::user();
+            $order_id = 'NUTRA-' . time() . '-' . $user->id;
+            //cashfree
+            $address = UserAddress::where('id', $request->address_id)->where('user_id', $user->id)->first();
 
-        $user = Auth::user();
-        $order = new Order();
-        $order->uid = $user->user_id;
-        $order->order_id = 'NUTRA-' . time() . '-' . $user->id;
-        $order->address_id = $request->address_id;
-        $order->coupon_id = $coupon_id;
-        $order->amount = $subtotal;
-        $order->total_qty = $cartItems->sum('quantity');
-        $order->total_gst = $total_gst;
-        $order->total_amount = $subtotal + $total_gst;
-        $order->total_gross = $subtotal + $total_gst;
-        $order->total_discount = $total_discount;
-        $order->total_net_amount = $total_net_amount;
-        $order->payment_method = 'prepaid';
-        $order->payment_status = 'pending';
-        $order->payment_gateway = $request->payment_gateway;
-        $order->txn_id = '';
-        $order->payment_response = json_encode([]);
-        $order->status = 'pending';
-        if (!$order->save()) {
-            DB::rollBack();
-            return ['status' => false, 'msg' => 'Failed to create order.'];
-        }
-
-        foreach ($cartItems as $cartItem) {
-            if ($cartItem->product) {
-                $orderToProduct = new OrderToProduct();
-                $orderToProduct->order_id = $order->id;
-                $orderToProduct->product_id = $cartItem->product_id;
-                $orderToProduct->variant_id = $cartItem->variant_id;
-                $orderToProduct->attribute_id = null;
-                $orderToProduct->quantity = $cartItem->quantity;
-                $orderToProduct->price = $cartItem->product->guest_price;
-                $orderToProduct->gst = $cartItem->product->igst;
-                if (!$orderToProduct->save()) {
+            if (in_array($request->payment_mode, ['online']) && $request->payment_gateway == 'cashfree') {
+                $payload = [
+                    'order_id' => $order_id,
+                    'customer_id' => $user->user_num,
+                    'customer_name' => $address->user_add_name,
+                    'customer_email' => $address->user_add_email ?? '',
+                    'customer_phone' => $address->user_add_mobile,
+                    'return_url' => url('checkout/payment-response/cashfree/deal_order?order_id={order_id}'),
+                    'webhook_url' => url('checkout/payment-webhook/cashfree')
+                ];
+                $payment = new CashFree();
+                $paymentResponse = $payment->createOrder($total_net_amount, 'INR', $payload);
+                if (empty($paymentResponse['status']) || !$paymentResponse['status']) {
                     DB::rollBack();
-                    return ['status' => false, 'msg' => 'Failed to create order to product.'];
+                    return ['status' => false, 'msg' => $paymentResponse['msg'] ?? 'Something went wrong in CashFree Side'];
                 }
             }
+
+            $order = new Order();
+            $order->uid = $user->user_id;
+            $order->order_id = $order_id;
+            $order->address_id = $request->address_id;
+            $order->coupon_id = $coupon_id;
+            $order->amount = $subtotal;
+            $order->total_qty = $cartItems->sum('quantity');
+            $order->total_gst = $total_gst;
+            $order->total_amount = $subtotal + $total_gst;
+            $order->total_gross = $subtotal + $total_gst;
+            $order->total_discount = $total_discount;
+            $order->total_net_amount = $total_net_amount;
+            $order->payment_method = 'prepaid';
+            $order->payment_status = !empty($paymentResponse['cashfree_order_id']) ? 'initiated' : 'failed';
+            $order->payment_gateway = $request->payment_gateway;
+            $order->txn_id = $paymentResponse['cashfree_order_id'];
+            $order->payment_response = json_encode($paymentResponse);
+            $order->status = 'pending';
+            if (!$order->save()) {
+                DB::rollBack();
+                return ['status' => false, 'msg' => 'Failed to create order.'];
+            }
+
+            foreach ($cartItems as $cartItem) {
+                if ($cartItem->product) {
+                    $orderToProduct = new OrderToProduct();
+                    $orderToProduct->order_id = $order->id;
+                    $orderToProduct->product_id = $cartItem->product_id;
+                    $orderToProduct->variant_id = $cartItem->variant_id;
+                    $orderToProduct->attribute_id = null;
+                    $orderToProduct->quantity = $cartItem->quantity;
+                    $orderToProduct->price = $cartItem->product->guest_price;
+                    $orderToProduct->gst = $cartItem->product->igst;
+                    if (!$orderToProduct->save()) {
+                        DB::rollBack();
+                        return ['status' => false, 'msg' => 'Failed to create order to product.'];
+                    }
+                }
+            }
+            Cart::where('user_id', $user->id)->delete();
+            DB::commit();
+
+            return [
+                'status' => true,
+                'msg' => 'Order placed successfully!',
+                'array' => [
+                    'payment_session_id' => $paymentResponse['payment_session_id'],
+                    'payment_gateway' => $request->payment_gateway
+                ]
+            ];
+        } catch (\Exception $e) {
+            DB::rollback();
+            return ['status' => false, 'msg' => 'Failed to process order: ' . $e->getMessage()];
         }
-        Cart::where('user_id', $user->id)->delete();
-
-        DB::commit();
-
-        return ['status' => true, 'msg' => 'Order placed successfully!'];
-        // } catch (\Exception $e) {
-        //     DB::rollback();
-        //     return ['status' => false, 'msg' => 'Failed to process order: ' . $e->getMessage()];
-        // }
     }
 
     private function ApOrder($request, $cartItems)
@@ -295,6 +318,28 @@ class CheckoutController extends Controller
             }
         }
 
+        $user = Auth::user();
+        $address = UserAddress::where('id', $request->address_id)->where('user_id', $user->id)->first();
+        //cashfree Payment gatway
+        if (in_array($payment_mode, ['online','wallet_online']) && $request->payment_gateway == 'cashfree') {
+            $payload = [
+                'order_id' => $order_id,
+                'customer_id' => $user->user_num,
+                'customer_name' => $address->user_add_name,
+                'customer_email' => $address->user_add_email ?? '',
+                'customer_phone' => $address->user_add_mobile,
+                'return_url' => url('checkout/payment-response/cashfree/ap_order?order_id={order_id}'),
+                'webhook_url' => url('checkout/payment-webhook/cashfree')
+            ];
+    
+            $payment = new CashFree();
+            $paymentResponse = $payment->createOrder($onlinePayableAmount, 'INR', $payload);
+            if (empty($paymentResponse['status']) || !$paymentResponse['status']) {
+                DB::rollBack();
+                return ['status' => false, 'msg' => $paymentResponse['msg'] ?? 'Something went wrong in CashFree Side'];
+            }
+        }
+
         $save = new ApOrder();
         $save->uid = $user_id;
         $save->order_id = $order_id;
@@ -310,13 +355,19 @@ class CheckoutController extends Controller
         $save->unique_order_id = $uniqueOd;
         $save->delivery_mode = $request->delivery_mode;
         // $save->order_type = $ord_type;
+        $save->payment_method = 'prepaid';
+        $save->payment_status = !empty($paymentResponse['cashfree_order_id']) ? 'initiated' : 'failed';
+        $save->payment_gateway = $request->payment_gateway;
+        $save->txn_id = $paymentResponse['cashfree_order_id'];
+        $save->payment_response = json_encode($paymentResponse);
+        $save->payment_type = $payment_mode;
         $save->status = 'pending';
         if (!$save->save())
             return ['status' => false, 'msg' => 'Something Went Wrong, Order not created.'];
 
         foreach ($cartItems as $cartItem) {
             if ($cartItem->product) {
-                $orderToProduct = new OrderToProduct();
+                $orderToProduct = new ApOrderToProduct();
                 $orderToProduct->order_id = $save->id;
                 $orderToProduct->product_id = $cartItem->product_id;
                 $orderToProduct->variant_id = $cartItem->variant_id;
@@ -337,8 +388,8 @@ class CheckoutController extends Controller
             if (!$checkWallet['status'])
                 return ['status' => false, 'msg' => ($checkWallet['msg'])];
         }
-//  &&
-                // $request->payment_mode['status'] == 'success'
+
+        // $request->payment_mode['status'] == 'success'
         if ((in_array($request->payment_mode, ['online', 'wallet_online']))) {
             $orderService = new OrderService();
             $orderService->distributePayout($totSv, $order_id);
@@ -385,18 +436,63 @@ class CheckoutController extends Controller
             'order_id' => $order_id,
             'message' => $message,
             'purchase' => $purstep,
-            'bonus' => $bonus
+            'bonus' => $bonus,
+            'payment_type' => $payment_mode,
+            'payment_gateway' => $request->payment_gateway,
+            'payment_session_id' => $paymentResponse['payment_session_id'] ?? '',
         ];
         Cart::where('user_id', Auth::user()->id)->delete();
         return ['status' => true, 'array' => $resResponse, 'msg' => $msg];
     }
 
-    public function paymentProcess()
-    {
-        $payment = new CashFree();
-        $res = $payment->createOrder(100, 'INR', ['customer_id' => '1234567890', 'customer_name' => 'John Doe', 'customer_email' => 'john.doe@example.com', 'customer_phone' => '+919876543210']);
 
-        print_r($res);
-        die;
+    
+    public function paymentResponse(Request $request,$type)
+    {
+        Log::info('Payment Redirect cashfree Response -'.$request->order_id, $request->all());
+
+        $payment = new CashFree();
+        $res = $payment->getPayment($request->order_id);
+
+        if (empty($res['status']) || $res['status'] == false) {
+            Log::info('Payment Redirect cashfree Response Failed -'.$request->order_id,[$res]);
+            die('Payment Failed');
+            return view('website.order_failed');
+        }
+
+        $paymentStatus = ((!empty($res['payment_status']) && $res['payment_status'] == 'SUCCESS') && !empty($res['is_captured'])) ? 'success' : (strtolower($res['payment_status']) ?? 'failed');
+      
+        if($type == 'ap_order'){
+            $order = ApOrder::where('order_id', $request->order_id)->first();
+        }else{
+            $order = Order::where('order_id', $request->order_id)->first();
+        }
+        $order->payment_status = $paymentStatus;
+        $order->payment_ref_id = $res['bank_reference'] ?? '';
+        $order->payment_response = json_encode($res);
+        $res = $order->save();
+        if ($res) {
+            if ($paymentStatus == 'success') {
+                Log::info('Payment Redirect cashfree Response Success -'.$request->order_id);
+                die('Payment Success');
+                return view('website.order_success');
+            } else {
+                Log::info('Payment Redirect cashfree Response Failed -'.$request->order_id,['Something went wrong in Payment Status update']);
+                die('Payment Failed');
+                return view('website.order_failed');
+            }
+        } else {
+            Log::info('Payment Redirect cashfree Response Failed -'.$request->order_id,['Something went wrong in Order update']);
+            die('Payment Failed');
+            return view('website.order_failed');
+        }
+    }
+
+    public function paymentWebhook(Request $request)
+    {
+
+        Log::info('Payment Webhook cashfree',[$request->all()]);
+
+        return response()->json('success',200);
     }
 }

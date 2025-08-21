@@ -423,7 +423,24 @@
         }
     </style>
 
+<script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+@push('cashfree')
+
+@endpush
     @push('scripts')
+    <script>
+        const cashfree = Cashfree({
+            mode: "sandbox",
+        });
+    
+        function initiatePayment(paymentSessionId) {
+            let checkoutOptions = {
+                paymentSessionId: paymentSessionId,
+                redirectTarget: "_self",
+            };
+            cashfree.checkout(checkoutOptions);
+        }
+    </script>
         <script>
             $(document).ready(function() {
                 $('.payment_mode').on('change', function() {
@@ -473,18 +490,12 @@
                         $('#proceed_to_pay').text('Proceed to Pay (₹' + totalNetAmount + ')');
                     }
                 });
-
-                
             });
         </script>
-        <script>
-            $(document).ready(function() {
+        <script>      
+          $(document).ready(function() {
 
-                // Global variables
-                let isEditMode = false;
-                let currentAddressId = null;
-
-                $('form#saveOrder').on('submit', function(e) {
+            $('form#saveOrder').on('submit', function(e) {
                     e.preventDefault();
                     const $form = $(this);
                     const $submitBtn = $form.find('.submit-btn');
@@ -504,12 +515,17 @@
                         dataType: 'json',
                         success: function(response) {
                             hideCartLoading();
-                            showSnackbar(response.msg, response.status ? 'success' : 'error');
-                            if (response.status) {
-                                setTimeout(function() {
-                                    location.reload();
-                                }, 1000);
+                            if(response.status){
+                                if(response.record.payment_gateway == 'cashfree'){
+                                    initiatePayment(response.record.payment_session_id);
+                                }
                             }
+                            // showSnackbar(response.msg, response.status ? 'success' : 'error');
+                            // if (response.status) {
+                            //     setTimeout(function() {
+                            //         // location.reload();
+                            //     }, 1000);
+                            // }
                         },
                         error: function(xhr) {
                             hideCartLoading();
@@ -522,7 +538,14 @@
                         }
                     });
                 });
+        })
+        </script>
+        <script>
+            $(document).ready(function() {
 
+                // Global variables
+                let isEditMode = false;
+                let currentAddressId = null;
                 // Toggle address form visibility
                 $('.add-address').on('click', function() {
                     const $form = $('#addAddressForm');

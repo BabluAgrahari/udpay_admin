@@ -39,7 +39,11 @@ class OrderHistoryController extends Controller
     public function orderDetail($id)
     {   
         try {
-            $data['order'] = Order::with(['orderToProducts', 'orderToProducts.product', 'orderToProducts.variant'])->where('id', $id)->first();
+            if(Auth::user()->role == 'distributor' || Auth::user()->role == 'customer'){
+                $data['order'] = ApOrder::with(['orderToProducts', 'orderToProducts.product', 'orderToProducts.variant'])->where('id', $id)->first();
+            }else{
+                $data['order'] = Order::with(['orderToProducts', 'orderToProducts.product', 'orderToProducts.variant'])->where('id', $id)->first();
+            }
             return view('Website.order_detail', $data);
         } catch (\Exception $e) {
             abort(500, $e->getMessage());
@@ -51,13 +55,24 @@ class OrderHistoryController extends Controller
     {
         // try {
             // Load order with all necessary relationships for invoice
-            $data['order'] = Order::with([
-                'orderToProducts', 
-                'orderToProducts.product', 
-                'orderToProducts.variant',
-                'user',
-                'shipping_address'
-            ])->where('id', $id)->first();
+
+            if(Auth::user()->role == 'distributor' || Auth::user()->role == 'customer'){
+                $data['order'] = ApOrder::with([
+                    'orderToProducts', 
+                    'orderToProducts.product', 
+                    'orderToProducts.variant',
+                    'user',
+                    'shipping_address'
+                ])->where('id', $id)->first();
+            }else{
+                $data['order'] = Order::with([
+                    'orderToProducts', 
+                    'orderToProducts.product', 
+                    'orderToProducts.variant',
+                    'user',
+                    'shipping_address'
+                ])->where('id', $id)->first();
+            }
             
             if (!$data['order']) {
                 abort(404, 'Order not found');
@@ -73,7 +88,9 @@ class OrderHistoryController extends Controller
             $pdf->setOption('defaultFont', 'DejaVu Sans');
             
             $filename = 'invoice_' . ($data['order']->order_number ?? $data['order']->id) . '.pdf';
-            return $pdf->download($filename);
+            //not download only show
+            return $pdf->stream($filename);
+            // return $pdf->download($filename);
 
         // } catch (\Exception $e) {
         //     \Log::error('Error generating invoice: ' . $e->getMessage(), [
