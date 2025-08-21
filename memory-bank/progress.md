@@ -35,6 +35,7 @@
 - **API Endpoints**: RESTful API for mobile applications
 - **External Integrations**: SMS service, courier service integration
 - **Error Handling**: Comprehensive error handling and logging
+ - **PDF Generation**: Invoice PDF renders with rupee symbol using DejaVu Sans and `&#8377;` entity; header background removed for fidelity
 
 ## What's Left to Build 🚧
 
@@ -58,6 +59,10 @@
    - Inventory analytics and reporting
 
 4. **Performance Optimization**
+5. **PDF Reliability**
+   - Prefer local assets over external URLs in PDFs
+   - Add PDF smoke test to CI
+   - Optionally reintroduce dynamic data with DOMPDF-safe styles
    - Caching strategy implementation
    - Image optimization and compression
    - Database query optimization
@@ -114,7 +119,7 @@
 - **Admin Management**: 90% Complete
 - **User Management**: 80% Complete
 - **Payment Integration**: 95% Complete
-- **Frontend Development**: 75% Complete
+- **Frontend Development**: 76% Complete (invoice PDF UI stabilized)
 - **API Development**: 70% Complete
 - **Testing**: 40% Complete
 - **Documentation**: 60% Complete

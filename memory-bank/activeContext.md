@@ -2,10 +2,10 @@
 
 ## Current Work Focus
 
-### Primary Focus: Product Structure Analysis
-- **Objective**: Comprehensive analysis of the product management system
-- **Scope**: Controller, view, model, library, services, config, env, resources
-- **Status**: Analysis completed, Memory Bank creation in progress
+### Primary Focus: Invoice PDF Rendering & Template Stabilization
+- **Objective**: Ensure invoice PDF renders consistently with images and currency symbol; simplify UI for DOMPDF
+- **Scope**: Website invoice view, Order controller PDF generation, DomPDF config
+- **Status**: Implemented static invoice, fixed rupee symbol rendering, removed header background
 
 ### Recent Analysis Completed
 1. **Product Management System**: Full CRUD operations with variants and images
@@ -16,7 +16,13 @@
 
 ## Recent Changes & Discoveries
 
-### Product System Architecture
+### Invoice/PDF Implementation
+- Converted `resources/views/Website/order_invoice.php` to Blade and then standardized it as a static template per request: `resources/views/Website/order_invoice.blade.php`.
+- Replaced dynamic bindings with static content to match provided sample.
+- Switched currency display from literal ₹ to HTML entity `&#8377;` for reliable rendering.
+- Set PDF default font to `DejaVu Sans` for currency symbol support.
+- Simplified header: removed background color for better PDF fidelity.
+- Controller options: A4 portrait, HTML5 parser enabled, remote enabled (for external logo), default font set.
 - **Models**: Product, ProductVariant, ProductImage, ProductDetail, ProductReel
 - **Controllers**: ProductController (CRM), ProductDetailController (Website), FrontController
 - **Views**: Comprehensive Blade templates with Bootstrap 5
@@ -61,10 +67,9 @@
 ## Next Steps & Roadmap
 
 ### Immediate Next Steps
-1. **Complete Memory Bank**: Finish all documentation files
-2. **Feature Enhancement Planning**: Prioritize missing features
-3. **Performance Analysis**: Identify optimization opportunities
-4. **Security Review**: Audit current security implementation
+1. Decide whether to keep external logo URL or switch to local asset for PDF reliability.
+2. If business requires dynamic invoices later, reintroduce data bindings behind a feature flag and validate with DOMPDF safe styles.
+3. Add a basic feature test to generate a sample invoice PDF successfully (smoke test).
 
 ### Short-term Goals (1-2 weeks)
 1. **Advanced Search Implementation**: Global search functionality

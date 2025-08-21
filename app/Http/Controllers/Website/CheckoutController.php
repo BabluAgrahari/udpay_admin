@@ -309,7 +309,7 @@ class CheckoutController extends Controller
         $save->shipping_charge = $shippingCharge;
         $save->unique_order_id = $uniqueOd;
         $save->delivery_mode = $request->delivery_mode;
-        $save->order_type = $ord_type;
+        // $save->order_type = $ord_type;
         $save->status = 'pending';
         if (!$save->save())
             return ['status' => false, 'msg' => 'Something Went Wrong, Order not created.'];

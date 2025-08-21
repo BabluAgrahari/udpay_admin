@@ -378,3 +378,26 @@ class Icarry
 - **File Backups**: User uploads and assets
 - **Configuration Backups**: Environment settings
 - **Disaster Recovery**: Complete system restoration 
+
+## PDF Generation Patterns
+
+### DOMPDF-Compatible Templates
+- Use table-based layouts; avoid flexbox, CSS grid, complex gradients, and box shadows.
+- Keep backgrounds minimal; prefer transparent/white headers to avoid rendering artifacts.
+- Limit CSS to basic properties (margin, padding, borders, font styles).
+
+### Fonts and Currency Symbols
+- Default PDF font set to DejaVu Sans to ensure the Indian rupee symbol renders.
+- Use HTML entity for rupee: `&#8377;` instead of the literal ₹ character.
+
+### Images
+- Prefer local public assets (via `asset()` paths) to ensure availability during PDF rendering.
+- If external images are used, ensure `isRemoteEnabled` is true; however, local images are more reliable.
+
+### Controller Options
+- Paper: A4 portrait.
+- Options: `isRemoteEnabled = true`, `isHtml5ParserEnabled = true`, `defaultFont = 'DejaVu Sans'`.
+
+### Templates
+- Website invoice template: `resources/views/Website/order_invoice.blade.php` (currently static by business request).
+- CRM invoice template remains separate under `resources/views/CRM/Order/invoice.blade.php`.
