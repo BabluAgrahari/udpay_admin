@@ -225,25 +225,25 @@
                             </select> -->
                             <div class="d-flex payment-option gap-4 align-items-center flex-wrap">
                                 <div class="d-flex gap-1 align-items-center">
-                                    <input type="radio" name="cashfree" class="payment_mode" value="cashfree"
+                                    <input type="radio" name="payment_gateway" class="payment_mode" value="cashfree"
                                         id="cashfree">
                                     <label class="mb-0" for="cashfree">
                                         <img src="../front_assets/images/payment/1.png" alt="img" class="payment-image"> Cashfree</label>
                                 </div>
                                 <div class="d-flex gap-1 align-items-center">
-                                    <input type="radio" name="cashfree" class="payment_mode" value="razorpay"
+                                    <input type="radio" name="payment_gateway" class="payment_mode" value="razorpay"
                                         id="razorpay">
                                     <label class="mb-0" for="razorpay"> 
                                         <img src="../front_assets/images/payment/2.png" alt="img" class="payment-image"> Razorpay</label>
                                 </div>
                                 <div class="d-flex gap-1 align-items-center">
-                                    <input type="radio" name="cashfree" class="payment_mode" value="debit"
+                                    <input type="radio" name="payment_gateway" class="payment_mode" value="debit"
                                         id="debit">
                                     <label class="mb-0" for="debit">
                                     <img src="../front_assets/images/payment/3.png" alt="img" class="payment-image"> PhonePe</label>
                                 </div>
                                 <div class="d-flex gap-1 align-items-center">
-                                    <input type="radio" name="cashfree" class="payment_mode" value="upi"
+                                    <input type="radio" name="payment_gateway" class="payment_mode" value="upi"
                                         id="payu">
                                     <label class="mb-0" for="payu">
                                     <img src="../front_assets/images/payment/4.png" alt="img" class="payment-image"> PayU</label>
@@ -258,11 +258,11 @@
                                 <option value="courier">Courier</option>
                             </select> -->
                             <div class="d-flex gap-2 align-items-center">
-                                <input type="radio" name="pickup" class="payment_mode" value="pickup"
-                                    id="pickup">
+                                <input type="radio" name="delivery_mode" id="delivery_mode" class="payment_mode" value="self_pickup"
+                                    >
                                 <label class="mb-0" for="pickup">Self Pickup</label>
-                                <input type="radio" name="pickup" class="payment_mode" value="courier"
-                                    id="courier">
+                                <input type="radio" name="delivery_mode" id="delivery_mode" class="payment_mode" value="courier"
+                                    >
                                 <label class="mb-0" for="courier">Courier</label>
                             </div>
                         </div>
