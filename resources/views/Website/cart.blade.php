@@ -183,7 +183,7 @@
                                 </div>
                             </div>
                         @endif
-
+                        <div class="d-flex align-items-center gap-3 flex-wrap">
                         @if (Auth::check() &&
                                 (Auth::user()->role == 'customer' || Auth::user()->role == 'distributor' || Auth::user()->role == 'guest'))
                             <a href="{{ url('checkout') }}" class="thm-btn w-100 mb-3 proceed-to-pay">Proceed to Pay
@@ -194,7 +194,7 @@
                                 ₹{{ session('applied_coupon') ? $subtotal - session('applied_coupon.discount_amount') : $subtotal }}</a>
                         @endif
                         <button class="thm-btn btn btn-outline-danger w-100 mb-3" style="background: red" onclick="clearCart()">Clear Cart</button>
-
+                        </div>
                         <div class="summary-box">
                             <h6 class="mb-2"><span class="text-black">Order Summary</span> ({{ cartCount() }} Items)
                             </h6>

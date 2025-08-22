@@ -8,6 +8,7 @@
             font-size: 12px;
             margin-top: 5px;
         }
+        
     </style>
     <section class="section-padding">
         <div class="container">
@@ -116,7 +117,7 @@
                                             ]) }}">
                                             <div class="address-header">
                                                 <h6 class="mb-2">{{ $address->user_add_name }}</h6>
-                                                <div class="address-actions">
+                                                <div class="address-actions gap-0">
                                                     <button class="btn btn-sm btn-outline-primary edit-address"
                                                         style="margin-right: 15px;" data-address-id="{{ $address->id }}"
                                                         title="Edit Address">
@@ -124,7 +125,7 @@
                                                     </button>
                                                     @if ($addresses->count() > 1)
                                                         <button class="btn btn-sm btn-outline-primary remove-address"
-                                                            style="margin-right: 15px;"
+                                                            style="margin-right: 0px;"
                                                             data-address-id="{{ $address->id }}" title="Remove Address">
                                                             <i class="fas fa-trash" style="color: red;"></i>
                                                         </button>
@@ -398,6 +399,7 @@
             border: 1px solid #dee2e6;
             border-radius: 8px;
             padding: 20px;
+            margin: 0 10px;
         }
 
 

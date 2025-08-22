@@ -67,7 +67,7 @@
             display: table-cell;
             width: 50%;
             vertical-align: top;
-            padding: 0 10px;
+            padding: 0 5px;
         }
         
         .section-title {
@@ -78,16 +78,18 @@
         }
         
         .section-content {
-            line-height: 1.5;
-            font-size: 13px;
+            line-height: 1.3;
+            font-size: 12px;
         }
         
         .order-summary {
             margin-bottom: 20px;
+            
         }
         
         .summary-header {
             background: #f7f7f7;
+            /* background:#C9FFE9; */
             padding: 12px;
             border: 1px solid #e5e5e5;
             border-bottom: none;
@@ -102,7 +104,7 @@
         .order-id {
             text-align: right;
             font-weight: 600;
-            color: #0071cc;
+            color: #006038;
         }
         
         .product-table {
@@ -147,7 +149,8 @@
         }
         
         .total-row td {
-            border-top: 2px solid #0071cc;
+            border-top: 2px solid #006038;
+            color:#000;
         }
         
         .transaction-table {
@@ -197,7 +200,7 @@
         }
         
         .btn-primary {
-            background: #0071cc;
+            background: #006038;
             color: white;
         }
         
@@ -207,9 +210,9 @@
         }
         
         .signature-section {
-            display: table-cell;
-            width: 50%;
-            text-align: center;
+            /* display: table-cell; */
+            width: 100%;
+            text-align: right;
             vertical-align: bottom;
         }
         
@@ -223,6 +226,7 @@
             font-weight: 600;
             color: #000;
             font-size: 12px;
+            text-align: right;
         }
         
         @media print {
@@ -249,7 +253,7 @@
     <div class="invoice-container" id="receipt">
         <!-- Invoice Header -->
         <div class="invoice-header">
-            <img src="https://uni-pay.in/assets/images/logo1.jpg" width="200">
+            <img src="front_assets/images/logo.png" width="200">
             <div class="invoice-title">Invoice</div>
             <div class="invoice-number">Invoice Number: IN-UNI2025-1543</div>
         </div>
@@ -262,9 +266,7 @@
                     <div class="section-title">Invoice To</div>
                     <div class="section-content">
                         UNI39368632 (Surendra Kumar Yadav)<br>
-                        <br>
-                        , -<br>
-                        <br>
+                        
                         Mob :
                     </div>
                 </div>
@@ -272,7 +274,7 @@
                 <div class="invoice-section">
                     <div class="section-title">Pay To</div>
                     <div class="section-content">
-                        <strong>Uni Pay Digital Pvt. Ltd.</strong><br>
+                        <strong style="color:#000;">Uni Pay Digital Pvt. Ltd.</strong><br>
                         Office Number 2 First Floor Ganga Tower<br>
                         Khatipura Road, near S D Aggarwal<br>
                         Jhotwara Jaipur, Rajasthan 302012<br>
@@ -311,7 +313,7 @@
                             <th>HSN/SAC</th>
                             <th>MRP</th>
                             <th>QTY</th>
-                            <th>AP</th>
+                            <th>SV</th>
                             <th>Discount</th>
                             <th>Taxable Amount</th>
                             <th>CGST Rate</th>
@@ -326,11 +328,11 @@
                     <tbody>
                         <tr>
                             <td>1</td>
-                            <td class="product-name">ACV (Apple & Orange)</td>
+                            <td class="product-name" style=" color:#000;">ACV (Apple & Orange)</td>
                             <td>21069099</td>
                             <td>&#8377;1,598.00</td>
                             <td>1</td>
-                            <td>&#8377;500.00</td>
+                            <td>500.00</td>
                             <td>&#8377;599</td>
                             <td>&#8377;846.61</td>
                             <td>0%</td>
@@ -359,13 +361,13 @@
                         </tr>
                         
                         <tr>
-                            <td colspan="13" style="text-align: right;"><strong>Shipping Charges</strong></td>
-                            <td><strong>&#8377;0.00</strong></td>
+                            <td colspan="14" style="text-align: right; color:#000;"><strong>Shipping Charges</strong></td>
+                            <td><strong style="color:#000;">&#8377;0.00</strong></td>
                         </tr>
                         
                         <tr class="total-row">
-                            <td colspan="13" style="text-align: right;"><strong>Payable Amount</strong></td>
-                            <td><strong>&#8377;999.00</strong></td>
+                            <td colspan="14" style="text-align: right; color:#000;"><strong>Payable Amount</strong></td>
+                            <td><strong style="color:#000;"> &#8377;999.00</strong></td>
                         </tr>
                     </tbody>
                 </table>
@@ -395,9 +397,10 @@
             <div class="invoice-footer">
                 
                 
-                <div class="signature-section">
-                    <div class="signature-text">Authorized Signature</div>
-                    <div style="margin-top: 20px; border-top: 2px solid #000; width: 150px; margin-left: auto; margin-right: auto;"></div>
+                <div class="signature-section" style="text-align:right;">
+                    <img src="front_assets/images/sign3.jpeg" alt="img" class="signature-image">
+                    <div class="signature-text" style="text-align:right;">Authorized Signature</div>
+                    <div style="margin-top: 20px; border-top: 2px solid #000; width: 150px; margin-left: auto; margin-right: 0;"></div>
                 </div>
             </div>
         </div>
