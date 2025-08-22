@@ -36,7 +36,7 @@
                                                             <a href="#" class="reorder"><i
                                                                     class="fa-solid fa-right-left"></i> Reorder</a>
                                                         @endif
-                                                        <a href="{{ url('invoice/' . $order->id) }}" class="invoice track"><i
+                                                        <a href="{{ url('invoice/' . $order->id) }}" class="invoice track color-two"><i
                                                           class="fa-solid fa-file-invoice"></i> Invoice</a>
                                                           <br>
                                                         <a href="{{ url('order-detail/' . $order->id) }}" class="track"><i

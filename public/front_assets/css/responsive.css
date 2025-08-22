@@ -146,6 +146,9 @@
 .contact-left {
     height: 420px !important;
 }
+.thm-btn {
+    width: auto !important;
+}
 }
 
 @media screen and (max-width: 576px) {
