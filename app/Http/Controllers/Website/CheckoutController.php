@@ -25,6 +25,8 @@ class CheckoutController extends Controller
 {
     public function index(Request $request)
     {
+
+       
         $user = Auth::user();
 
         $data['addresses'] = UserAddress::where('user_id', $user->id)
@@ -74,6 +76,8 @@ class CheckoutController extends Controller
         $data['net_amount'] = $subtotal - $discount;
         $data['total_items'] = $total_items;
 
+        $data['payment_gateway'] = config('global.payment_gateway');
+
         return view('Website.checkout', $data);
     }
 
@@ -96,6 +100,7 @@ class CheckoutController extends Controller
         $data['total_mrp'] = $total_mrp;
         $data['total_saving'] = $total_saving;
         $data['total_items'] = $total_items;
+        $data['payment_gateway'] = config('global.payment_gateway');
         return view('Website.checkout', $data);
     }
 
@@ -123,12 +128,12 @@ class CheckoutController extends Controller
             $rules['delivery_mode'] = 'required|in:self_pickup,courier';
         }
         $validator = Validator::make($request->all(), $rules, [
-            'address_id.required' => 'Address is required.',
-            'payment_gateway.required' => 'Payment gateway is required.',
+            'address_id.required' => 'Please select an address.',
+            'payment_gateway.required' => 'Please select a payment gateway.',
             'payment_gateway.in' => 'Invalid payment gateway.',
-            'delivery_mode.required' => 'Delivery mode is required.',
+            'delivery_mode.required' => 'Please select a delivery mode.',
             'delivery_mode.in' => 'Invalid delivery mode.',
-            'payment_mode.required' => 'Payment mode is required.',
+            'payment_mode.required' => 'Please select a payment mode.',
             'payment_mode.in' => 'Invalid payment mode.',
         ]);
 
@@ -354,7 +359,7 @@ class CheckoutController extends Controller
         $save->shipping_charge = $shippingCharge;
         $save->unique_order_id = $uniqueOd;
         $save->delivery_mode = $request->delivery_mode;
-        // $save->order_type = $ord_type;
+        $save->order_type = $ord_type;
         $save->payment_method = 'prepaid';
         $save->payment_status = !empty($paymentResponse['cashfree_order_id']) ? 'initiated' : 'failed';
         $save->payment_gateway = $request->payment_gateway;
@@ -463,9 +468,9 @@ class CheckoutController extends Controller
         $paymentStatus = ((!empty($res['payment_status']) && $res['payment_status'] == 'SUCCESS') && !empty($res['is_captured'])) ? 'success' : (strtolower($res['payment_status']) ?? 'failed');
       
         if($type == 'ap_order'){
-            $order = ApOrder::where('order_id', $request->order_id)->first();
+            $order = ApOrder::with(['shipping_address','orderToProduct.product'])->where('order_id', $request->order_id)->first();
         }else{
-            $order = Order::where('order_id', $request->order_id)->first();
+            $order = Order::with(['shipping_address','orderToProduct.product'])->where('order_id', $request->order_id)->first();
         }
         $order->payment_status = $paymentStatus;
         $order->payment_ref_id = $res['bank_reference'] ?? '';
@@ -474,8 +479,8 @@ class CheckoutController extends Controller
         if ($res) {
             if ($paymentStatus == 'success') {
                 Log::info('Payment Redirect cashfree Response Success -'.$request->order_id);
-                die('Payment Success');
-                return view('website.order_success');
+                $data['order']= $order;
+                return view('Website.order_success',$data);
             } else {
                 Log::info('Payment Redirect cashfree Response Failed -'.$request->order_id,['Something went wrong in Payment Status update']);
                 die('Payment Failed');

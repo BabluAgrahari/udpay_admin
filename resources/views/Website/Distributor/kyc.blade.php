@@ -224,7 +224,7 @@
                         </div>
                         <div class="col-md-6 mb-2">
                             <label class="form-label">Referral ID <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" value="{{ $user->user_num ?? '' }}" readonly
+                            <input type="text" class="form-control" value="{{ $user->ref_id ?? '' }}" readonly
                                 required>
                             <span class="text-danger error" id="ref_id_error"></span>
                         </div>

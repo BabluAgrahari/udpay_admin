@@ -350,7 +350,7 @@
                                                 class="fa-solid fa-chevron-down"></i></a>
                                         <div class="profile-dropdown">
                                             <ul class="user-list-header">
-                                              @if(!empty(Auth::user()) && (Auth::user()->can('isCustomer')||Auth::user()->can('isDistributor')))
+                                              @if(!empty(Auth::user()) && (Auth::user()->can('isCustomer')))
                                                 <li><a href="{{ url('/product') }}"><i class="fa-solid fa-user"></i> Become a Distributor</a></li>
                                                 @endif
                                                 <li><a href="{{ url('my-account') }}"><i class="fa-solid fa-user"></i>

@@ -53,12 +53,13 @@ class DashboardController extends Controller
     }
 
 
-    public function userLeavelList(Request $request,$level){
+    public function userLeavelList(Request $request,$level,$user_id=null){
 
         $data['records'] = DB::table('level_count')
             ->select('level_count.level as lvl', 
             'level_count.child_id as child', 
             'level_count.is_active', 
+            'users_lvl.isactive',
             'users_lvl.name', 
             'users_lvl.upgrade_date',
             'users_lvl.user_num',
@@ -66,7 +67,7 @@ class DashboardController extends Controller
             'users_lvl.mobile',
             'users_lvl.email')
             ->join('users_lvl', 'level_count.child_id', '=', 'users_lvl.user_num')
-            ->where('level_count.parent_id', auth()->user()->user_num)
+            ->where('level_count.parent_id',auth()->user()->user_num)
             ->where('level_count.level', $level)
             ->orderBy('users_lvl.upgrade_date', 'desc')
             ->get();

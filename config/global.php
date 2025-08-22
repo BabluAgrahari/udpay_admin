@@ -17,5 +17,10 @@ return [
         'transfer_history',
         'pickup_address',
         'slider'
+    ],
+
+    'payment_gateway'=>[
+        'cashfree',
+        'razorpay'
     ]
 ];

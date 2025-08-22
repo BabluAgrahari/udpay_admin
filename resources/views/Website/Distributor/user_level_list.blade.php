@@ -38,9 +38,9 @@
                                     <td>{{ $record->name }}</td>
                                     <td>{{ date('d-m-Y', strtotime($record->upgrade_date)) }}</td>
                                     <td>{{ $record->month_sv??0 }}</td>
-                                    <td style="color: {{ $record->is_active ? 'green' : 'red' }}"><i class="fa-solid fa-circle"></i></td>
+                                    <td style="color: {{ $record->isactive ? 'green' : 'red' }}"><i class="fa-solid fa-circle"></i></td>
                                     <td>
-                                        <a href="{{ url('distributor/user-level-list/'.$record->lvl) }}" class="thm-btn">View</a>
+                                        <a href="{{ url('distributor/user-level-list/'.$record->lvl.'/'.$record->user_num) }}" class="thm-btn">View</a>
                                     </td>
                                 </tr>
                             @endforeach

@@ -40,9 +40,9 @@ class OrderHistoryController extends Controller
     {   
         try {
             if(Auth::user()->role == 'distributor' || Auth::user()->role == 'customer'){
-                $data['order'] = ApOrder::with(['orderToProducts', 'orderToProducts.product', 'orderToProducts.variant'])->where('id', $id)->first();
+                $data['order'] = ApOrder::with(['orderToProducts', 'orderToProducts.product', 'orderToProducts.variant','shipping_address'])->where('id', $id)->first();
             }else{
-                $data['order'] = Order::with(['orderToProducts', 'orderToProducts.product', 'orderToProducts.variant'])->where('id', $id)->first();
+                $data['order'] = Order::with(['orderToProducts', 'orderToProducts.product', 'orderToProducts.variant','shipping_address'])->where('id', $id)->first();
             }
             return view('Website.order_detail', $data);
         } catch (\Exception $e) {

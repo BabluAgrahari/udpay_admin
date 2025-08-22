@@ -20,7 +20,7 @@ Route::post('/distributor/signup/resend-otp', [SignupController::class, 'resendO
 
 Route::group(['prefix' => 'distributor', 'middleware' => 'customer.or.distributor'], function () {
     Route::get('/{type}', [DashboardController::class, 'index'])->where('type', 'dashboard|kyc|my-direct-referral|team-generation|my-acheivements');
-    Route::get('/user-level-list/{level}', [DashboardController::class, 'userLeavelList']);
+    Route::get('/user-level-list/{level}/{user_id?}', [DashboardController::class, 'userLeavelList']);
     
     // KYC Routes
     Route::post('kyc/personal-details', [KYCController::class, 'updatePersonalDetails']);
