@@ -105,7 +105,7 @@ class CartController extends Controller
 		try {
 			$cart = Cart::where('product_id',$product_id);
 			if (empty($cart))
-				return $this->failRes('Invaliad Cart id.');
+				return $this->failRes('Invaliad Product id.');
 
 			$res = $cart->delete();
 			if (!$res)
@@ -166,7 +166,7 @@ class CartController extends Controller
 				'id' => $cart->id,
 				'product_id' => $cart->product_id,
 				'quantity' => $cart->quantity,
-				'product' => !empty($cart->product) ? $this->field($cart->product) : [],
+				'product' => !empty($cart->product) ? $this->field($cart->product,$cart->quantity) : [],
 			];
 		}
 
@@ -189,14 +189,14 @@ class CartController extends Controller
 		return $recordData;
 	}
 
-	private function field($product)
+	private function field($product,$quantity)
 	{
 		$sv = 0;
 		if(Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer')){
-			$price = $product->product_sale_price;
-			$sv = $product->sv;
+			$price = $product->product_sale_price * $quantity;
+			$sv = $product->sv * $quantity;
 		}else{
-			$price = $product->guest_price;
+			$price = $product->guest_price * $quantity;
 		}
 		$field = [
 			'id' => (int) $product->id ?? 0,

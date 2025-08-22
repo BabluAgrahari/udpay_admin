@@ -69,7 +69,7 @@ class ShippingBillingController extends Controller
             $address = UserAddress::where('user_id', Auth::user()->user_id)->get();
             foreach ($address as $item) {
                 $updateAddress = UserAddress::where('id', $item->id)->first();
-                $updateAddress->is_default = 0;
+                $updateAddress->is_default = '0';
                 $updateAddress->save();
             }
 
@@ -123,7 +123,7 @@ class ShippingBillingController extends Controller
             $address = UserAddress::where('user_id', Auth::user()->user_id)->get();
             foreach ($address as $item) {
                 $updateAddress = UserAddress::where('id', $item->id)->first();
-                $updateAddress->is_default = 0;
+                $updateAddress->is_default = '0';
                 $updateAddress->save();
             }
 

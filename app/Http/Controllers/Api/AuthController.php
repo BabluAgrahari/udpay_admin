@@ -559,4 +559,23 @@ class AuthController extends Controller
 
         return false;
     }
+
+
+    public function paymentGateway(){
+
+        try{
+
+            $array = [[
+                'status' => true,
+                'gateway' => 'cashfree',
+            ],[
+                'status' => true,
+                'gateway' => 'razorpay',
+            ]];
+            
+            return $this->recordRes($array);
+        }catch(\Exception $e){
+            return $this->failRes($e->getMessage());
+        }
+    }
 }

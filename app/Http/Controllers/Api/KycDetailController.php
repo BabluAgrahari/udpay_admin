@@ -161,7 +161,7 @@ class KycDetailController extends Controller
             'pincode' => 'required|numeric|digits:6',
         ]);
         if ($validator->fails())
-            return validationRes($validator->messages());
+            return $this->validationRes($validator->messages());
 
         $pincode = Pincode::where('pincode', $request->pincode)->first();
         if (empty($pincode))
@@ -182,7 +182,7 @@ class KycDetailController extends Controller
             'ifsc_code' => 'required|string',
         ]);
         if ($validator->fails())
-            return validationRes($validator->messages());
+            return $this->validationRes($validator->messages());
 
         $ifsc = Ifsc::where('ifsc', $request->ifsc_code)->first();
         if (empty($ifsc))

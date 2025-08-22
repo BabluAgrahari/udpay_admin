@@ -16,20 +16,37 @@ Privacy Policy - title description - Done
 Order Creation Part - demo Api 
 
 
-Today Work
-Make Address set defautl Api
-Add profile in Profile update Api
-Make a coupon Apply api
-Product list filter basis of category add in api
-Category List api image issue fix
-Order history list and detils Api
-Make contact_us, Api
-download certificat Api
-Faq and Privacy Policy Api
-address default issue fixed
 
 
 
 
 
-ALTER TABLE `users_lvl` CHANGE `profile_pic` `profile_pic` VARCHAR(288) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL;
+Pinco
+Banner API -Done
+Search Product API -Done
+Notification API
+Refferal 
+Filter or sort and search Option in View all Products list -done
+Single product full details according UI -Done
+Manual coupon Add -Done
+Delivery Status API - hold
+Payment Method -Done
+Order confirmation 
+Track Order
+Category Details API - Images of category pending -Done
+
+
+and in Cashfree PG Initial and confirmation API pending, rest implemented
+
+Add to cart multiple product Api
+3 product list api basis of product
+
+
+Banner APi - Done
+Search Product API -Done
+Filter or sort and search Option in View all Products list -done
+Single product full details according UI -Done
+Manual coupon Add -Done
+Payment Method -Done
+Pincode Detail Api -Done
+Ifsc Detail Api -Done

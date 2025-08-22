@@ -85,6 +85,8 @@ Route::group(['middleware' => ['jwt.verify']], function () {
     Route::get('product-list', [ProductController::class, 'productList']);
     Route::get('product-detail/{id}', [ProductController::class, 'productDetail']);
     Route::get('related-products/{id}', [ProductController::class, 'relatedProducts']);
+    Route::get('product-search', [ProductController::class, 'productSearch']);
+    Route::get('payment-gateway', [AuthController::class, 'paymentGateway']);
 
     //wishlist
     Route::get('wishlist-items', [WishListController::class, 'getWishlist']);
@@ -122,7 +124,8 @@ Route::group(['middleware' => ['jwt.verify']], function () {
     Route::get('order-list', [OrderController::class, 'index']);
     Route::get('order-detail/{id}', [OrderController::class, 'show']);
 
-
+    Route::get('pincode-detail', [KycDetailController::class, 'pincodeDetail']);
+    Route::get('ifsc-detail', [KycDetailController::class, 'ifscDetail']);
 
 
 
@@ -142,8 +145,7 @@ Route::group(['middleware' => ['jwt.verify']], function () {
     Route::post('kyc-personal-detail', [KycDetailController::class, 'personalDetails']);
     Route::post('kyc-docs', [KycDetailController::class, 'keyDocs']);
     Route::post('kyc-bank-detail', [KycDetailController::class, 'bankDetails']);
-    Route::get('pincode-detail', [KycDetailController::class, 'pincodeDetail']);
-    Route::get('ifsc-detail', [KycDetailController::class, 'ifscDetail']);
+    
 
     //epin
     Route::post('get-epin-otp', [UpinController::class, 'get_epin_otp']);

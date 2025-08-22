@@ -109,7 +109,7 @@ class ProductController extends Controller
 
 			if(!empty($request->category_name)){
 				$query->whereHas('category', function($query) use ($request){
-					$query->where('name', $request->category_name);
+					$query->where('name','LIKE', '%' . $request->category_name . '%');
 				});
 			}
 
@@ -119,6 +119,32 @@ class ProductController extends Controller
 
 			if (!empty($request->product_name)) {
 				$query->where('product_name', 'like', '%' . $request->product_name . '%');
+			}
+
+			//add a filter in price range
+			if (!empty($request->min_price) && !empty($request->max_price)) {
+				if(Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer')){
+					$query->whereBetween('product_sale_price', [$request->min_price, $request->max_price]);
+				}else{
+					$query->whereBetween('guest_price', [$request->min_price, $request->max_price]);
+				}
+			}
+
+			//filter sort basis of price
+			if (!empty($request->price_sort)) {
+				if($request->price_sort == 'low_to_high'){
+					if(Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer')){
+						$query->orderBy('product_sale_price', 'asc');
+					}else{
+						$query->orderBy('guest_price', 'asc');
+					}
+				}else{
+					if(Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer')){
+						$query->orderBy('product_sale_price', 'desc');
+					}else{
+						$query->orderBy('guest_price', 'desc');
+					}
+				}
 			}
 
 			if (Auth::user()->role == 'customer') {
@@ -280,5 +306,27 @@ class ProductController extends Controller
 			];
 		}
 		return $field;
+	}
+
+
+	public function productSearch(Request $request)
+	{
+		try {
+
+			
+			$product = Product::status();
+			if(!empty($request->search)){
+				$product = $product->where('product_name', 'like', '%' . $request->search . '%');
+			}
+			$product = $product->get()->map(function ($product) {
+				return [
+					'id'=>$product->id,
+					'product_name'=>$product->product_name,
+				];
+			});
+			return $this->recordsRes($product);
+		} catch (Exception $e) {
+			return $this->failRes($e->getMessage());
+		}
 	}
 }
