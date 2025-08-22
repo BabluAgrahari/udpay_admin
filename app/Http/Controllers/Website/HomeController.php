@@ -15,7 +15,7 @@ class HomeController extends Controller
     {
         // try {
 
-            $data['categories'] = Category::status()->where('parent_id', '0')->get();
+            $data['categories'] = Category::status()->where('parent_id', '0')->where('pro_section', 'primary')->get();
             $category = Category::status()->where('parent_id', '0')->where('pro_section', 'primary')->get();
 
            $query = Product::status()->with('reviews')->where('pro_section', 'primary');
