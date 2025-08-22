@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\UserKyc;
 use App\Models\Wallet;
+use App\Models\UniCashDetail;
 use App\Models\WalletHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Services\PaymentGatway\CashFree;
 use Illuminate\Support\Facades\Validator;
 
 class AddMoneyController extends Controller
@@ -57,16 +59,53 @@ class AddMoneyController extends Controller
           return $this->validationMsg($validator->errors());
         }
 
+        $currentUser = Auth::user();
+        // $payload = [
+        //     'order_id' => 'MT-' . time() . '-' . $currentUser->user_id,
+        //     'customer_id' => $currentUser->user_num,
+        //     'customer_name' => $currentUser->name,
+        //     'customer_email' => $currentUser->email,
+        //     'customer_phone' => $currentUser->mobile,
+        //     'return_url' => url('add-money/payment-response/cashfree/?order_id={order_id}'),
+        //     'webhook_url' => url('add-money/payment-webhook/cashfree')
+        // ];
+        // $payment = new CashFree();
+        // $paymentResponse = $payment->createOrder($request->amount, 'INR', $payload);
+
+        // if (empty($paymentResponse['status']) || $paymentResponse['status'] == false) {
+        //     return $this->failMsg('Payment Failed');
+        // }
+        
+        // if(empty($paymentResponse['payment_session_id'])){
+        //     return $this->failMsg('Payment Session ID not found');
+        // }
+        // $payment_session_id =  $paymentResponse['payment_session_id'];
+
+        // $unicash = new UniCashDetail();
+        // $unicash->user_id = $currentUser->user_id;
+        // $unicash->unm = $currentUser->user_num;
+        // $unicash->amount = $request->amount;
+        // $unicash->order_id = $paymentResponse['order_id'];
+        // $unicash->status = 'initiated';
+        // $unicash->payout_type = 'cash_free';
+        // $unicash->created_on = date('Y-m-d H:i:s');
+        // $unicash->transition_id = $paymentResponse['cashfree_order_id'];
+        // $unicash->bank_txn_id = '';
+        // $unicash->bank_res_code = '';
+        // $unicash->description = 'Payment initiated';
+        // $unicash->payment_response = json_encode($paymentResponse);
+        // if($unicash->save()){
+        //     return $this->successMsg('Payment initiated successfully',['payment_session_id'=>$payment_session_id]);
+        // }
+        
+
         try {
             DB::beginTransaction();
-
-            $currentUser = Auth::user();
             $userWallet = Wallet::where('userid', $currentUser->user_id)->first();
-
             if (!$userWallet) {
                 $userWallet = new Wallet();
                 $userWallet->userid = $currentUser->user_id;
-                $userWallet->unm = $currentUser->name;
+                $userWallet->unm = $currentUser->user_num;
                 $userWallet->amount = $request->amount;
                 $userWallet->save();
             } else {

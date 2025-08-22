@@ -31,23 +31,23 @@ class OrderService
             14 => ['direct' => 5, 'percent' => 0.01],
             15 => ['direct' => 5, 'percent' => 0.01],
         ];
-        $levelMembers = LevelCount::where('child_id', Auth::user()->user_nm)
+        $levelMembers = LevelCount::where('child_id', Auth::user()->user_num)
             ->whereBetween('level', [2, 15])
             ->get();
         if ($levelMembers->isEmpty()) {
-            Log::info('No level members found for user: ' . Auth::user()->user_nm);
+            Log::info('No level members found for user: ' . Auth::user()->user_num);
 
             return;
         }
 
         $parentIds = $levelMembers->pluck('parent_id')->unique()->values();
-        $users = User::whereIn('user_nm', $parentIds)->get()->keyBy('user_nm');
+        $users = User::whereIn('user_num', $parentIds)->get()->keyBy('user_num');
 
-        $directCounts = User::select('refid', DB::raw('COUNT(*) as count'))
-            ->whereIn('refid', $parentIds)
+        $directCounts = User::select('ref_id', DB::raw('COUNT(*) as count'))
+            ->whereIn('ref_id', $parentIds)
             ->where('isactive', 1)
-            ->groupBy('refid')
-            ->pluck('count', 'refid');
+            ->groupBy('ref_id')
+            ->pluck('count', 'ref_id');
 
         foreach ($levelMembers as $lvl) {
             $level = $lvl->level;

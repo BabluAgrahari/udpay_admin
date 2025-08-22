@@ -32,7 +32,7 @@
                         <div class="tab-content">
 
                             @if ($type == 'dashboard')
-                                {{ 'dashboard' }}
+                               @include('Website.Distributor.dashboard_view')
                             @elseif($type == 'profile')
                                 @include('Website.Distributor.profile')
                             @elseif($type == 'kyc')

@@ -66,9 +66,9 @@ class DashboardController extends Controller
     public function orderHistory(Request $request) {
         try {
             if(Auth::user()->role == 'distributor' || Auth::user()->role == 'customer'){
-                $data['orders'] = ApOrder::where('uid', Auth::user()->user_id)->get();
+                $data['orders'] = ApOrder::where('uid', Auth::user()->user_id)->orderBy('created_at', 'desc')->get();
             }else{
-                $data['orders'] = Order::where('uid', Auth::user()->user_id)->get();
+                $data['orders'] = Order::where('uid', Auth::user()->user_id)->orderBy('created_at', 'desc')->get();
             }
             return view('Website.Dashboard.order_history', $data);
         } catch (\Exception $e) {

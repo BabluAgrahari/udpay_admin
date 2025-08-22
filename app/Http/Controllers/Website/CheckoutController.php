@@ -461,7 +461,7 @@ class CheckoutController extends Controller
 
         if (empty($res['status']) || $res['status'] == false) {
             Log::info('Payment Redirect cashfree Response Failed -'.$request->order_id,[$res]);
-            die('Payment Failed');
+            // die('Payment Failed');
             return view('website.order_failed');
         }
 
@@ -483,12 +483,12 @@ class CheckoutController extends Controller
                 return view('Website.order_success',$data);
             } else {
                 Log::info('Payment Redirect cashfree Response Failed -'.$request->order_id,['Something went wrong in Payment Status update']);
-                die('Payment Failed');
+                // die('Payment Failed');
                 return view('website.order_failed');
             }
         } else {
             Log::info('Payment Redirect cashfree Response Failed -'.$request->order_id,['Something went wrong in Order update']);
-            die('Payment Failed');
+            // die('Payment Failed');
             return view('website.order_failed');
         }
     }

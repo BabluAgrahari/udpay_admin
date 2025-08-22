@@ -36,26 +36,44 @@
                                                             <a href="#" class="reorder"><i
                                                                     class="fa-solid fa-right-left"></i> Reorder</a>
                                                         @endif
-                                                        <a href="{{ url('invoice/' . $order->id) }}" class="invoice track"><i
-                                                          class="fa-solid fa-file-invoice"></i> Invoice</a>
-                                                          <br>
+                                                        <a href="{{ url('invoice/' . $order->id) }}"
+                                                            class="invoice track"><i class="fa-solid fa-file-invoice"></i>
+                                                            Invoice</a>
+                                                        <br>
                                                         <a href="{{ url('order-detail/' . $order->id) }}" class="track"><i
                                                                 class="fa-solid fa-location-dot"></i> Track Order</a>
-                                                       
+
                                                     </div>
                                                 </div>
                                                 <div class="price">
-                                                    Amount: <span class="color-one">{{ $order->total_amount }}</span>
+                                                    Order Method: <span
+                                                        class="color-one">{{ $order->payment_method ?? 'N/A' }}</span>
+                                                </div>
+                                                <div class="price">
+                                                    @if ((!empty(Auth::check()) && Auth::user()->can('isCustomer')) || Auth::user()->can('isDistributor'))
+                                                 
+                                                    Amount: <span
+                                                            class="color-one">₹{{ $order->total_net_amt ?? 0 }}</span>
+                                                    @else
+                                                        Amount: <span
+                                                            class="color-one">₹{{ $order->total_net_amount ?? 0 }}</span>
+                                                    @endif
+                                                </div>
+                                                <div class="price">
+                                                    Payment Status: <span
+                                                        class="color-one">{{ $order->payment_status ?? 'Pending' }}</span>
+                                                        <br>
+                                                        <small>Payment Txn ID: {{ $order->txn_id ?? 'N/A' }}</small>
                                                 </div>
                                                 <p class="mb-2">{{ date('d M, Y', strtotime($order->created_at)) }}</p>
                                                 <div class="order-actions">
                                                     <div class="rating open-rating-modal">
-                                                        <span class="text-black">Rate</span>
+                                                        {{-- <span class="text-black">Rate</span>
                                                         <i class="fa-regular fa-star"></i>
                                                         <i class="fa-regular fa-star"></i>
                                                         <i class="fa-regular fa-star"></i>
                                                         <i class="fa-regular fa-star"></i>
-                                                        <i class="fa-regular fa-star"></i>
+                                                        <i class="fa-regular fa-star"></i> --}}
                                                     </div>
                                                     @if ($order->status == 'delivered')
                                                         <button class="delivered"><i class="fa fa-circle-check"></i>
