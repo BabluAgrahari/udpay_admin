@@ -310,38 +310,43 @@
                             <a href="{{ url('/') }}"><img src="{{ asset('front_assets') }}/images/logo.png"
                                     class="image-fit" alt="logo" /> </a>
                         </div>
-                        <nav class="navigation">
-                            <ul class="main-menu">
-                                <li class="menu-item"><a href="{{ url('/') }}" class="">Home</a></li>
-                                <li class="menu-item"><a href="{{ url('product') }}">Products</a></li>
-                                <li class="menu-item"><a href="{{ url('download') }}">Downloads</a></li>
-                                <li class="menu-item"><a href="{{ url('about-us') }}">About Us</a></li>
-                                <li class="menu-item"><a href="{{ url('contact-us') }}">Contact Us</a></li>
-                                @if(!empty(Auth::user()) && (Auth::user()->can('isGuest')))
-                                {{-- <li class="menu-item"><a href="{{url('my-account')}}">Become Partner</a></li> --}}
-                                @endif
-                                @if(!empty(Auth::user()) && (Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer')))
-                                <li class="menu-item menu-item-has-children">
-                                    <a href="#">Business</a>
-                                    <ul class="sub-menu">
-                                        <li class="menu-item"><a href="{{ url('distributor/dashboard') }}"><i class="fa-solid fa-plus"></i>Dashboard</a></li>
-                                        <li class="menu-item"><a href="{{ url('distributor/kyc') }}"><i class="fa-solid fa-plus"></i> KYC</a></li>
-                                        <li class="menu-item"><a href="{{ url('distributor/team-generation') }}"><i class="fa-solid fa-exchange-alt"></i> Team Generation</a></li>
-                                        <li class="menu-item"><a href="{{ url('distributor/my-direct-referral') }}"><i class="fa-solid fa-exchange-alt"></i> My Direct Referral</a></li>
-                                        <li class="menu-item"><a href="{{ url('distributor/my-acheivements') }}"><i class="fa-solid fa-exchange-alt"></i> My Acheivements</a></li>
-                                    </ul>
-                                </li>
-                                <li class="menu-item menu-item-has-children">
-                                    <a href="#">Wallet</a>
-                                    <ul class="sub-menu">
-                                        <li class="menu-item"><a href="{{ url('distributor/wallet/add-money') }}"><i class="fa-solid fa-plus"></i> Add Money</a></li>
-                                        <li class="menu-item"><a href="{{ url('distributor/wallet/money-transfer') }}"><i class="fa-solid fa-exchange-alt"></i> Money Transfer</a></li>
-                                        <li class="menu-item"><a href="{{ url('distributor/payout-generation') }}"><i class="fa-solid fa-exchange-alt"></i> My Earning</a></li>
-                                    </ul>
-                                </li>
-                                @endif
-                            </ul>
+                        <div class="navigation-main">
 
+                            <nav class="navigation">
+                                <div class="user-responsive">
+                                    <i class="fa fa-user"></i> {{ auth()->user()->name??'Guest User' }}
+                                </div>
+                                <ul class="main-menu">
+                                    <li class="menu-item"><a href="{{ url('/') }}" class="">Home</a></li>
+                                    <li class="menu-item"><a href="{{ url('product') }}">Products</a></li>
+                                    <li class="menu-item"><a href="{{ url('download') }}">Downloads</a></li>
+                                    <li class="menu-item"><a href="{{ url('about-us') }}">About Us</a></li>
+                                    <li class="menu-item"><a href="{{ url('contact-us') }}">Contact Us</a></li>
+                                    @if(!empty(Auth::user()) && (Auth::user()->can('isGuest')))
+                                    {{-- <li class="menu-item"><a href="{{url('my-account')}}">Become Partner</a></li> --}}
+                                    @endif
+                                    @if(!empty(Auth::user()) && (Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer')))
+                                    <li class="menu-item menu-item-has-children">
+                                        <a href="#">Business</a>
+                                        <ul class="sub-menu">
+                                            <li class="menu-item"><a href="{{ url('distributor/dashboard') }}"><i class="fa-solid fa-plus"></i>Dashboard</a></li>
+                                            <li class="menu-item"><a href="{{ url('distributor/kyc') }}"><i class="fa-solid fa-plus"></i> KYC</a></li>
+                                            <li class="menu-item"><a href="{{ url('distributor/team-generation') }}"><i class="fa-solid fa-exchange-alt"></i> Team Generation</a></li>
+                                            <li class="menu-item"><a href="{{ url('distributor/my-direct-referral') }}"><i class="fa-solid fa-exchange-alt"></i> My Direct Referral</a></li>
+                                            <li class="menu-item"><a href="{{ url('distributor/my-acheivements') }}"><i class="fa-solid fa-exchange-alt"></i> My Acheivements</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="menu-item menu-item-has-children">
+                                        <a href="#">Wallet</a>
+                                        <ul class="sub-menu">
+                                            <li class="menu-item"><a href="{{ url('distributor/wallet/add-money') }}"><i class="fa-solid fa-plus"></i> Add Money</a></li>
+                                            <li class="menu-item"><a href="{{ url('distributor/wallet/money-transfer') }}"><i class="fa-solid fa-exchange-alt"></i> Money Transfer</a></li>
+                                            <li class="menu-item"><a href="{{ url('distributor/payout-generation') }}"><i class="fa-solid fa-exchange-alt"></i> My Earning</a></li>
+                                        </ul>
+                                    </li>
+                                    @endif
+                                </ul>
+                            </nav>
                             <div class="header-right">
                                 @if (!auth()->check())
                                     <a href="#" data-popup="login1" class="openPopup thm-btn">Login/Sign</a>
@@ -350,8 +355,8 @@
 
                                 @if (auth()->check())
                                     <div class="profile-main">
-                                        <a href="#" class="profile-icon">{{ auth()->user()->name??'Guest User' }} <i
-                                                class="fa-solid fa-chevron-down"></i></a>
+                                        <a href="#" class="profile-icon">{{ auth()->user()->name??'You' }}
+                                            <i class="fa-solid fa-chevron-down"></i></a>
                                         <div class="profile-dropdown">
                                             <ul class="user-list-header">
                                               @if(!empty(Auth::user()) && (Auth::user()->can('isCustomer')))
@@ -384,8 +389,8 @@
                                             class="fa-solid fa-cart-shopping"></i></a>
                                 </div>
                             </div>
-                        </nav>
 
+                        </div>
 
                         <!-- <a href="#" class="thm-btn"><i class="fa-solid fa-circle-right"></i> <span>Appointment</span></a> -->
                         <div class="hamburger">
@@ -659,14 +664,14 @@
                     hideCartLoading();
                     if (response.status) {
                         $('#price-'+response.record.cart_id).text('₹'+response.record.price);
-                        $('#mrp-'+response.record.cart_id).text('₹'+response.record.mrp);   
+                        $('#mrp-'+response.record.cart_id).text('₹'+response.record.mrp);
                         updateCartSummary(response.record.cart_data);
                         showSnackbar(response.msg, 'success');
                     } else {
                         showSnackbar(response.msg, 'error');
                         var input = $('input[data-product-id="' + productId + '"]');
                         var currentQty = parseInt(input.val());
-                         
+
                         if (quantity > currentQty) {
                             input.val(currentQty - 1);
                         } else {

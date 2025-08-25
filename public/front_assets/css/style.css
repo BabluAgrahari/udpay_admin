@@ -892,7 +892,19 @@ table img {
     /* padding-bottom: 0; */
     /* padding-top: 0; */
 }
-nav.navigation {
+/* nav.navigation {
+    width: 100%;
+    text-align: center;
+    justify-content: space-between;
+    display: flex;
+    align-items: center;
+    gap: 17px;
+    background: #006038;
+    border-radius: 30px;
+    padding: 0 16px;
+    margin: 17px 0;
+} */
+.navigation-main {
     width: 100%;
     text-align: center;
     justify-content: space-between;
@@ -906,6 +918,7 @@ nav.navigation {
     padding: 0 16px;
     margin: 17px 0;
 }
+
 .header.sticky {
     animation-name: fadeHeaderInDown;
     position: fixed !important;
@@ -1064,14 +1077,20 @@ nav.navigation {
 }
 .total-cart-count {
     position: absolute;
-    top: 2px;
-    right: 12px;
+    top: 0px;
+    right: 5px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
+    font-size: 10px;
     border-radius: 50%;
-    color: #000;
+    color: #fff;
+    width: 15px;
+    height: 15px;
+    background: #F1624B;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 .header-profile .profile-icon:hover {
     background-color: #000;
@@ -4867,5 +4886,15 @@ img.payment-image {
     padding: 35px;
     background: var(--thm-color-two);
 }
+
+.user-responsive {
+    color: #fff;
+    padding: 10px 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    display: none;
+}
+
 
 /* -----------end css---------------- */

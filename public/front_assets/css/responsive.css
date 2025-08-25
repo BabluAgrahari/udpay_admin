@@ -1,20 +1,14 @@
-@media screen and (max-width: 360px) {
-
-}
 
 @media screen and (max-width: 480px) {
-
-.header .navigation .menu-item-has-children .sub-menu .menu-item-has-children>.sub-menu {
-    left: 0% !important;
-    top: 100% !important;
+    .header .navigation .menu-item-has-children .sub-menu .menu-item-has-children>.sub-menu {
+        left: 0% !important;
+        top: 100% !important;
+    }
+    .header.sticky .navigation .menu-item-has-children .sub-menu .menu-item-has-children>.sub-menu {
+        left: 0% !important;
+        top: 100% !important;
+    }
 }
-.header.sticky .navigation .menu-item-has-children .sub-menu .menu-item-has-children>.sub-menu {
-    left: 0% !important;
-    top: 100% !important;
-}
-
-}
-
 
 @media screen and (max-width: 992px) {
 	.hamburger {
@@ -27,12 +21,45 @@
 }
 .navigaation-warpper {
     padding: 10px 0;
+    gap: 8px !important;
+}
+.header-right .thm-btn {
+    padding: 0 9px !important;
+}
+.navigation-main {
+    width: auto !important;
+    padding: 0 1px!important;
+    margin: 7px 0!important;
+    background-color: transparent !important;
+}
+a.profile-icon {
+    color: #000 !important;
+    font-size: 16px !important;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+.header {
+    border-bottom: 1px solid var(--thm-color-one);
+}
+.header-profile .profile-icon {
+   background-color: var(--thm-color-one) !important;
+   width: 35px !important;
+    height: 35px !important;
+
+}
+.header-profile .profile-icon i {
+    font-size: 14px ;
+    color: #fff;
+}
+.profile-dropdown {
+    right: -75% !important;
 }
 .navigation {
     display: block !important;
     position: fixed;
     left: -100% !important;
-    top: 38px;
+    top: 74px;
     height: 100vh;
     overflow-y: auto;
     width: 250px !important;
@@ -118,9 +145,10 @@
 }
 .header-right {
     padding-top: 0 !important;
+    gap: 11px !important;
 }
 .header-profile {
-    display: none !important;
+    gap: 7px !important;
 }
 .header-search {
     position: relative;
@@ -149,6 +177,13 @@
 .thm-btn {
     width: auto !important;
 }
+#searchInput.open {
+    right: -50px !important;
+}
+.user-responsive {
+    display: flex !important;
+}
+
 }
 
 @media screen and (max-width: 576px) {
@@ -216,8 +251,8 @@
 }
 
 .otp-box {
-    width: 35px !important;
-    height: 35px !important;
+    width: 50px !important;
+    height: 50px !important;
 }
 .loader-wrap h1 {
     font-size: 25px !important;
@@ -228,7 +263,7 @@
     gap: 4px !important;
 }
 .section-heading {
-    flex-wrap: wrap;
+    /* flex-wrap: wrap; */
     gap: 10px;
 }
 .product-img {
@@ -311,15 +346,15 @@
     font-size: 35px !important;
 }
 .popup-content {
-    width: 300px!important;
-    height: 380px !important;
-    margin: 10px;
+    width: 340px!important;
+    height: 475px !important;
+    margin: 27% 10px !important;
 }
 .login-box {
     padding: 5px !important;
 }
 .back-image {
-    height: 125px !important;
+    height: 175px !important;
     border-radius: 10px 10px 0 0 !important;
     margin-bottom: 25px;
 }
