@@ -478,7 +478,7 @@
     @push('scripts')
         <script>
             const cashfree = Cashfree({
-                mode: "sandbox",
+                mode: "production",
             });
 
             function initiatePayment(paymentSessionId) {
