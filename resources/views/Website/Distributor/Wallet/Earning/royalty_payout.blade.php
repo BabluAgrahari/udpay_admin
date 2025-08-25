@@ -32,7 +32,7 @@
                 <div class="row">
                     <div class="col-md-5">
                         <div>
-                            <h5>Total Royalty Payout: <span class="text-success">{{ $total_royalty_payout }}</span></h5>
+                            <h5>Total Royalty Payout: <span class="text-success">{{ number_format($total_royalty_payout, 2) }}</span></h5>
                         </div>
                     </div>
                 <div class="col-md-7">
@@ -65,9 +65,9 @@
                             </tr>
                         </thead>
                         <tbody> 
-                        @foreach ($royalty_payout as $item)
+                        @foreach ($royalty_payout as $index => $item)
                         <tr>
-                                <td>{{ $loop->iteration }}</td>
+                                <td>{{ ($royalty_payout->currentPage() - 1) * $royalty_payout->perPage() + $index + 1 }}</td>
                                 <td>{{ date('d M,Y', strtotime($item->for_date)) }}</td>
                                 <td>{{ $item->user_id }}</td>
                                 <td>{{ $item->in_type??'' }}</td>
@@ -83,6 +83,7 @@
                         @endforeach
                         </tbody>    
                     </table>
+                    {{ $royalty_payout->links() }}
                 </div>
             </div>
         </div>

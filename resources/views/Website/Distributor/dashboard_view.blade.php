@@ -8,28 +8,28 @@
                     <div class="col-lg-3 col-md-4 col-sm-6">
                         <div class="stat-card">
                             <h5>My Direct</h5>
-                            <h3>{{ $my_direct_referal ?? 0 }}</h3>
+                            <h3>{{ number_format($my_direct_referal ?? 0, 2) }}</h3>
                             <p>Partners</p>
                         </div>
                     </div>
                     <div class="col-lg-3 col-md-4 col-sm-6">
                         <div class="stat-card">
                             <h5>Generation Team</h5>
-                            <h3>{{ $generationTeam ?? 0 }}</h3>
+                            <h3>{{ number_format($generationTeam ?? 0, 2) }}</h3>
                             <p>Partners</p>
                         </div>
                     </div>
                     <div class="col-lg-3 col-md-4 col-sm-6">
                         <div class="stat-card">
                             <h5>Total Team</h5>
-                            <h3>{{$totalTeamSv??0}}</h3>
+                            <h3>{{ number_format($totalTeamSv ?? 0, 2) }}</h3>
                             <p>SV</p>
                         </div>
                     </div>
                     <div class="col-lg-3 col-md-4 col-sm-6">
                         <div class="stat-card">
                             <h5>My Direct</h5>
-                            <h3>{{$myDirectSv??0}}</h3>
+                            <h3>{{ number_format($myDirectSv ?? 0, 2) }}</h3>
                             <p>SV</p>
                         </div>
                     </div>
@@ -43,21 +43,21 @@
                     <div class="col-lg-3 col-md-4 col-sm-6">
                         <div class="stat-card">
                             <h5>Self SV</h5>
-                            <h3>{{$current_month_sv??0}}</h3>
+                            <h3>{{ number_format($current_month_sv ?? 0, 2) }}</h3>
                             <p>Current Month</p>
                         </div>
                     </div>
                     <div class="col-lg-3 col-md-4 col-sm-6">
                         <div class="stat-card">
                             <h5>Self SV</h5>
-                            <h3>{{$total_self_sv??0}}</h3>
+                            <h3>{{ number_format($total_self_sv ?? 0, 2) }}</h3>
                             <p>Total</p>
                         </div>
                     </div>
                     <div class="col-lg-3 col-md-4 col-sm-6">
                         <div class="stat-card">
                             <h5>Total</h5>
-                            <h3>{{$total_earning??0}}</h3>
+                            <h3>{{ number_format($total_earning ?? 0, 2) }}</h3>
                             <p>Earning</p>
                         </div>
                     </div>
@@ -92,7 +92,7 @@
                     <button class="thm-btn btn-referral" id="copyLinkBtn" onclick="copyLink()">Copy Referral Link</button>
                     {{-- only show in mobile -- add function to share link --}}
                     <button class="thm-btn btn-referral mt-2 mobile-share-btn" onclick="shareLink()">Share Referral Link</button>
-                    <p class=" mt-3 thm-btn">Wallat Balance: {{ walletBalance(Auth::user()->user_id) }}</p>
+                    <p class=" mt-3 thm-btn">Wallat Balance: {{ number_format(walletBalance(Auth::user()->user_id), 2) }}</p>
                 </div>
             </div>
 

@@ -275,6 +275,9 @@
         .ft-social-icon li a:hover {
             transform: translateY(-3px);
         }
+        .pagi{
+            display: none !important;
+        }
     </style>
     <!--  -->
 </head>

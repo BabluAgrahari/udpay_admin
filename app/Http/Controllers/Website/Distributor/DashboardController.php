@@ -28,7 +28,8 @@ class DashboardController extends Controller
             $data['kyc'] = UserKyc::where('userId', auth()->user()->user_id)->first();
         }
         if ($type == 'my-direct-referral') {
-            $data['referrals'] = Customer::with('rank')->where('ref_id', auth()->user()->user_num)->get();
+
+            $data['referrals'] = User::with('rank')->where('ref_id', auth()->user()->user_num)->paginate(20);
         }
 
 
@@ -67,8 +68,8 @@ class DashboardController extends Controller
             $royalty_earning = RoyaltyIncome::where('user_id', auth()->user()->user_num)->sum('amount');
             $data['total_earning']=$total_earning+$royalty_earning;
 
-            $data['total_self_sv'] = ApOrder::where('uid', auth()->user()->user_id)->sum('sv');
-            $data['current_month_sv'] = ApOrder::where('uid', auth()->user()->user_id)->whereMonth('created_at', now()->month)->sum('sv');
+            $data['total_self_sv'] = ApOrder::where('uid', auth()->user()->user_id)->whereNotIn('status',['failed','cancelled'])->sum('sv');
+            $data['current_month_sv'] = ApOrder::where('uid', auth()->user()->user_id)->whereNotIn('status',['failed','cancelled'])->whereMonth('created_at', now()->month)->sum('sv');
             
             // echo "<pre>";
             // print_r($rank->toArray());die;
@@ -79,6 +80,7 @@ class DashboardController extends Controller
 
     public function userLeavelList(Request $request,$level,$user_id=null){
 
+        $user_id = !empty($user_id) ? $user_id : auth()->user()->user_num;
         $data['records'] = DB::table('level_count')
             ->select('level_count.level as lvl', 
             'level_count.child_id as child', 
@@ -91,8 +93,8 @@ class DashboardController extends Controller
             'users_lvl.mobile',
             'users_lvl.email')
             ->join('users_lvl', 'level_count.child_id', '=', 'users_lvl.user_num')
-            ->where('level_count.parent_id',auth()->user()->user_num)
-            ->where('level_count.level', $level)
+            ->where('level_count.parent_id',$user_id)
+            ->where('level_count.level', 1)
             ->orderBy('users_lvl.upgrade_date', 'desc')
             ->get();
         $data['level'] = $level;

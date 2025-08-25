@@ -255,7 +255,7 @@
         <div class="invoice-header">
             <img src="front_assets/images/logo.png" width="200">
             <div class="invoice-title">Invoice</div>
-            <div class="invoice-number">Invoice Number: {{ $data['order']->order_id }}</div>
+            <div class="invoice-number">Invoice Number: {{ $order->order_id }}</div>
         </div>
         
         <!-- Invoice Body -->
@@ -265,9 +265,9 @@
                 <div class="invoice-section">
                     <div class="section-title">Invoice To</div>
                     <div class="section-content">
-                        UNI39368632 (Surendra Kumar Yadav)<br>
+                        {{ $order->user->alpha_num_id??'' }} ({{ $order->user->name??'' }})<br>
                         
-                        Mob :
+                        Mob : {{ $order->user->mobile??'' }}
                     </div>
                 </div>
                 

@@ -31,7 +31,7 @@
                 <div class="tab-content-body">
                     <div class="row">
                         <div class="col-md-5">
-                        <h5>Total Payout: <span class="text-success">{{ $total_payout }}</span></h5>
+                        <h5>Total Payout: <span class="text-success">{{ number_format($total_payout, 2) }}</span></h5>
                     </div>
                     <div class="col-md-7">
                     <form action="{{ url('distributor/payout-generation') }}" method="get">
@@ -64,9 +64,9 @@
                                 </tr>
                             </thead>
                             <tbody> 
-                            @foreach ($payout_generation as $item)
+                            @foreach ($payout_generation as $index => $item)
                             <tr>
-                                    <td>{{ $loop->iteration }}</td>
+                                    <td>{{ ($payout_generation->currentPage() - 1) * $payout_generation->perPage() + $index + 1 }}</td>
                                     <td>{{ date('d M,Y', strtotime($item->created_at)) }}</td>
                                     <td>{{ $item->in_type??'' }}</td>
                                     <td>
@@ -79,11 +79,12 @@
                                         @endif
                                     </td>
                                     <td>{{ $item->sv }}</td>
-                                    <td>{{ $item->amount }}</td>
+                                    <td>{{ number_format($item->amount, 2) }}</td>
                             </tr>
                             @endforeach
                             </tbody>    
                         </table>
+                        {{ $payout_generation->links() }}
                     </div>
                 </div>
             </div>

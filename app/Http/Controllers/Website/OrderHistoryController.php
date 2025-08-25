@@ -79,7 +79,7 @@ class OrderHistoryController extends Controller
             }
             
             // Generate PDF using the updated template
-            $pdf = Pdf::loadView('Website.order_invoice', compact('data'));
+            $pdf = Pdf::loadView('Website.order_invoice',$data);
             
             // Set PDF options for better compatibility
             $pdf->setPaper('A4', 'portrait');

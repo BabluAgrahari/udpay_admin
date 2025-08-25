@@ -426,6 +426,7 @@ if (!function_exists('addWallet1')) {
         $closing_amount = $walletBal->amount ?? 0;
         $closing_earning = $walletBal->earning ?? 0;
         $closing_unicash = $walletBal->unicash ?? 0;
+        $closing_bp = $walletBal->bp ?? 0;
 
 
         $save1 = new WalletTransition();
@@ -443,7 +444,7 @@ if (!function_exists('addWallet1')) {
         $save1->closing_amount = $closing_amount;
         $save1->closing_earning = $closing_earning;
         $save1->closing_unicash = $closing_unicash;
-        $save1->closing_unipoint = 0;
+        $save1->closing_bp = $closing_bp;
         $save1->description = '';
         $save1->save();
 
@@ -495,10 +496,12 @@ if (!function_exists('addWallet1')) {
             $closing_amount = 0;
             $closing_earning = 0;
             $closing_unicash = 0;
+            $closing_bp = 0;
             if (!empty($wallet)) {
                 $closing_amount = $wallet->amount;
                 $closing_earning = $wallet->earning;
                 $closing_unicash = $wallet->unicash;
+                $closing_bp = $wallet->bp;
             }
 
             $save = new WalletTransition();
@@ -519,7 +522,7 @@ if (!function_exists('addWallet1')) {
             $save->closing_amount = $closing_amount;
             $save->closing_earning = $closing_earning;
             $save->closing_unicash = $closing_unicash;
-            $save->closing_unipoint = $request->unipoint ?? 0;
+            $save->closing_bp = $closing_bp;
             $save->order_id      = $request->order_id ?? '';
             if ($save->save())
                 return true;

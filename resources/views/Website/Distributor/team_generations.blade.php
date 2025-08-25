@@ -4,6 +4,7 @@
         font-size: 14px;
         white-space: nowrap;
     }
+
     thead.table-light tr th {
         background: var(--thm-color-two);
     }
@@ -42,8 +43,9 @@
                 <thead class="table-light">
                     <tr>
                         <th>Level</th>
-                        <th>Active/Inactive</th>
                         <th>Total Team</th>
+                        <th>Active/Inactive</th>
+
                         <th>Month SV</th>
                         <th>Total SV</th>
                         {{-- <th>Status</th> --}}
@@ -72,14 +74,16 @@
                         ?>
                         <tr>
                             <td>{{ $item->lvl }}</td>
+                            <td>{{ $item->Tcnt }}</td>
                             <td><span class="text-success">{{ $item->Tgreen }}</span>/<span
                                     class="text-danger">{{ $item->Tred }}</span></td>
-                            <td>{{ $item->Tcnt }}</td>
+
                             <td>{{ $monthSv }}</td>
                             <td>{{ $totSv }}</td>
                             {{-- <td>{{ $item->isactive > 0 ? 'Active' : 'Inactive' }}</td> --}}
                             <td>
-                                <a href="{{ url('distributor/user-level-list/' . $item->lvl) }}" class="thm-btn">View</a>
+                                <a href="{{ url('distributor/user-level-list/' . $item->lvl) }}"
+                                    class="thm-btn">View</a>
                             </td>
                         </tr>
                     @endforeach

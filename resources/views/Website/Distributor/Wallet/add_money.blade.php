@@ -39,27 +39,27 @@
                                                 <input type="text" name="name" class="form-control"
                                                     placeholder="Enter your name" autocomplete="off" disabled
                                                     value="{{ Auth::user()->name }}">
-                                                <span class="error-message text-danger" id="name-error"></span>
+                                                <span class="error text-danger" id="name-error"></span>
                                             </div>
                                             <div class="col-sm-6 form-group">
                                                 <label>Email <span class="color-red">*</span></label>
                                                 <input type="email" name="email" class="form-control"
                                                     placeholder="Enter your email" autocomplete="off" disabled
                                                     value="{{ Auth::user()->email }}">
-                                                <span class="error-message text-danger" id="email-error"></span>
+                                                <span class="error  text-danger" id="email-error"></span>
                                             </div>
                                             <div class="col-sm-6 form-group">
                                                 <label>Mobile <span class="color-red">*</span></label>
                                                 <input type="text" name="mobile" class="form-control"
                                                     placeholder="Enter your mobile number" autocomplete="off" disabled
                                                     value="{{ Auth::user()->mobile }}">
-                                                <span class="error-message text-danger" id="mobile-error"></span>
+                                                <span class="error  text-danger" id="mobile-error"></span>
                                             </div>
                                             <div class="col-sm-6 form-group">
                                                 <label>Amount <span class="color-red">*</span></label>
                                                 <input type="number" name="amount" class="form-control"
                                                     placeholder="Enter amount (min: ₹50)" min="50" step="0.01">
-                                                <span class="error-message text-danger" id="amount-error"></span>
+                                                <span class="error  text-danger" id="amount-error"></span>
                                             </div>
                                         </div>
                                         <button type="submit" class="thm-btn" id="submitBtn">Proceed</button>
@@ -129,7 +129,7 @@
 @push('scripts')
     <script>
         const cashfree = Cashfree({
-            mode: "production",
+            mode: "sandbox",
         });
 
         function initiatePayment(paymentSessionId) {
@@ -145,7 +145,7 @@
             function clearForm() {
                 $('#addMoneyForm')[0].reset();
                 $('#message').text('');
-                $('.error-message').text('');
+                $('.error').text('');
             }
 
             // Handle form submission for preview
@@ -153,7 +153,7 @@
                 e.preventDefault();
 
                 $('#message').text('');
-                $('.error-message').text('');
+                $('.error').text('');
                 var formData = $(this).serialize();
                 $('#submitBtn').prop('disabled', true).text('Processing...');
 
@@ -189,7 +189,7 @@
                         }
                     },
                     complete: function() {
-                        $('#submitBtn').prop('disabled', false).text('Preview');
+                        $('#submitBtn').prop('disabled', false).text('Proceed');
                     }
                 });
             });

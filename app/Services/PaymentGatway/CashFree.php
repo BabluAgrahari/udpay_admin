@@ -44,9 +44,7 @@ class CashFree
         //     'verify' => false,
         // ])->
         Log::info('CashFree Payment Request -'.$customerData['order_id'], $orderData);
-        $response = Http::withOptions([
-            'verify' => false,
-        ])->withHeaders([
+        $response = Http::withHeaders([
             'X-Client-Secret' => $this->clientSecret,
             'X-Client-Id' => $this->clientId,
             'x-api-version' => $this->apiVersion,
@@ -86,9 +84,7 @@ class CashFree
 
     public function getPayment($order_id)
     {
-        $response = Http::withOptions([
-            'verify' => false,
-        ])->withHeaders([
+        $response = Http::withHeaders([
             'X-Client-Secret' => $this->clientSecret,
             'X-Client-Id' => $this->clientId,
             'x-api-version' => $this->apiVersion,

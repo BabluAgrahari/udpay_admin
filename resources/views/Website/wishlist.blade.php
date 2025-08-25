@@ -22,14 +22,14 @@
                           <a href="{{ url('product/'.$item->product->slug_url) }}"><h3>{{ $item->product->product_name }}</h3></a>
                       </div>
                       <h5 class="price-bg">
-                        @canany(['isDistributor', 'isCustomer'])
+                        @if(Auth::user()->role == 'distributor' || Auth::user()->role == 'customer')
                             ₹{{ number_format($item->product->product_sale_price, 2) }}
                         @else
                             ₹{{ number_format($item->product->guest_price, 2) }}
-                        @endcanany
-                        @canany(['isDistributor', 'isCustomer'])
+                        @endif
+                        @if(Auth::user()->role == 'distributor' || Auth::user()->role == 'customer')
                             <span class="price-bg"><small>SV: {{ $item->product->sv }}</small></span>
-                        @endcanany
+                        @endif
                       </h5>
                       <div class="wishlist-bottom">
                           <a href="javascript:void(0)" class="thm-btn bg-light remove-wishlist" data-id="{{ $item->id }}">Remove</a>

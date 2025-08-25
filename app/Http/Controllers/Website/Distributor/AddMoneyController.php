@@ -61,9 +61,9 @@ class AddMoneyController extends Controller
                 return $this->validationMsg($validator->errors());
             }
 
-           
+
             $currentUser = Auth::user();
-            $order_id = 'MT-' . time() . '-' . $currentUser->user_id;
+            $order_id = 'CF-' . time() . '-' . $currentUser->user_id;
             $payload = [
                 'order_id' => $order_id,
                 'customer_id' => $currentUser->user_num,
@@ -93,7 +93,7 @@ class AddMoneyController extends Controller
             $unicash->status = 'initiated';
             $unicash->payout_type = 'cash_free';
             $unicash->created_on = date('Y-m-d H:i:s');
-            $unicash->transition_id = $paymentResponse['cashfree_order_id']??'';
+            $unicash->transition_id = $paymentResponse['cashfree_order_id'] ?? '';
             // $unicash->bank_txn_id = '';
             // $unicash->bank_res_code ='';
             $unicash->description = 'Payment initiated';
@@ -153,7 +153,10 @@ class AddMoneyController extends Controller
             $closing_amount = $userWallet->amount ?? 0;
             $closing_earning = $userWallet->earning ?? 0;
             $closing_unicash = $userWallet->unicash ?? 0;
-            $closing_unipoint = 0;
+            $closing_bp = $userWallet->bp ?? 0;
+
+            $description = "Unicash: " . $closing_unicash . " earning: " . $closing_earning . " amount: " . $closing_amount . " bp:" . $closing_bp;
+            $in_type = ' Your Wallet is Creditd ' . $unicash->amount . ' for ' . $unicash->bank_txn_id . ' Using UPI-PG';
 
             $walletHistory = new WalletHistory();
             $walletHistory->user_id = $user_id;
@@ -161,9 +164,9 @@ class AddMoneyController extends Controller
             $walletHistory->credit = $unicash->amount;
             $walletHistory->debit = 0;
             $walletHistory->balance = $userWallet->amount;
-            $walletHistory->in_type = 'credit';
-            $walletHistory->transition_type = 'add_money';
-            $walletHistory->description = 'Money added to wallet';
+            $walletHistory->in_type = $in_type;
+            $walletHistory->transition_type = 'money_transfer';
+            $walletHistory->description = $description;
             $walletHistory->amount = $unicash->amount;
             $walletHistory->earning = 0;
             $walletHistory->unicash = 0;
@@ -171,7 +174,7 @@ class AddMoneyController extends Controller
             $walletHistory->closing_amount = $closing_amount;
             $walletHistory->closing_earning = $closing_earning;
             $walletHistory->closing_unicash = $closing_unicash;
-            $walletHistory->closing_unipoint = $closing_unipoint;
+            $walletHistory->closing_bp = $closing_bp;
             $walletHistory->remark = 'Money added via cashfree';
             $walletHistory->from_type = 'wallet';
             $walletHistory->order_id = null;

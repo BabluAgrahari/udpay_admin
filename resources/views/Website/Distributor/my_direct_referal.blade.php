@@ -63,6 +63,7 @@
                             @endforeach
                         </tbody>
                     </table>
+                    {{ $referrals->links() }}
                 </div>
             </div>
         </div>

@@ -15,7 +15,7 @@
 <div class="section-padding">
     <div class="container">
         <div class="tab-panel active edit-form-open" id="user-level-list">
-            <h4 class="mb-3">User Level List (Level {{ $level }})</h4>
+            <h4 class="mb-3">User Level List (Level {{ $level+1 }})</h4>
             <div class="tab-content-body p-0">
                 <div class="table-responsive">
                     <table class="table table-bordered">
@@ -32,15 +32,16 @@
                         </thead>
                         <tbody> 
                             @foreach ($records as $record)
+                                <?php $lvl = $record->lvl+1; ?>
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
                                     <td>UNI{{ $record->user_num }}</td>
-                                    <td>{{ $record->name }}</td>
-                                    <td>{{ date('d-m-Y', strtotime($record->upgrade_date)) }}</td>
+                                    <td><?php echo $record->name ?></td>
+                                    <td>{{ !empty($record->upgrade_date)?date('d-m-Y', strtotime($record->upgrade_date)):'-' }}</td>
                                     <td>{{ $record->month_sv??0 }}</td>
                                     <td style="color: {{ $record->isactive ? 'green' : 'red' }}"><i class="fa-solid fa-circle"></i></td>
                                     <td>
-                                        <a href="{{ url('distributor/user-level-list/'.$record->lvl.'/'.$record->user_num) }}" class="thm-btn">View</a>
+                                        <a href="{{ url('distributor/user-level-list/'.$lvl.'/'.$record->user_num) }}" class="thm-btn">View</a>
                                     </td>
                                 </tr>
                             @endforeach

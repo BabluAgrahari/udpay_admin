@@ -4,7 +4,7 @@
     use Illuminate\Http\Request;
 
     $perPage = (!empty($_GET['perPage'])) ? (int)$_GET['perPage'] : config('constants.perPage'); ?>
-    <div class="col-md-2 is-5 mt-3">
+    <div class="col-md-2 is-5 mt-3 pagi">
         <select class="form-select-sm form-select" name="perPare" id="perPage">
             <!-- <option value="10" {{ ($perPage =="10" )?"selected":"" }}>10</option> -->
             <option value="20" {{ ($perPage =="20" )?'selected':''}}>20</option>
