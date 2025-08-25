@@ -62,7 +62,7 @@
                                                 <span class="error-message text-danger" id="amount-error"></span>
                                             </div>
                                         </div>
-                                        <button type="submit" class="thm-btn" id="submitBtn">Preview</button>
+                                        <button type="submit" class="thm-btn" id="submitBtn">Proceed</button>
                                         <button type="button" class="thm-btn bg-light mx-3" id="cancelBtn">Cancel</button>
                                     </form>
 
@@ -115,7 +115,7 @@
                         </div>
                         <div class="col-6" id="preview-amount"></div>
                     </div>
-                    
+
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="thm-btn bg-light mx-3" data-bs-dismiss="modal">Cancel</button>
@@ -124,11 +124,22 @@
             </div>
         </div>
     </div>
-
 @endsection
-
+<script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
 @push('scripts')
     <script>
+        const cashfree = Cashfree({
+            mode: "production",
+        });
+
+        function initiatePayment(paymentSessionId) {
+            let checkoutOptions = {
+                paymentSessionId: paymentSessionId,
+                redirectTarget: "_self",
+            };
+            cashfree.checkout(checkoutOptions);
+        }
+
         $(document).ready(function() {
             // Clear form and errors
             function clearForm() {
@@ -145,7 +156,7 @@
                 $('.error-message').text('');
                 var formData = $(this).serialize();
                 $('#submitBtn').prop('disabled', true).text('Processing...');
-                
+
                 $.ajax({
                     url: '{{ url('distributor/wallet/preview-add-money') }}',
                     type: 'POST',
@@ -160,7 +171,7 @@
                             $('#preview-email').text(response.record.email);
                             $('#preview-mobile').text(response.record.mobile);
                             $('#preview-amount').text('₹' + response.record.amount);
-                           
+
                             $('#previewModal').modal('show');
                         } else {
                             sweetalert(false, response.msg);
@@ -187,7 +198,7 @@
             $('#confirmBtn').click(function() {
                 var formData = $('#addMoneyForm').serialize();
                 $('#confirmBtn').prop('disabled', true).text('Processing...');
-                
+
                 $.ajax({
                     url: '{{ url('distributor/wallet/add-money-save') }}',
                     type: 'POST',
@@ -200,12 +211,15 @@
                         if (response.status) {
                             // Hide preview modal
                             $('#previewModal').modal('hide');
-                            
+
+                            if (response.record.payment_gateway == 'cashfree') {
+                                initiatePayment(response.record.payment_session_id);
+                            }
                             // Show success message
-                            sweetalert(true, response.msg, 0);
+                            // sweetalert(true, response.msg, 0);
                             // Clear form and refresh page after user clicks OK
-                            clearForm();
-                            location.reload();
+                            // clearForm();
+                            // location.reload();
                         } else {
                             sweetalert(false, response.msg);
                         }

@@ -106,7 +106,9 @@
                 <div class="row">
                     <div class="col-lg-8">
                         <div>
+                            <div style="text-align: right;">Order ID: {{ $order->order_id }}</div>
                             <div class="track-left">
+                               
                                 <h3 class="tab-title">Track Order</h3>
                                 <div class="tab-content-body">
                                     @foreach ($order->orderToProducts as $orderToProduct)
@@ -132,9 +134,9 @@
                                                         OFF</span>
                                                 </div>
                                                 <div class="order-actions">
-                                                    <div class="delivery-status"> Expected delivery in 3-4 days</div>
+                                                    <div class="delivery-status"> Expected delivery in 6-7 days</div>
 
-                                                    @if (Auth::check())
+                                                    @if (Auth::check() && $order->payment_status !='failed')
                                                         <span class="review-link"
                                                             onclick="openReviewModal({{ $orderToProduct->product->id }}, '{{ $orderToProduct->product->product_name }}')">
                                                             <i class="fa fa-edit"></i> Write a Review
@@ -150,11 +152,11 @@
                             <?php //echo "<pre>"; print_r($order);die; ?>
                             <div class="order-summary-box">
                                 <div class="summary-row">
-                                    <span>Subtotal . {{ count($order->orderToProducts) }} items</span>
+                                    <span>Taxable Amount . {{ count($order->orderToProducts) }} items</span>
                                     @if(!empty(Auth::check()) && Auth::user()->can('isCustomer') || Auth::user()->can('isDistributor'))
-                                        <span>₹{{ $order->total_amt??0 }}</span>
+                                        <span>₹{{ $order->total_gross??0 }}</span>
                                     @else
-                                        <span>₹{{ $order->amount??0 }}</span>
+                                        <span>₹{{ $order->total_gross??0 }}</span>
                                     @endif
                                 </div>
                                 <div class="summary-row">
@@ -189,7 +191,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-4">
+                    {{-- <div class="col-lg-4">
                         <div class="track-right">
                             <div class="order-track-steps">
                                 <div class="step completed">
@@ -223,7 +225,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div> --}}
                 </div>
             </div>
         </section>

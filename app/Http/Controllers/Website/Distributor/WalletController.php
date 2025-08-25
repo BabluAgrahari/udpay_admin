@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\PayoutTransaction;
 use App\Models\ReedemWallet;
 use App\Models\Wallet;
+use App\Models\UniCashDetail;
 use App\Models\WalletHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -36,7 +37,7 @@ class WalletController extends Controller
     {
         $currentUser = Auth::user();
         
-        $transactions = WalletHistory::where('user_id', $currentUser->user_id)
+        $transactions = UniCashDetail::where('user_id', $currentUser->user_id)
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Website\Distributor;
 
 use App\Http\Controllers\Controller;
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
+use App\Models\LevelCount;
 use Illuminate\Support\Str;
 
 class SignupController extends Controller
@@ -24,7 +26,7 @@ class SignupController extends Controller
         if (empty($referral_id)) {
             abort(500, 'Referral ID is required');
         }
-        $data['user'] = User::where('ref_id', $referral_id)->whereIn('role', ['distributor', 'customer'])->first();
+        $data['user'] = User::where('user_num', $referral_id)->whereIn('role', ['distributor', 'customer'])->first();
         if (empty($data['user'])) {
             abort(500, 'Referral ID is not valid');
         }
@@ -54,12 +56,12 @@ class SignupController extends Controller
         Session::put('signup_mobile', $request->mobile);
         Session::put('otp_expires_at', now()->addMinutes(5));
 
-        $smsService = new SmsService();
-        $smsSent = $smsService->sendMessage('send_otp', $request->mobile, $otp);
+        // $smsService = new SmsService();
+        // $smsSent = $smsService->sendMessage('send_otp', $request->mobile, $otp);
 
-        if (!$smsSent['status']) {
-            return $this->failMsg($smsSent['msg']);
-        }
+        // if (!$smsSent['status']) {
+        //     return $this->failMsg($smsSent['msg']);
+        // }
 
         return $this->successMsg('OTP sent successfully to your phone number', ['otp' => $otp]);
     }
@@ -69,7 +71,7 @@ class SignupController extends Controller
         $validator = Validator::make($request->all(), [
             'mobile' => 'required|digits:10|numeric|not_in:0|regex:/^[1-9][0-9]{9}$/',
             'otp' => 'required|digits:6',
-        ],[
+        ], [
             'mobile.numeric' => 'Phone number must be a number',
             'mobile.not_in' => 'Phone number must not start with 0',
             'mobile.regex' => 'Phone number must not start with 0',
@@ -110,7 +112,7 @@ class SignupController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'mobile' => 'required|digits:10|numeric|not_in:0|regex:/^[1-9][0-9]{9}$/',
-        ],[
+        ], [
             'mobile.numeric' => 'Phone number must be a number',
             'mobile.not_in' => 'Phone number must not start with 0',
             'mobile.regex' => 'Phone number must not start with 0',
@@ -168,11 +170,11 @@ class SignupController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return $this->validateMsg($validator->errors()->first());
+            return $this->failMsg($validator->errors()->first());
         }
 
         try {
-            $existRefId = User::where('ref_id', $request->referral_id)->first();
+            $existRefId = User::where('user_num', $request->referral_id)->first();
             if (empty($existRefId)) {
                 return $this->failMsg('Referral ID is not valid');
             }
@@ -199,7 +201,7 @@ class SignupController extends Controller
             $customer->ref_id = $request->referral_id;
             $customer->user_id = $user_id;
             $customer->user_num = $user_num;
-            $customer->alpha_num_uid = 'UNI' . $user_id;
+            $customer->alpha_num_uid = 'UNI' . $user_num;
             $customer->name = $request->full_name;
             $customer->email = $request->email;
             $customer->mobile = $request->mobile;
@@ -208,8 +210,16 @@ class SignupController extends Controller
             $customer->role = 'customer';
             $customer->type = 'customer';
             if ($customer->save()) {
-                $res = $this->saveUserDetail($customer->ref_id, $customer->user_num, $user_id,
-                    $customer->alpha_num_uid, $customer->pwd, $customer->email, $customer->name, $customer->mobile);
+                $res = $this->saveUserDetail(
+                    $customer->ref_id,
+                    $customer->user_num,
+                    $user_id,
+                    $customer->alpha_num_uid,
+                    $customer->pwd,
+                    $customer->email,
+                    $customer->name,
+                    $customer->mobile
+                );
                 if (!$res['status']) {
                     DB::rollBack();
                     return $this->failRes($res['msg'] ?? '');
@@ -240,6 +250,7 @@ class SignupController extends Controller
         $user->save();
 
         $payload = ['user_id' => $user_id, 'unm' => $user_num, 'refered_by' => $refered_by, 'org' => ''];
+        $this->CreateUserLevel($payload);
         // dispatch(new RegisterJob($payload));  // here run job queue  here
 
         $walletUpdate = Wallet::where('unm', $refered_by)->first();
@@ -247,10 +258,10 @@ class SignupController extends Controller
         $walletUpdate->bp = $existbp + 100;
 
         if ($walletUpdate->save()) {
-            // $sms = new SmsService;
-            // $msgSend = $sms->sendMessage('reg_msg', $mobile, '', 'UNI' . $user_nm, $password);
-            // if (!$msgSend)
-            //     Log::warning('Something went wrong, SMS not sent - UserId', [$user_nm]);
+            $sms = new SmsService;
+            $msgSend = $sms->sendMessage('reg_msg', $mobile, '', 'UNI' . $user_num);
+            if (!$msgSend)
+                Log::warning('Something went wrong, SMS not sent - UserId', [$user_num]);
 
             // // for send mail by job queue
             // dispatch(new MailJob(['email' => $email, 'user_name' => 'UNI' . $user_nm, 'password' => $password, 'full_name' => $fname], 'sign_up'));
@@ -279,9 +290,55 @@ class SignupController extends Controller
         return false;
     }
 
+    private function CreateUserLevel($payload)
+    {
+        $payload = (object) $payload;
+        $insertLvl = $this->insertLvl($payload->unm);
+        if (!$insertLvl) {
+            Log::warning('Something went wrong, Not insert in User Lvl - UserId', [$payload->user_id]);
+        } else {
+            Log::info('Lvl created - UserId', [$payload->user_id]);
+            $user = User::where('user_id', $payload->user_id)->first();
+            $user->uflag = 5;
+            $user->save();
+        }
+    }
+
+    private function insertLvl($child_id)
+    {
+        $temp = $child_id;
+        $lvl = 1;
+        $refid = $child_id;
+        while ($refid != "" || $refid != "0") {
+            if ($refid >= 1) {
+
+                $posid = User::select('ref_id')->where('user_num', $temp)->first();
+                $refid = $posid->ref_id;
+
+                $save = new LevelCount();
+                $save->child_id = $child_id;
+                $save->parent_id = $refid;
+                $save->level = $lvl;
+                $save->is_active = 0;
+                if ($save->save()) {
+                    $lvl = $lvl + 1;
+                    $temp = $refid;
+                    if ($temp == 0) {
+                        return true;
+                    }
+                } else {
+                    return false;
+                }
+            } else {
+                return true;
+            }
+        } //while 	   
+    }
+
     public function welcome($id)
     {
         $user = User::where('alpha_num_uid', $id)->first();
+        // print_r($user);die;
         if (empty($user)) {
             return redirect()->to('/');
         }

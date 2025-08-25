@@ -44,7 +44,6 @@
                                                         <th>Transaction ID</th>
                                                         <th>Amount</th>
                                                         <th>Status</th>
-                                                        
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -53,9 +52,12 @@
                                                             <td>{{ ($transactions->currentPage() - 1) * $transactions->perPage() + $index + 1 }}</td>
                                                             <td>{{ $tnx->created_at ? date('d-m-Y H:i', strtotime($tnx->created_at)) : 'N/A' }}</td>
                                                             <td>{{ $tnx->order_id ?? 'N/A' }}</td>
-                                                            <td>{{ $tnx->transaction_id ?? '' }}</td>
+                                                            <td>{{ $tnx->transition_id ?? '' }}
+                                                                <br>
+                                                                <small>{{ $tnx->bank_txn_id }}</small>
+                                                            </td>
                                                             <td>{{ $tnx->amount ?? 'N/A' }}</td>
-                                                            <td>{{ $tnx->status ? 'Success' : 'Pending' }}</td>
+                                                            <td><span class="text-success">{{ $tnx->status}}</span></td>
                                                         </tr>
                                                     @endforeach
                                                 </tbody>

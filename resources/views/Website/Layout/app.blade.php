@@ -317,10 +317,14 @@
                                 <li class="menu-item"><a href="{{ url('download') }}">Downloads</a></li>
                                 <li class="menu-item"><a href="{{ url('about-us') }}">About Us</a></li>
                                 <li class="menu-item"><a href="{{ url('contact-us') }}">Contact Us</a></li>
+                                @if(!empty(Auth::user()) && (Auth::user()->can('isGuest')))
+                                {{-- <li class="menu-item"><a href="{{url('my-account')}}">Become Partner</a></li> --}}
+                                @endif
                                 @if(!empty(Auth::user()) && (Auth::user()->can('isDistributor') || Auth::user()->can('isCustomer')))
                                 <li class="menu-item menu-item-has-children">
                                     <a href="#">Business</a>
                                     <ul class="sub-menu">
+                                        <li class="menu-item"><a href="{{ url('distributor/dashboard') }}"><i class="fa-solid fa-plus"></i>Dashboard</a></li>
                                         <li class="menu-item"><a href="{{ url('distributor/kyc') }}"><i class="fa-solid fa-plus"></i> KYC</a></li>
                                         <li class="menu-item"><a href="{{ url('distributor/team-generation') }}"><i class="fa-solid fa-exchange-alt"></i> Team Generation</a></li>
                                         <li class="menu-item"><a href="{{ url('distributor/my-direct-referral') }}"><i class="fa-solid fa-exchange-alt"></i> My Direct Referral</a></li>

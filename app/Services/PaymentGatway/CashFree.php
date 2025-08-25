@@ -17,13 +17,8 @@ class CashFree
     public function __construct()
     {
         $this->apiVersion = '2025-01-01';
-        //$this->baseUrl = 'https://api.cashfree.com/pg';  // env('CASHFREE_ENV') === 'production'
-        // ? 'https://api.cashfree.com/pg'
-        // : 'https://sandbox.cashfree.com/pg';
 
-        $this->baseUrl = 'https://sandbox.cashfree.com/pg';
-        $this->clientId = env('CASHFREE_CLIENT_ID');
-        $this->clientSecret = env('CASHFREE_CLIENT_SECRET');
+        
     }
 
     public function createOrder($amount, $currency = 'INR', $customerData = [])
@@ -43,11 +38,16 @@ class CashFree
                 'notify_url' => $customerData['webhook_url'] ?? ''
             ]
         ];
+        // withOptions([
+        //     'verify' => false,
+        // ])->
         Log::info('CashFree Payment Request -'.$customerData['order_id'], $orderData);
         $response = Http::withHeaders([
             'X-Client-Secret' => $this->clientSecret,
             'X-Client-Id' => $this->clientId,
             'x-api-version' => $this->apiVersion,
+           
+
             'Content-Type' => 'application/json',
             'Accept' => 'application/json'
         ])->post($this->baseUrl . '/orders', $orderData);
@@ -82,6 +82,7 @@ class CashFree
 
     public function getPayment($order_id)
     {
+        // 
         $response = Http::withHeaders([
             'X-Client-Secret' => $this->clientSecret,
             'X-Client-Id' => $this->clientId,
@@ -91,7 +92,7 @@ class CashFree
         ])->get($this->baseUrl . '/orders/' . $order_id . '/payments');
         Log::info('Get Payment Response -'.$order_id, [$response->json()]);
 
-        if ($response->successful() && !empty($response->json()[0]['payment_status']) && $response->json()[0]['payment_status'] == 'SUCCESS') {
+        if ($response->successful() && !empty($response->json()[0]['payment_status'])) {
             $res = $response->json();
             return [
                 'status' => true,

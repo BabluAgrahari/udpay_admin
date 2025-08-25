@@ -48,11 +48,11 @@ class AuthController extends Controller
 
             $expiryTime = now()->addMinutes(5);
 
-              $smsService = new SmsService();
-              $res = $smsService->sendMessage('send_otp', $mobile, $otp);
-              if ($res['status'] == false) {
-                  return $this->failMsg($res['msg']);
-              }
+            //   $smsService = new SmsService();
+            //   $res = $smsService->sendMessage('send_otp', $mobile, $otp);
+            //   if ($res['status'] == false) {
+            //       return $this->failMsg($res['msg']);
+            //   }
 
             Session::put('otp', $otp);
             Session::put('mobile', $mobile);
@@ -133,7 +133,9 @@ class AuthController extends Controller
 
     private function cartItems()
     {
-        $cartItems = Cart::where('cart_cookie_id', Session::get('cart_cookie_id'))->get();
+
+        $cartItems = Cart::where('cart_cookie_id', request()->cookie('cart_cookie_id'))->get();
+       
         foreach ($cartItems as $item) {
             $cart = Cart::find($item->id);
             $cart->user_id = Auth::user()->id;

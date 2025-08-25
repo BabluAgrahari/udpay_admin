@@ -136,7 +136,7 @@
                                                         data-product-id="{{ $item->product_id }}">+</button>
                                                 </div>
                                                 <div class="delivery-status"><i class="fa-solid fa-truck-fast"></i> Expected
-                                                    delivery in 3–4 days</div>
+                                                    delivery in 6–7 days</div>
                                             </div>
                                         </div>
                                     </div>
@@ -209,8 +209,6 @@
                                 <p>Coupon Discount <span
                                         class="discount">−₹{{ session('applied_coupon.discount_amount') }}</span></p>
                             @endif
-
-                            <p>Convenience Fee <span>₹0</span></p>
                             <hr />
                             <p class="total text-black">Payable Amount
                                 <span>₹{{ session('applied_coupon') ? $subtotal - session('applied_coupon.discount_amount') : $subtotal }}</span>

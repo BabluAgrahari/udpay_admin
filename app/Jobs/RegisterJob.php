@@ -25,6 +25,7 @@ class RegisterJob implements ShouldQueue
 
     public function handle(): void
     {
+        sleep(60);
         Log::info('run after 60 seconds.');
         $payload = (object) $this->payload;
         $insertLvl = $this->insertLvl($payload->unm);

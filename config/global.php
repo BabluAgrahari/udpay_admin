@@ -20,7 +20,6 @@ return [
     ],
 
     'payment_gateway'=>[
-        'cashfree',
-        'razorpay'
+        'cashfree'
     ]
 ];

@@ -19,6 +19,12 @@ use Illuminate\Support\Facades\Route;
 Route::get('/checkout/payment-response/cashfree/{type}', [CheckoutController::class, 'paymentResponse']);
 Route::post('/checkout/payment-webhook/{payment_getaway}', [CheckoutController::class, 'paymentWebhook'])->name('payment-webhook');
 
+
+
+Route::get('/checkout/order-success/{order_id}/{type}', [CheckoutController::class, 'orderSuccess'])->name('order-success');
+Route::get('/checkout/order-failed/{order_id}/{type}', [CheckoutController::class, 'orderFailed'])->name('order-failed');
+
+
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/product', [ProductListController::class, 'index']);
 Route::get('/product/{category?}', [ProductListController::class, 'index']);

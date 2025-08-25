@@ -219,11 +219,11 @@
                     <div class="row">
                         <div class="col-md-6 mb-2">
                             <label class="form-label">User ID <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" value="{{ $user->user_id }}" readonly required>
+                            <input type="text" class="form-control" value="{{ $user->user_num??'' }}" readonly required>
                             <span class="text-danger error" id="user_id_error"></span>
                         </div>
                         <div class="col-md-6 mb-2">
-                            <label class="form-label">Referral ID <span class="text-danger">*</span></label>
+                            <label class="form-label">Sponsor ID <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" value="{{ $user->ref_id ?? '' }}" readonly
                                 required>
                             <span class="text-danger error" id="ref_id_error"></span>
@@ -242,36 +242,36 @@
                         </div>
                         <div class="col-md-6 mb-2">
                             <label class="form-label">PIN Code <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="pincode" required
+                            <input type="text" class="form-control" name="pincode" id="pincode" required
                                 value="{{ $kyc->pincode ?? '' }}">
                             <span class="text-danger error" id="pincode_error"></span>
                         </div>
                         <div class="col-md-6 mb-2">
                             <label class="form-label">Locality <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="locality" required
+                            <input type="text" class="form-control" id="locality" name="locality" required
                                 value="{{ $kyc->locality ?? '' }}">
                             <span class="text-danger error" id="locality_error"></span>
                         </div>
                         <div class="col-md-6 mb-2">
                             <label class="form-label">City <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="district" required
+                            <input type="text" class="form-control" id="city" name="district" required
                                 value="{{ $kyc->district ?? '' }}">
                             <span class="text-danger error" id="district_error"></span>
                         </div>
                         <div class="col-md-6 mb-2">
                             <label class="form-label">State <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="state" required
+                            <input type="text" class="form-control" id="state" name="state" required
                                 value="{{ $kyc->state ?? '' }}">
                             <span class="text-danger error" id="state_error"></span>
                         </div>
                         <div class="col-12 mb-2">
                             <label class="form-label">Address</label>
-                            <textarea class="form-control" name="address" rows="3">{{ $kyc->address ?? '' }}</textarea>
+                            <textarea class="form-control" name="address" id="address" rows="2">{{ $kyc->address ?? '' }}</textarea>
                             <span class="text-danger error" id="address_error"></span>
                         </div>
                         <div class="col-md-6 mb-2">
                             <label class="form-label">Mobile Number <span class="text-danger">*</span></label>
-                            <input type="tel" class="form-control" name="mobile" required
+                            <input type="tel" class="form-control" name="mobile" id="mobile" required
                                 value="{{ $kyc->mobile ?? '' }}">
                             <span class="text-danger error" id="mobile_error"></span>
                         </div>
@@ -466,19 +466,19 @@
                                 </div>
                                 <h6 class="mt-3">PAN Document</h6>
                                 <p class="text-muted small">Upload clear image of your PAN card</p>
-                                <input type="file" class="form-control" name="pan_docs" accept="image/*,application/pdf,document/*"
+                                <input type="file" class="form-control" name="pan_docs" accept="image/*"
                                     required>
                                 <div class="upload-preview mt-2" id="panDocsPreview"></div>
                             </div>
                             <span class="text-danger error" id="pan_docs_error"></span>
                             @if(!empty($kyc->pan))
-                                <a href="{{ $kyc->pan }}" target="_blank" class="btn btn-sm btn-primary">View PAN</a>
+                            <img src="{{ $kyc->pan }}" alt="PAN" class="img-fluid">
                             @endif
                         </div>
                         <div class="col-md-6 mb-2">
                             <label class="form-label">Aadhaar Number <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" name="aadhar_no" placeholder="1234 5678 9012"
-                                value="{{ $kyc->aadhar1 ?? '' }}" required>
+                                value="{{ $kyc->aadhar_number ?? '' }}" required>
                             <span class="text-danger error" id="aadhar_no_error"></span>
                         </div>
                         <div class="col-md-6 mb-2">
@@ -486,17 +486,33 @@
                                 <div class="upload-icon">
                                     <i class="fa-solid fa-address-card fa-3x text-brand-orange"></i>
                                 </div>
-                                <h6 class="mt-3">Aadhaar Document</h6>
-                                <p class="text-muted small">Upload front and back of Aadhaar card</p>
-                                <input type="file" class="form-control" name="aadhar_docs" accept="image/*,application/pdf,document/*"
+                                <h6 class="mt-3">Front Aadhaar Document</h6>
+                                <p class="text-muted small">Upload front of Aadhaar card</p>
+                                <input type="file" class="form-control" name="aadhar_docs_front" accept="image/*"
                                     required>
-                                <div class="upload-preview mt-2" id="aadharDocsPreview"></div>
+                                <div class="upload-preview mt-2" id="aadharDocsFrontPreview"></div>
                             </div>
-                            <span class="text-danger error" id="aadhar_docs_error"></span>
+                            <span class="text-danger error" id="aadhar_docs_front_error"></span>
+                            @if(!empty($kyc->aadhar1))
+                            <img src="{{ $kyc->aadhar1 }}" alt="Aadhaar" class="img-fluid">
+                            @endif
+                        
+                            <div class="upload-card">
+                                <div class="upload-icon">
+                                    <i class="fa-solid fa-address-card fa-3x text-brand-orange"></i>
+                                </div>
+                                <h6 class="mt-3">Back Aadhaar Document</h6>
+                                <p class="text-muted small">Upload back of Aadhaar card</p>
+                                <input type="file" class="form-control" name="aadhar_docs_back" accept="image/*"
+                                    required>
+                                <div class="upload-preview mt-2" id="aadharDocsBackPreview"></div>
+                            </div>
+                            <span class="text-danger error" id="aadhar_docs_back_error"></span>
                             @if(!empty($kyc->aadhar2))
-                                <a href="{{ $kyc->aadhar2 }}" target="_blank" class="btn btn-sm btn-primary">View Aadhaar</a>
+                            <img src="{{ $kyc->aadhar2 }}" alt="Aadhaar" class="img-fluid">
                             @endif
                         </div>
+
                         <div class="col-md-6 mb-2">
                             <div class="upload-card">
                                 <div class="upload-icon">
@@ -656,6 +672,9 @@
             });
 
 
+            //add pan aadahr front and back previw
+            
+
             $('form#personalInfoForm').on('submit', function(e) {
                 e.preventDefault();
                 const formData = new FormData($('#personalInfoForm')[0]);
@@ -778,6 +797,30 @@
                 });
             });
 
+            $(document).on('change', '#pincode', function() {
+                getPincode();
+            })
+
+            function getPincode() {
+                    var pincode = $('#pincode').val();
+                    $.ajax({
+                        url: `{{ url('pincode') }}/${pincode}`,
+                        method: 'GET',
+                        dataType: 'json',
+                        success: function(response) {
+                            if (response.status) {
+                                if (response.record.office_name) {
+                                    $('#locality').val(response.record.office_name);
+                                }
+                                $('#state').val(response.record.state);
+                                $('#city').val(response.record.district);
+                            } else {
+                                showSnackbar('Pincode not found', 'error');
+                            }
+                        }
+                    });
+                }
+
 
             function showSuccessMessage() {
                 const successHtml = `
@@ -788,7 +831,7 @@
                         <h4 class="text-brand-green mb-3">KYC Submitted Successfully!</h4>
                         <p class="text-muted">Your KYC application has been submitted and is under review. We'll notify you once the verification is complete.</p>
                         <button class="btn btn-brand-green mt-3" onclick="location.reload()">
-                            <i class="fa-solid fa-refresh me-2"></i>Submit Another KYC
+                            <i class="fa-solid fa-refresh me-2"></i>Back
                         </button>
                     </div>
                 `;

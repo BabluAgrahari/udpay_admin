@@ -24,9 +24,9 @@
                                 class="tab-btn {{ $type == 'my-acheivements' ? 'active' : '' }}"><i
                                     class="fa-solid fa-trophy me-1"></i> My Acheivements</a>
 
-                            <a href="{{ url('distributor/signup') }}/{{ Auth::user()->ref_id??'' }}"
+                            {{-- <a href="{{ url('distributor/signup') }}/{{ Auth::user()->ref_id??'' }}"
                                 class="tab-btn {{ $type == 'signup' ? 'active' : '' }}" target="_blank"><i
-                                    class="fa-solid fa-link me-1"></i>My Referral Link</a>
+                                    class="fa-solid fa-link me-1"></i>My Referral Link</a> --}}
                         </div>
  
                         <div class="tab-content">

@@ -32,13 +32,13 @@ class DashboardController extends Controller
     public function saveProfile(Request $request) {
         try {
             $validator = Validator::make($request->all(), [
-                'name' => 'required|string|max:255',
+                'name' => 'required|string|min:2|max:255',
                 'email' => 'required|email|max:255',
                 'gender' => 'required|string|max:255',
-                'mobile' => 'required|string|max:255',
+                // 'mobile' => 'required|string|min:10|max:255',
             ]);
             if ($validator->fails()) {  
-                return $this->validationMsg($validator->errors()->first());
+                return $this->validationMsg($validator->errors());
             }
           
            $checkMobile = User::where('mobile', $request->mobile)->where('id', '!=', Auth::user()->id)->first();
@@ -54,7 +54,7 @@ class DashboardController extends Controller
             $user->name = $request->name;
             $user->email = $request->email;
             $user->gender = $request->gender;
-            $user->mobile = $request->mobile;
+            // $user->mobile = $request->mobile;
             $user->save();
            return $this->successMsg('Profile updated successfully', ['user' => $user]);
         } catch (\Exception $e) {

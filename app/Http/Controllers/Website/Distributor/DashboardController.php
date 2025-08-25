@@ -7,10 +7,14 @@ use App\Models\Customer;
 use App\Models\LevelCount;
 use App\Models\Product;
 use App\Models\Royalty;
+use App\Models\RoyaltyIncome;
 use App\Models\User;
 use App\Models\UserKyc;
+use App\Models\Payout;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Helper\Helper;
+use App\Models\ApOrder;
 
 class DashboardController extends Controller
 {
@@ -26,6 +30,8 @@ class DashboardController extends Controller
         if ($type == 'my-direct-referral') {
             $data['referrals'] = Customer::with('rank')->where('ref_id', auth()->user()->user_num)->get();
         }
+
+
         if ($type == 'team-generation') {
             $data['team_generation'] = DB::table('level_count')
                 ->select(
@@ -41,17 +47,35 @@ class DashboardController extends Controller
 
                
         }
+
+
         if ($type == 'my-acheivements') {
             $data['achievement'] = Royalty::where('userId', auth()->user()->user_num)->first();
         }
 
         // Add level count statistics for dashboard
         if ($type == 'dashboard') {
+
+            $data['wallet_balance'] = walletBalance(auth()->user()->user_id);
+            $data['my_direct_referal'] = Customer::with('rank')->where('ref_id', auth()->user()->user_num)->count();
+            $data['generationTeam'] = LevelCount::where('parent_id', auth()->user()->user_num)->count();
+            $data['totalTeamSv'] = Payout::where('user_id', auth()->user()->user_num)->sum('sv');
+            $data['myDirectSv'] = Payout::where('level', 1)->where('parent_id', auth()->user()->user_num)->sum('sv');
+            $data['rank'] =Royalty::where('userId', auth()->user()->user_num)->first();
+
+            $total_earning = Payout::where('user_id', auth()->user()->user_num)->sum('amount');
+            $royalty_earning = RoyaltyIncome::where('user_id', auth()->user()->user_num)->sum('amount');
+            $data['total_earning']=$total_earning+$royalty_earning;
+
+            $data['total_self_sv'] = ApOrder::where('uid', auth()->user()->user_id)->sum('sv');
+            $data['current_month_sv'] = ApOrder::where('uid', auth()->user()->user_id)->whereMonth('created_at', now()->month)->sum('sv');
+            
+            // echo "<pre>";
+            // print_r($rank->toArray());die;
         }
 
         return view('Website.Distributor.dashboard', $data);
     }
-
 
     public function userLeavelList(Request $request,$level,$user_id=null){
 

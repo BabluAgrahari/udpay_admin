@@ -18,6 +18,9 @@ Route::post('/distributor/signup/complete', [SignupController::class, 'completeR
 Route::post('/distributor/signup/resend-otp', [SignupController::class, 'resendOTP']);
 
 
+Route::get('/add-money/payment-response/cashfree', [AddMoneyController::class, 'paymentResponse']);
+Route::post('/add-money/payment-webhook/cashfree', [AddMoneyController::class, 'paymentWebhook'])->name('addmoney-payment-webhook');
+
 Route::group(['prefix' => 'distributor', 'middleware' => 'customer.or.distributor'], function () {
     Route::get('/{type}', [DashboardController::class, 'index'])->where('type', 'dashboard|kyc|my-direct-referral|team-generation|my-acheivements');
     Route::get('/user-level-list/{level}/{user_id?}', [DashboardController::class, 'userLeavelList']);

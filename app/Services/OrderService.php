@@ -11,11 +11,12 @@ use Illuminate\Support\Facades\Log;
 
 class OrderService
 {
-    public function distributePayout($totalAmount, $orderId)
+
+    public function distributePayout($totAp, $order_id)
     {
         $bv = 1;
-        $levelRules = [
-            1 => ['direct' => 0, 'percent' => 0.4],
+        $level_rules = [
+            1 => ['direct' => 0, 'percent' => 0.40],
             2 => ['direct' => 1, 'percent' => 0.08],
             3 => ['direct' => 1, 'percent' => 0.05],
             4 => ['direct' => 2, 'percent' => 0.04],
@@ -31,62 +32,143 @@ class OrderService
             14 => ['direct' => 5, 'percent' => 0.01],
             15 => ['direct' => 5, 'percent' => 0.01],
         ];
-        $levelMembers = LevelCount::where('child_id', Auth::user()->user_num)
-            ->whereBetween('level', [2, 15])
+
+        $level_member = LevelCount::where('child_id', Auth::user()->user_num)
+            ->where('level', '>', 1)
+            ->where('level', '<=', 15)
             ->get();
-        if ($levelMembers->isEmpty()) {
-            Log::info('No level members found for user: ' . Auth::user()->user_num);
 
-            return;
-        }
+        $user = User::where('id',  Auth::user()->id)->first();
+        $isActive = $user->isactive;
 
-        $parentIds = $levelMembers->pluck('parent_id')->unique()->values();
-        $users = User::whereIn('user_num', $parentIds)->get()->keyBy('user_num');
+        if ($level_member->isNotEmpty()) {
+            foreach ($level_member as $lvl) {
+                $level = $lvl->level;
+                if (!isset($level_rules[$level]))
+                    continue;
 
-        $directCounts = User::select('ref_id', DB::raw('COUNT(*) as count'))
-            ->whereIn('ref_id', $parentIds)
-            ->where('isactive', 1)
-            ->groupBy('ref_id')
-            ->pluck('count', 'ref_id');
+                $rule = $level_rules[$level];
+                $uid = "UNI" . $lvl->child_id;
 
-        foreach ($levelMembers as $lvl) {
-            $level = $lvl->level;
+                $user = User::where('user_num', $lvl->parent_id)->first();
+                if (!$user) {
+                    Log::debug("User not found for parent_id: {$lvl->parent_id}");
+                    continue;
+                }
 
-            if (!isset($levelRules[$level])) {
-                continue;
-            }
+                if ($user->isactive != 1 || $user->restricted != 0) {
+                    Log::info("User {$lvl->parent_id} is inactive or restricted at level $level.");
+                    continue;
+                }
 
-            $rule = $levelRules[$level];
-            $uidDisplay = 'UNI' . $lvl->child_id;
+                $direct_count = User::where('ref_id',$lvl->parent_id)
+                    ->where('isactive','1')
+                    ->count();
 
-            $user = $users->get($lvl->parent_id);
-            if (!$user) {
-                Log::debug("User not found for parent_id: {$lvl->parent_id}");
-                continue;
-            }
+                if ($direct_count >= $rule['direct']) {
+                    $amt1 = $totAp * $rule['percent'];
+                    $amt = $amt1 * $bv;
+                    $in_type = "Start Bonus from {$uid} - level {$level}";
 
-            if ($user->isactive != 1 || $user->restricted != 0) {
-                Log::info("User {$lvl->parent_id} is inactive or restricted at level $level.");
-                continue;
-            }
+                    $insert = insertPayout($amt, $lvl->parent_id, $in_type, $lvl->child_id, $order_id, $totAp, $level, $isActive);
 
-            $directCount = $directCounts->get($lvl->parent_id, 0);
-
-            if ($directCount < $rule['direct']) {
-                Log::info("User {$lvl->parent_id} missed Level $level bonus. Required directs: {$rule['direct']}, Found: $directCount");
-                continue;
-            }
-
-            $amount = $totalAmount * $rule['percent'] * $bv;
-            $inType = "Start Bonus from {$uidDisplay} - level {$level}";
-
-            if (insertPayout($amount, $lvl->parent_id, $inType, $lvl->child_id, $orderId, $totalAmount, $level)) {
-                addWallet1(1, $lvl->parent_id, $amount, $orderId, 'gen_payout');
-            } else {
-                Log::info("$amount not inserted at Level $level >>> Payout user id: {$lvl->parent_id}");
+                    if ($insert) {
+                        if ($isActive == 0 || empty($isActive)) {
+                            addWallet1(1, $lvl->parent_id, $amt, $order_id, 'gen_payout', $isActive);
+                        }
+                    } else {
+                        Log::info("$amt not inserted at Level $level >>> Payout user id: {$lvl->parent_id}");
+                    }
+                } else {
+                    Log::info("User {$lvl->parent_id} missed Level $level bonus. Required directs: {$rule['direct']}, Found: $direct_count");
+                }
             }
         }
+        Log::debug('Level members:', $level_member->toArray());
     }
+
+
+    // public function distributePayout($totalAmount, $orderId)
+    // {
+    //     $bv = 1;
+    //     $levelRules = [
+    //         1 => ['direct' => 0, 'percent' => 0.4],
+    //         2 => ['direct' => 1, 'percent' => 0.08],
+    //         3 => ['direct' => 1, 'percent' => 0.05],
+    //         4 => ['direct' => 2, 'percent' => 0.04],
+    //         5 => ['direct' => 2, 'percent' => 0.03],
+    //         6 => ['direct' => 2, 'percent' => 0.02],
+    //         7 => ['direct' => 3, 'percent' => 0.02],
+    //         8 => ['direct' => 3, 'percent' => 0.02],
+    //         9 => ['direct' => 3, 'percent' => 0.02],
+    //         10 => ['direct' => 4, 'percent' => 0.02],
+    //         11 => ['direct' => 4, 'percent' => 0.01],
+    //         12 => ['direct' => 4, 'percent' => 0.01],
+    //         13 => ['direct' => 5, 'percent' => 0.01],
+    //         14 => ['direct' => 5, 'percent' => 0.01],
+    //         15 => ['direct' => 5, 'percent' => 0.01],
+    //     ];
+    //     $levelMembers = LevelCount::where('child_id', Auth::user()->user_num)
+    //         ->whereBetween('level', [2, 15])
+    //         ->get();
+    //     if ($levelMembers->isEmpty()) {
+    //         Log::info('No level members found for user: ' . Auth::user()->user_num);
+
+    //         return;
+    //     }
+
+    //     $parentIds = $levelMembers->pluck('parent_id')->unique()->values();
+    //     $users = User::whereIn('user_num', $parentIds)->get()->keyBy('user_num');
+
+    //     $directCounts = User::select('ref_id', DB::raw('COUNT(*) as count'))
+    //         ->whereIn('ref_id', $parentIds)
+    //         ->where('isactive', 1)
+    //         ->groupBy('ref_id')
+    //         ->pluck('count', 'ref_id');
+
+    //         $user = User::where('id',  Auth::user()->id)->first();
+    //         $isActive = $user->isactive;
+
+    //     foreach ($levelMembers as $lvl) {
+    //         $level = $lvl->level;
+
+    //         if (!isset($levelRules[$level])) {
+    //             continue;
+    //         }
+
+    //         $rule = $levelRules[$level];
+    //         $uidDisplay = 'UNI' . $lvl->child_id;
+
+    //         $user = $users->get($lvl->parent_id);
+    //         if (!$user) {
+    //             Log::debug("User not found for parent_id: {$lvl->parent_id}");
+    //             continue;
+    //         }
+
+    //         if ($user->isactive != 1 || $user->restricted != 0) {
+    //             Log::info("User {$lvl->parent_id} is inactive or restricted at level $level.");
+    //             continue;
+    //         }
+
+    //         $directCount = $directCounts->get($lvl->parent_id, 0);
+
+    //         if ($directCount < $rule['direct']) {
+    //             Log::info("User {$lvl->parent_id} missed Level $level bonus. Required directs: {$rule['direct']}, Found: $directCount");
+    //             continue;
+    //         }
+    //         $amount = $totalAmount * $rule['percent'] * $bv;
+    //         $inType = "Start Bonus from {$uidDisplay} - level {$level}";
+
+
+    //         if (insertPayout($amount, $lvl->parent_id, $inType, $lvl->child_id, $orderId, $totalAmount, $level,$isActive)) {
+    //             if($isActive==0 || empty($isActive)){
+    //                 addWallet1(1, $lvl->parent_id, $amount, $orderId, 'gen_payout',$isActive);
+    //             }
+    //         } else {
+    //             Log::info("$amount not inserted at Level $level >>> Payout user id: {$lvl->parent_id}");
+    //         }
+    //     }
+    // }
 
     public function checkWallet($amount, $orderId, $types, $totDiscount, $checkBalance = false)
     {

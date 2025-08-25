@@ -17,7 +17,7 @@ class Category extends BaseModel
         'status',
         'meta_title',
         'meta_keyword',
-        'meta_description'
+         'meta_description'
     ];
 
     protected $casts = [

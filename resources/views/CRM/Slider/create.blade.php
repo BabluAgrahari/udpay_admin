@@ -42,6 +42,8 @@
                                 <option value="recharge_main">Recharge Main</option>
                                 <option value="deals">Deals</option>
                                 <option value="new">New</option>
+                                 <option value="app_slider">App Slider</option>
+                                 <option value="app_home">App Home</option>
                             </select>
                             <span class="text-danger error" id="type_error"></span>
                         </div>

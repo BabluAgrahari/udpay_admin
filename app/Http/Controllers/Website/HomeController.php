@@ -8,13 +8,17 @@ use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Slider;
+use Illuminate\Support\Facades\Session;
+use App\Models\Cart;
+use App\Models\User;
 
 class HomeController extends Controller
 {
     public function index()
     {
         // try {
-
+           
+          
             $data['categories'] = Category::status()->where('parent_id', '0')->where('pro_section', 'primary')->get();
             $category = Category::status()->where('parent_id', '0')->where('pro_section', 'primary')->get();
 

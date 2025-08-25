@@ -20,7 +20,7 @@ class SmsService
         } else if ($type == 'reg_otp') {
             $message = 'Your OTP for Mobile Verification with Unipay is : ' . $otp . ' UNIPAY DIGITAL PRIVATE LIMITED';
         } else if ($type == 'reg_msg') {
-            $message = 'Welcome to UniPay. Your Username : {' . $alpha_num_uid . '} And Password : {' . $password . '} Join Our Telegram Channel for All Updates and Notification about Unipay https://t.me/unipayofficial UNIPAY DIGITAL PRIVATE LIMITED';
+            $message = 'Welcome to UniPay. Your ID is : {' . $alpha_num_uid . '}. Join Our Telegram Channel for All Updates and Notification about Unipay https://t.me/unipayofficial UNIPAY DIGITAL PRIVATE LIMITED';
         }
 
 

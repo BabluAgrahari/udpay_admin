@@ -14,22 +14,22 @@ class KYCController extends Controller
     public function updatePersonalDetails(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|min:2|max:255',
             'email' => 'required|email|max:255',
-            'pincode' => 'required|string|max:10',
-            'locality' => 'required|string|max:255',
-            'district' => 'required|string|max:255',
-            'state' => 'required|string|max:255',
-            'address' => 'required|string|max:500',
-            'mobile' => 'required|string|max:15',
-            'occupation' => 'required|string|max:255',
+            'pincode' => 'required|numeric|digits:6|not_in:0',
+            'locality' => 'required|string|min:2|max:255',
+            'district' => 'required|string|min:2|max:255',
+            'state' => 'required|string|min:2|max:255',
+            'address' => 'required|string|min:10|max:500',
+            'mobile' => 'required|numeric|digits:10|not_in:0|regex:/^[6-9]\d{9}$/',
+            'occupation' => 'required|string|min:2|max:255',
             'dob' => 'required|date|before:today',
-            'nominee' => 'required|string|max:255',
-            'relation' => 'required|string|max:50',
+            'nominee' => 'required|string|min:2|max:255',
+            'relation' => 'required|string|min:2|max:50',
             'gender' => 'required|string|in:male,female,other',
         ], [
             'name.required' => 'Full name is required',
-            'name.max' => 'Full name cannot exceed 255 characters',
+            'name.min' => 'Full name cannot exceed 255 characters',
             'email.required' => 'Email address is required',
             'email.email' => 'Please enter a valid email address',
             'pincode.required' => 'PIN code is required',
@@ -55,8 +55,18 @@ class KYCController extends Controller
             $user = Auth::user();
 
             $kyc = UserKyc::where('userId', $user->user_id)->first();
+
             if (empty($kyc)) {
+                $existMobile = UserKyc::where('mobile', $request->mobile)->count();
+                if ($existMobile > 0) {
+                    return $this->failMsg('Mobile number already exists!');
+                }
                 $kyc = new UserKyc();
+            }else{
+                $existMobile = UserKyc::where('userId','!=',$user->user_id)->where('mobile',$request->mobile)->count();
+                if ($existMobile > 0) {
+                    return $this->failMsg('Mobile number already exists!');
+                }
             }
 
             $kyc->userId = $user->user_id;
@@ -86,7 +96,7 @@ class KYCController extends Controller
     public function updateBankDetails(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'holder_name' => 'required|string|max:255',
+            'holder_name' => 'required|string|min:2|max:255',
             'account_no' => 'required|string|max:50',
             'confirm_account_no' => 'required|same:account_no',
             'ifsc_code' => 'required|string|max:20',
@@ -137,7 +147,8 @@ class KYCController extends Controller
             'pan_numer' => 'required|string|max:20',
             'pan_docs' => 'required|image|mimes:jpeg,png,jpg|max:2048',
             'aadhar_no' => 'required|string|max:20',
-            'aadhar_docs' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'aadhar_docs_front' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'aadhar_docs_back' => 'required|image|mimes:jpeg,png,jpg|max:2048',
             'selfi' => 'required|image|mimes:jpeg,png,jpg|max:2048',
         ], [
             'pan_numer.required' => 'PAN number is required',
@@ -164,15 +175,20 @@ class KYCController extends Controller
             $user = Auth::user();
 
             $panDocPath = null;
-            $aadharDocPath = null;
+            $aadharDocPathFront = null;
+            $aadharDocPathBack = null;
             $selfiePath = null;
 
             if ($request->hasFile('pan_docs')) {
                 $panDocPath = singleFile($request->file('pan_docs'), 'kyc/pan');
             }
 
-            if ($request->hasFile('aadhar_docs')) {
-                $aadharDocPath = singleFile($request->file('aadhar_docs'), 'kyc/aadhaar');
+            if ($request->hasFile('aadhar_docs_front')) {
+                $aadharDocPathFront = singleFile($request->file('aadhar_docs_front'), 'kyc/aadhaar');
+            }
+
+            if ($request->hasFile('aadhar_docs_back')) {
+                $aadharDocPathBack = singleFile($request->file('aadhar_docs_back'), 'kyc/aadhaar');
             }
 
             if ($request->hasFile('selfi')) {
@@ -189,9 +205,13 @@ class KYCController extends Controller
             if (!empty($panDocPath)) {
                 $kyc->pan = $panDocPath;
             }
-            $kyc->aadhar1 = $request->aadhar_no;
-            if (!empty($aadharDocPath)) {
-                $kyc->aadhar2 = $aadharDocPath;
+            $kyc->aadhar_number = $request->aadhar_no;
+            if (!empty($aadharDocPathFront)) {
+                $kyc->aadhar1 = $aadharDocPathFront;
+            }
+
+            if (!empty($aadharDocPathBack)) {
+                $kyc->aadhar2 = $aadharDocPathBack;
             }
             if (!empty($selfiePath)) {
                 $kyc->self = $selfiePath;

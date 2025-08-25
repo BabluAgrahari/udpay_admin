@@ -89,5 +89,9 @@ class User extends Authenticatable implements JWTSubject
         return in_array($permission, $this->roleTable->permissions ?? []);
     }
 
+    public function rank()
+    {
+        return $this->hasOne(Royalty::class, 'userId', 'user_num');
+    }
     
 }

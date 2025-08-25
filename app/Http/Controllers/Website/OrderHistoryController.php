@@ -87,7 +87,7 @@ class OrderHistoryController extends Controller
             $pdf->setOption('isHtml5ParserEnabled', true);
             $pdf->setOption('defaultFont', 'DejaVu Sans');
             
-            $filename = 'invoice_' . ($data['order']->order_number ?? $data['order']->id) . '.pdf';
+            $filename = 'invoice_' . ($data['order']->order_id ?? $data['order']->id) . '.pdf';
             //not download only show
             return $pdf->stream($filename);
             // return $pdf->download($filename);

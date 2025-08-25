@@ -82,7 +82,7 @@
                                                             Cancelled</button>
                                                     @else
                                                         <div class="delivery-status"><i class="fa-solid fa-truck-fast"></i>
-                                                            Expected delivery in 3–4 days</div>
+                                                            Expected delivery in 6–7 days</div>
                                                     @endif
                                                 </div>
                                             </div>

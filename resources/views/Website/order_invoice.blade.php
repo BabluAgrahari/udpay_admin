@@ -255,7 +255,7 @@
         <div class="invoice-header">
             <img src="front_assets/images/logo.png" width="200">
             <div class="invoice-title">Invoice</div>
-            <div class="invoice-number">Invoice Number: IN-UNI2025-1543</div>
+            <div class="invoice-number">Invoice Number: {{ $data['order']->order_id }}</div>
         </div>
         
         <!-- Invoice Body -->

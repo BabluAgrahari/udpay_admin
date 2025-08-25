@@ -27,7 +27,7 @@
                             <label class="form-label">Type <span class="text-danger">*</span></label>
                             <select name="type" class="form-select select2" required>
                                 <option value="">Select Type</option>
-                                @foreach (['web', 'app_main', 'app_offer', 'cat', 'cat1', 'bus_banner', 'fina_main', 'insurance_main', 'pro_cat', 'mob_recharge', 'unilearn_main', 'eduction_main', 'legal_main', 'recharge_main', 'deals', 'new'] as $type)
+                                @foreach (['web', 'app_main', 'app_offer', 'cat', 'cat1', 'bus_banner', 'fina_main', 'insurance_main', 'pro_cat', 'mob_recharge', 'unilearn_main', 'eduction_main', 'legal_main', 'recharge_main', 'deals', 'new','app_slider','app_home'] as $type)
                                     <option value="{{ $type }}" {{ $slider->type == $type ? 'selected' : '' }}>
                                         {{ ucwords(str_replace('_', ' ', $type)) }}</option>
                                 @endforeach

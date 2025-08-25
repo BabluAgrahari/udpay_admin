@@ -20,7 +20,7 @@
                                     <label for="referral_id" class="form-label">Referral ID<span class="text-danger">
                                             *</span></label>
                                     <input type="text" class="form-control" id="referral_id" name="referral_id"
-                                        placeholder="Enter referral ID" value="{{ $user->ref_id ?? '' }}" readonly required>
+                                        placeholder="Enter referral ID" value="{{ $user->user_num ?? '' }}" readonly required>
                                     <span class="text-danger error" id="referral_id_error"></span>
                                     <span class="text-muted " id="referral_id_error"> <b>Username :</b>
                                         <span class="text-success">{{ $user->name ?? '' }}</span></span>
@@ -452,8 +452,7 @@
                                 alertMsg(true, 'Account created successfully! You can now login.');
                                 setTimeout(function() {
                                     window.location.href =
-                                        '{{ url('distributor/welcome/') }}' + data
-                                        .alpha_num_id;
+                                        '{{ url('distributor/welcome/') }}/' + data.record.alpha_num_id;
                                 }, 1200);
                             } else {
                                 alertMsg(false, data.msg ||

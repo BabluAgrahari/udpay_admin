@@ -36,7 +36,7 @@ class Order extends BaseModel
 
     public function shipping_address()
     {
-        return $this->belongsTo(UserAddress::class, 'shipping_address_id', 'id');
+        return $this->hasOne(UserAddress::class, 'id', 'address_id');
     }
 
     // Accessor for order_number
