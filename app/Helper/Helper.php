@@ -395,7 +395,7 @@ if (!function_exists('insertPayout')) {
         $qry->sv = $sv;
         $qry->level = $level;
         $qry->order_id = $order_id;
-        $qry->status = $isActive==1 ? (int)0 : (int)1;
+        $qry->status = $isActive == 1 ? (int)0 : (int)1;
         $qry->payout_type = !empty($isActive) ? 'rp' : 'activation';
         if ($qry->save())
             return true;
@@ -423,6 +423,10 @@ if (!function_exists('addWallet1')) {
             $tp = 'repurchase_payout';
         }
 
+        $closing_amount = $walletBal->amount ?? 0;
+        $closing_earning = $walletBal->earning ?? 0;
+        $closing_unicash = $walletBal->unicash ?? 0;
+
 
         $save1 = new WalletTransition();
         $save1->unm = $uid;
@@ -436,6 +440,10 @@ if (!function_exists('addWallet1')) {
         $save1->earning = $payout;
         $save1->amount = 0;
         $save1->unipoint = 0;
+        $save1->closing_amount = $closing_amount;
+        $save1->closing_earning = $closing_earning;
+        $save1->closing_unicash = $closing_unicash;
+        $save1->closing_unipoint = 0;
         $save1->description = '';
         $save1->save();
 
@@ -480,9 +488,19 @@ if (!function_exists('addWallet1')) {
     if (!function_exists('walletTransaction')) {
         function walletTransaction($request)
         {
-
             $request = (object)$request;
-            $userData = User::where('user_num', $request->unm)->first();
+            // $userData = User::where('user_num', $request->unm)->first();
+
+            $wallet = Wallet::where('unm', $request->unm)->first();
+            $closing_amount = 0;
+            $closing_earning = 0;
+            $closing_unicash = 0;
+            if (!empty($wallet)) {
+                $closing_amount = $wallet->amount;
+                $closing_earning = $wallet->earning;
+                $closing_unicash = $wallet->unicash;
+            }
+
             $save = new WalletTransition();
             $save->unm       = $request->unm;
             $save->user_id     = $request->user_id;
@@ -498,6 +516,10 @@ if (!function_exists('addWallet1')) {
             $save->earning     = $request->earning ?? 0;
             $save->amount      = $request->amount ?? 0;
             $save->unipoint    = $request->unipoint ?? 0;
+            $save->closing_amount = $closing_amount;
+            $save->closing_earning = $closing_earning;
+            $save->closing_unicash = $closing_unicash;
+            $save->closing_unipoint = $request->unipoint ?? 0;
             $save->order_id      = $request->order_id ?? '';
             if ($save->save())
                 return true;

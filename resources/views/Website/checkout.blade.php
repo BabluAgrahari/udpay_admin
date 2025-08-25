@@ -478,7 +478,7 @@
     @push('scripts')
         <script>
             const cashfree = Cashfree({
-                mode: "production",
+                mode: "sandbox",
             });
 
             function initiatePayment(paymentSessionId) {
@@ -501,7 +501,7 @@
                         $('#online_payment').addClass('d-none');
 
                         var wallet_balance = $('#wallet_balance_amount').val();
-                        console.log(net_amount, wallet_balance);
+                        // console.log(net_amount, wallet_balance);
                         if (parseFloat(net_amount) > parseFloat(wallet_balance)) {
                             $('#online_payment').removeClass('d-none').addClass('d-block');
                             $('#proceed_to_pay').text('Proceed to Pay (₹' + (parseFloat(net_amount) -
@@ -535,10 +535,10 @@
                     if (paymentMode == 'wallet' && parseFloat(wallet_balance) < parseFloat(totalNetAmount)) {
                         viewamount = parseFloat(totalNetAmount) - parseFloat(wallet_balance);
                     }
-                    console.log('paymentMode', paymentMode);
-                    console.log('wallet_balance', wallet_balance);
-                    console.log('totalNetAmount', totalNetAmount);
-                    console.log('viewamount', viewamount);
+                    // console.log('paymentMode', paymentMode);
+                    // console.log('wallet_balance', wallet_balance);
+                    // console.log('totalNetAmount', totalNetAmount);
+                    // console.log('viewamount', viewamount);
 
                     $('#shipping_change').val(0);
                     if (val == 'courier') {

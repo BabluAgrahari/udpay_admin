@@ -149,6 +149,12 @@ class AddMoneyController extends Controller
                 $userWallet->save();
             }
             // Create wallet history for adding money (credit)
+
+            $closing_amount = $userWallet->amount ?? 0;
+            $closing_earning = $userWallet->earning ?? 0;
+            $closing_unicash = $userWallet->unicash ?? 0;
+            $closing_unipoint = 0;
+
             $walletHistory = new WalletHistory();
             $walletHistory->user_id = $user_id;
             $walletHistory->unm = $unicash->unm;
@@ -162,6 +168,10 @@ class AddMoneyController extends Controller
             $walletHistory->earning = 0;
             $walletHistory->unicash = 0;
             $walletHistory->unipoint = 0;
+            $walletHistory->closing_amount = $closing_amount;
+            $walletHistory->closing_earning = $closing_earning;
+            $walletHistory->closing_unicash = $closing_unicash;
+            $walletHistory->closing_unipoint = $closing_unipoint;
             $walletHistory->remark = 'Money added via cashfree';
             $walletHistory->from_type = 'wallet';
             $walletHistory->order_id = null;

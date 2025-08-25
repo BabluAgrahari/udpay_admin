@@ -8,6 +8,7 @@
         margin-top: 5px;
         margin-bottom: 4px;
     }
+
     .step-indicator.completed {
         background-color: rgba(241, 97, 74, 0.1);
         color: var(--brand-orange);
@@ -141,36 +142,41 @@
         border-color: #dc3545;
         box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
     }
+
     .progress-bar {
         background-color: var(--thm-color-one);
     }
+
     .step-box {
-    background: #C9FFE9;
-    border-radius: 10px;
-    border: 1px solid #a1dfc6;
-    margin-bottom: 20px;
-}
-.step-indicator.active {
-    background-color: rgb(1 96 56 / 80%);
-    color: #fff !important;
-}
-.step-indicator {
-    text-align: center;
-    padding: 7px 15px;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    cursor: pointer;
-}
-.kyc-user {
-    width: 30px;
-    height: 30px;
-    background: var(--thm-color-two);
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--thm-color-one);
-}
+        background: #C9FFE9;
+        border-radius: 10px;
+        border: 1px solid #a1dfc6;
+        margin-bottom: 20px;
+    }
+
+    .step-indicator.active {
+        background-color: rgb(1 96 56 / 80%);
+        color: #fff !important;
+    }
+
+    .step-indicator {
+        text-align: center;
+        padding: 7px 15px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .kyc-user {
+        width: 30px;
+        height: 30px;
+        background: var(--thm-color-two);
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--thm-color-one);
+    }
 </style>
 <div class="tab-panel active edit-form-open" id="kyc">
     <h3 class="tab-title account-top">KYC Verification Process</h3>
@@ -212,14 +218,16 @@
             <div id="messageError" style="display: none;"></div>
             <!-- Step 1: Personal Information -->
             <div class="form-step active" id="step1">
-                <h6 class="text-brand-green mb-3"><i class="kyc-user fa-solid fa-user me-2"></i>Personal Information</h6>
+                <h6 class="text-brand-green mb-3"><i class="kyc-user fa-solid fa-user me-2"></i>Personal Information
+                </h6>
                 <form id="personalInfoForm" enctype="multipart/form-data"
                     action="{{ url('distributor/kyc/personal-details') }}" method="post">
                     @csrf
                     <div class="row">
                         <div class="col-md-6 mb-2">
                             <label class="form-label">User ID <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" value="{{ $user->user_num??'' }}" readonly required>
+                            <input type="text" class="form-control" value="{{ $user->user_num ?? '' }}" readonly
+                                required>
                             <span class="text-danger error" id="user_id_error"></span>
                         </div>
                         <div class="col-md-6 mb-2">
@@ -297,8 +305,8 @@
                         <div class="col-md-6 mb-2">
                             <label class="form-label">Date of Birth <span class="text-danger">*</span></label>
                             <input type="date" class="form-control" name="dob" required
-                                value="{{ !empty($kyc->dob)?date('Y-m-d', strtotime($kyc->dob)) : '' }}" max="{{ date('Y-m-d') }}"
-                                min="{{ date('Y-m-d', strtotime('-100 years')) }}">
+                                value="{{ !empty($kyc->dob) ? date('Y-m-d', strtotime($kyc->dob)) : '' }}"
+                                max="{{ date('Y-m-d') }}" min="{{ date('Y-m-d', strtotime('-100 years')) }}">
                             <span class="text-danger error" id="dob_error"></span>
                         </div>
                         <div class="col-md-6 mb-2">
@@ -346,7 +354,8 @@
 
             <!-- Step 2: Bank Details -->
             <div class="form-step" id="step2">
-                <h6 class="text-brand-green mb-3"><i class="kyc-user fa-solid fa-university me-2"></i>Bank Details</h6>
+                <h6 class="text-brand-green mb-3"><i class="kyc-user fa-solid fa-university me-2"></i>Bank Details
+                </h6>
                 <form id="bankInfoForm" enctype="multipart/form-data">
                     @csrf
                     <div class="row">
@@ -399,7 +408,8 @@
 
             <!-- Step 3: Upload KYC Documents -->
             <div class="form-step" id="step3">
-                <h6 class="text-brand-green mb-3"><i class="kyc-user fa-solid fa-file-upload me-2"></i>Upload KYC Documents
+                <h6 class="text-brand-green mb-3"><i class="kyc-user fa-solid fa-file-upload me-2"></i>Upload KYC
+                    Documents
                 </h6>
                 <form id="kycDocsForm" enctype="multipart/form-data">
                     @csrf
@@ -468,11 +478,11 @@
                                 <p class="text-muted small">Upload clear image of your PAN card</p>
                                 <input type="file" class="form-control" name="pan_docs" accept="image/*"
                                     required>
-                                <div class="upload-preview mt-2" id="panDocsPreview"></div>
+                                <div class="upload-preview mt-2" id="pan_docsPreview"></div>
                             </div>
                             <span class="text-danger error" id="pan_docs_error"></span>
-                            @if(!empty($kyc->pan))
-                            <img src="{{ $kyc->pan }}" alt="PAN" class="img-fluid">
+                            @if (!empty($kyc->pan))
+                                <img src="{{ $kyc->pan }}" alt="PAN" class="img-fluid">
                             @endif
                         </div>
                         <div class="col-md-6 mb-2">
@@ -481,38 +491,41 @@
                                 value="{{ $kyc->aadhar_number ?? '' }}" required>
                             <span class="text-danger error" id="aadhar_no_error"></span>
                         </div>
-                        <div class="col-md-6 mb-2">
-                            <div class="upload-card">
-                                <div class="upload-icon">
-                                    <i class="fa-solid fa-address-card fa-3x text-brand-orange"></i>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <div class="upload-card">
+                                    <div class="upload-icon">
+                                        <i class="fa-solid fa-address-card fa-3x text-brand-orange"></i>
+                                    </div>
+                                    <h6 class="mt-3">Front Aadhaar Document</h6>
+                                    <p class="text-muted small">Upload front of Aadhaar card</p>
+                                    <input type="file" class="form-control" name="aadhar_docs_front"
+                                        accept="image/*" required>
+                                    <div class="upload-preview mt-2" id="aadhar_docs_frontPreview"></div>
                                 </div>
-                                <h6 class="mt-3">Front Aadhaar Document</h6>
-                                <p class="text-muted small">Upload front of Aadhaar card</p>
-                                <input type="file" class="form-control" name="aadhar_docs_front" accept="image/*"
-                                    required>
-                                <div class="upload-preview mt-2" id="aadharDocsFrontPreview"></div>
+                                <span class="text-danger error" id="aadhar_docs_front_error"></span>
+                                @if (!empty($kyc->aadhar1))
+                                    <img src="{{ $kyc->aadhar1 }}" alt="Aadhaar" class="img-fluid">
+                                @endif
                             </div>
-                            <span class="text-danger error" id="aadhar_docs_front_error"></span>
-                            @if(!empty($kyc->aadhar1))
-                            <img src="{{ $kyc->aadhar1 }}" alt="Aadhaar" class="img-fluid">
-                            @endif
-                        
-                            <div class="upload-card">
-                                <div class="upload-icon">
-                                    <i class="fa-solid fa-address-card fa-3x text-brand-orange"></i>
-                                </div>
-                                <h6 class="mt-3">Back Aadhaar Document</h6>
-                                <p class="text-muted small">Upload back of Aadhaar card</p>
-                                <input type="file" class="form-control" name="aadhar_docs_back" accept="image/*"
-                                    required>
-                                <div class="upload-preview mt-2" id="aadharDocsBackPreview"></div>
-                            </div>
-                            <span class="text-danger error" id="aadhar_docs_back_error"></span>
-                            @if(!empty($kyc->aadhar2))
-                            <img src="{{ $kyc->aadhar2 }}" alt="Aadhaar" class="img-fluid">
-                            @endif
-                        </div>
+                            <div class="col-md-6 mb-2">
 
+                                <div class="upload-card">
+                                    <div class="upload-icon">
+                                        <i class="fa-solid fa-address-card fa-3x text-brand-orange"></i>
+                                    </div>
+                                    <h6 class="mt-3">Back Aadhaar Document</h6>
+                                    <p class="text-muted small">Upload back of Aadhaar card</p>
+                                    <input type="file" class="form-control" name="aadhar_docs_back"
+                                        accept="image/*" required>
+                                    <div class="upload-preview mt-2" id="aadhar_docs_backPreview"></div>
+                                </div>
+                                <span class="text-danger error" id="aadhar_docs_back_error"></span>
+                                @if (!empty($kyc->aadhar2))
+                                    <img src="{{ $kyc->aadhar2 }}" alt="Aadhaar" class="img-fluid">
+                                @endif
+                            </div>
+                        </div>
                         <div class="col-md-6 mb-2">
                             <div class="upload-card">
                                 <div class="upload-icon">
@@ -524,7 +537,7 @@
                                 <div class="upload-preview mt-2" id="selfiPreview"></div>
                             </div>
                             <span class="text-danger error" id="selfi_error"></span>
-                            @if(!empty($kyc->self))
+                            @if (!empty($kyc->self))
                                 <img src="{{ $kyc->self }}" alt="Selfie" class="img-fluid">
                             @endif
                         </div>
@@ -537,7 +550,7 @@
                     </div>
                 </form>
             </div>
-        
+
             </form>
         </div>
     </div>
@@ -673,7 +686,7 @@
 
 
             //add pan aadahr front and back previw
-            
+
 
             $('form#personalInfoForm').on('submit', function(e) {
                 e.preventDefault();
@@ -802,24 +815,24 @@
             })
 
             function getPincode() {
-                    var pincode = $('#pincode').val();
-                    $.ajax({
-                        url: `{{ url('pincode') }}/${pincode}`,
-                        method: 'GET',
-                        dataType: 'json',
-                        success: function(response) {
-                            if (response.status) {
-                                if (response.record.office_name) {
-                                    $('#locality').val(response.record.office_name);
-                                }
-                                $('#state').val(response.record.state);
-                                $('#city').val(response.record.district);
-                            } else {
-                                showSnackbar('Pincode not found', 'error');
+                var pincode = $('#pincode').val();
+                $.ajax({
+                    url: `{{ url('pincode') }}/${pincode}`,
+                    method: 'GET',
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.status) {
+                            if (response.record.office_name) {
+                                $('#locality').val(response.record.office_name);
                             }
+                            $('#state').val(response.record.state);
+                            $('#city').val(response.record.district);
+                        } else {
+                            showSnackbar('Pincode not found', 'error');
                         }
-                    });
-                }
+                    }
+                });
+            }
 
 
             function showSuccessMessage() {
