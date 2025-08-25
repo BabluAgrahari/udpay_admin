@@ -16,7 +16,10 @@ class CashFree
 
     public function __construct()
     {
-        $this->apiVersion = '2025-01-01';
+        $this->apiVersion   = config('global.cashfree.api_version');
+        $this->baseUrl      = config('global.cashfree.base_url');
+        $this->clientId     = config('global.cashfree.client_id');
+        $this->clientSecret = config('global.cashfree.client_secret');
 
     }
 

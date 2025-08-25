@@ -1,7 +1,7 @@
-<?php 
+<?php
 
 return [
-    'modules'=>[
+    'modules' => [
         'brand',
         'category',
         'order',
@@ -19,7 +19,15 @@ return [
         'slider'
     ],
 
-    'payment_gateway'=>[
+
+    'cashfree' => [
+        'base_url'     => env('CASHFREE_BASE_URL', 'https://sandbox.cashfree.com/pg'),
+        'client_id'    => env('CASHFREE_CLIENT_ID'),
+        'client_secret' => env('CASHFREE_CLIENT_SECRET'),
+        'api_version'  => '2025-01-01',
+    ],
+
+    'payment_gateway' => [
         'cashfree'
     ]
 ];
