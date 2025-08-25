@@ -94,7 +94,7 @@
                             @endphp
 
 
-                            <div class="cart-item cart-list" data-product-id="{{ $item->product_id }}">
+                            <div class="cart-item cart-list relative" data-product-id="{{ $item->product_id }}">
                                 <div class="row">
                                     <div class="col-xl-2 col-md-3">
                                         <a href="#" class="product-img">

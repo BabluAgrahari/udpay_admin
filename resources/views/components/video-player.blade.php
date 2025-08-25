@@ -169,8 +169,8 @@
 <div class="video-player-component">
     @if(!empty($title))
     <div class="section-heading mb-4">
-        <div class="w-100 text-center" style="text-align: center;">
-            <h2 class="mb-2">{{ $title }}</h2>
+        <div class="w-100 text-center">
+            <h2 class="mb-2 text-center">{{ $title }}</h2>
             <p>Customer experiences and product demonstrations</p>
         </div>
     </div>
@@ -186,7 +186,7 @@
                     <div class="video-card">
                         <div class="video-container" style="height: 250px; width: 100%; border-radius: 12px; overflow: hidden; position: relative; background: #000;">
                             <div class="file-type-badge" style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.7); color: white; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 500; text-transform: uppercase;">VIDEO</div>
-                            <video class="video-player" style="height: 100%; width: 100%; object-fit: cover; transition: transform 0.3s ease;" 
+                            <video class="video-player" style="height: 100%; width: 100%; object-fit: cover; transition: transform 0.3s ease;"
                                    preload="metadata" muted>
                                 <source src="{{ $reel->path }}" type="video/{{ $reel->file_extension }}">
                             </video>
@@ -211,7 +211,7 @@
                 @endif
             @endif
         @endforeach
-        
+
         @if(!$hasReels)
         <div class="col-12 text-center">
             <div class="no-reels-message">
@@ -251,10 +251,10 @@ $(document).ready(function() {
         const video = container.find('.video-player')[0];
         const durationSpan = container.find('.duration-text');
         const overlay = container.find('.video-overlay');
-        
+
         // Add loading state
         overlay.html('<div class="video-loading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 1.5rem;"><i class="bx bx-loader-alt bx-spin"></i></div>');
-        
+
         // Load video duration
         if (video) {
             video.addEventListener('loadedmetadata', function() {
@@ -262,7 +262,7 @@ $(document).ready(function() {
                 const minutes = Math.floor(duration / 60);
                 const seconds = duration % 60;
                 durationSpan.text(`${minutes}:${seconds.toString().padStart(2, '0')}`);
-                
+
                 // Restore play button
                 overlay.html('<i class="bx bx-play-circle" style="font-size: 3rem; color: white;"></i>');
             });
@@ -277,13 +277,13 @@ $(document).ready(function() {
         overlay.on('click', function() {
             const videoSrc = $(this).siblings('.video-player').find('source').attr('src');
             const videoExtension = $(this).siblings('.video-player').find('source').attr('type').split('/')[1];
-            
+
             // Set modal video source
             const modalVideo = $('#modalVideo')[0];
             const modalVideoSource = modalVideo.querySelector('source');
             modalVideoSource.src = videoSrc;
             modalVideoSource.type = `video/${videoExtension}`;
-            
+
             // Load and show modal
             modalVideo.load();
             $('#videoModal').modal('show');
@@ -305,5 +305,5 @@ $(document).ready(function() {
         });
     });
 });
-</script> 
+</script>
 @endpush

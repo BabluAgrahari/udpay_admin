@@ -2,8 +2,12 @@
 
 @section('content')
 <style>
-    .table-light th {
-        color: #000 !important;
+   .table-light th {
+    color: #000 !important;
+    background: var(--thm-color-two);
+}
+    .table tr td {
+        white-space: nowrap;
     }
 </style>
     <section class="section-padding py-5 pt-3">
@@ -89,4 +93,4 @@
             // Add any additional JavaScript functionality here if needed
         });
     </script>
-@endpush 
+@endpush

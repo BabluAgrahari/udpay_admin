@@ -1,5 +1,11 @@
 @extends('Website.Layout.app')
 @section('content')
+<style>
+    table th {
+    color: #000;
+    background: var(--thm-color-two) !important;
+}
+</style>
 <section class="section-padding">
     <div class="container">
         <div class="row">
@@ -190,4 +196,4 @@
         </div>
     </div>
 </section>
-@endsection 
+@endsection

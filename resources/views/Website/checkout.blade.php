@@ -8,6 +8,10 @@
             font-size: 12px;
             margin-top: 5px;
         }
+        .address-card.selected::before {
+            top: 22px !important;
+            right: 4px !important;
+        }
     </style>
     <section class="section-padding">
         <div class="container">
@@ -49,7 +53,7 @@
                                         </div>
                                         <div class="col-sm-12 form-group">
                                             <label>Address (Area & Street) <span class="color-red">*</span></label>
-                                            <textarea id="user_add_1" name="user_add_1" class="form-control" placeholder="Enter Addresses" required></textarea>
+                                            <textarea id="user_add_1" name="user_add_1" class="form-control mb-2" placeholder="Enter Addresses" required></textarea>
                                             <span class="errorMessage" id="user_add_1_error"></span>
                                         </div>
                                         <div class="col-sm-6 form-group">
@@ -116,7 +120,7 @@
                                             ]) }}">
                                             <div class="address-header">
                                                 <h6 class="mb-2">{{ $address->user_add_name }}</h6>
-                                                <div class="address-actions gap-0">
+                                                <div class="address-actions gap-0 flex-row">
                                                     <button class="btn btn-sm btn-outline-primary edit-address"
                                                         style="margin-right: 15px;" data-address-id="{{ $address->id }}"
                                                         title="Edit Address">
@@ -195,7 +199,7 @@
                         @csrf
                         <div class="cart-items mt-2 p-3">
                             <h6 class="mb-2">Payment Method</h6>
-                            <div class="d-flex gap-2 align-items-center">
+                            <div class="d-flex gap-3 align-items-center">
                                 @if ($wallet_balance > 0)
                                     <input type="radio" name="payment_mode" class="payment_mode paymentMode"
                                         value="wallet" id="wallet">
@@ -227,7 +231,7 @@
                                     </select> -->
                             <div class="d-flex payment-option gap-4 align-items-center flex-wrap">
                                 @if (in_array('cashfree', $payment_gateway))
-                                    <div class="d-flex gap-1 align-items-center">
+                                    <div class="d-flex align-items-center gap-3">
                                         <input type="radio" name="payment_gateway" class="payment_mode"
                                             value="cashfree" id="cashfree" checked>
                                         <label class="mb-0" for="cashfree">
@@ -236,7 +240,7 @@
                                     </div>
                                 @endif
                                 @if (in_array('razorpay', $payment_gateway))
-                                    <div class="d-flex gap-1 align-items-center">
+                                    <div class="d-flex align-items-center gap-3">
                                         <input type="radio" name="payment_gateway" class="payment_mode"
                                             value="razorpay" id="razorpay">
                                         <label class="mb-0" for="razorpay">
@@ -245,7 +249,7 @@
                                     </div>
                                 @endif
                                 @if (in_array('phonepe', $payment_gateway))
-                                    <div class="d-flex gap-1 align-items-center">
+                                    <div class="d-flex align-items-center gap-3">
                                         <input type="radio" name="payment_gateway" class="payment_mode" value="debit"
                                             id="debit">
                                         <label class="mb-0" for="debit">
@@ -254,7 +258,7 @@
                                     </div>
                                 @endif
                                 @if (in_array('payu', $payment_gateway))
-                                    <div class="d-flex gap-1 align-items-center">
+                                    <div class="d-flex align-items-center gap-3">
                                         <input type="radio" name="payment_gateway" class="payment_mode" value="upi"
                                             id="payu">
                                         <label class="mb-0" for="payu">
@@ -268,11 +272,11 @@
 
                         @if (!empty(Auth::user()) && (Auth::user()->can('isCustomer') || Auth::user()->can('isDistributor')))
                             <div class="cart-items mt-2 p-3">
-                                <div class="d-flex gap-2 align-items-center">
-                                    <input type="radio" name="delivery_mode" id="delivery_mode" class="payment_mode"
+                                <div class="d-flex gap-3 align-items-center">
+                                    <input type="radio" name="delivery_mode" id="pickup" class="payment_mode"
                                         value="self_pickup">
                                     <label class="mb-0" for="pickup">Self Pickup</label>
-                                    <input type="radio" name="delivery_mode" id="delivery_mode" class="payment_mode"
+                                    <input type="radio" name="delivery_mode" id="courier" class="payment_mode"
                                         value="courier">
                                     <label class="mb-0" for="courier">Courier</label>
                                 </div>

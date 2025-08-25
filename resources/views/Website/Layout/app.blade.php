@@ -355,8 +355,12 @@
 
                                 @if (auth()->check())
                                     <div class="profile-main">
-                                        <a href="#" class="profile-icon">{{ auth()->user()->name??'You' }}
-                                            <i class="fa-solid fa-chevron-down"></i></a>
+                                        <a href="#" class="profile-icon name-user">{{ auth()->user()->name??'Guest User' }}
+                                            <i class="fa-solid fa-chevron-down"></i>
+                                        </a>
+                                        <a href="#" class="profile-icon responsive-name-user">{{ auth()->user()->name??'You' }}
+                                            <i class="fa-solid fa-chevron-down"></i>
+                                        </a>
                                         <div class="profile-dropdown">
                                             <ul class="user-list-header">
                                               @if(!empty(Auth::user()) && (Auth::user()->can('isCustomer')))

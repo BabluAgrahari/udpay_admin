@@ -53,7 +53,8 @@ a.profile-icon {
     color: #fff;
 }
 .profile-dropdown {
-    right: -75% !important;
+    right: -16% !important;
+    top: 50px !important;
 }
 .navigation {
     display: block !important;
@@ -172,7 +173,7 @@ a.profile-icon {
     padding-top: 30px;
 }
 .contact-left {
-    height: 420px !important;
+    height: auto !important;
 }
 .thm-btn {
     width: auto !important;
@@ -183,7 +184,21 @@ a.profile-icon {
 .user-responsive {
     display: flex !important;
 }
-
+.responsive-name-user {
+    display: block !important;
+}
+.name-user {
+    display: none !important;
+}
+.product-card .thm-btn {
+    width: 40px !important;
+}
+.product-card-detail-price {
+    margin-top: 20px;
+}
+.blood-bg-text {
+    font-size: 25px;
+}
 }
 
 @media screen and (max-width: 576px) {
@@ -360,6 +375,21 @@ a.profile-icon {
 }
 .login-main {
     height: auto !important;
+}
+.card-body.p-5 {
+    padding: 15px !important;
+}
+.modal-content {
+    padding: 2px !important;
+}
+.dashboard-veiw-btn {
+    display: flex;
+    flex-direction: column;
+}
+button.delete.delete-item {
+    position: absolute;
+    top: 10px;
+    right: 10px;
 }
 }
 

@@ -1104,7 +1104,7 @@ table img {
 a.profile-icon {
     color: #fff;
     font-size: 14px;
-    display: flex;
+    /* display: flex; */
     align-items: center;
     white-space: nowrap;
 }
@@ -1442,7 +1442,7 @@ ul.user-list-header li a i {
 } */
 .ft-left {
     display: flex;
-    align-items: end;
+    align-items: center;
     justify-content: space-between;
     gap: 20px;
 }
@@ -2445,7 +2445,7 @@ color: var(--thm-color-one);
     background: #fff;
     border-left: 3px solid transparent;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 14px;
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
@@ -3969,7 +3969,7 @@ a.thm-btn.refer-btn {
     font-size: 16px;
 }
 .testimonial-card h5 {
-    font-weight: bold;
+    font-weight: 400;
     margin: 5px 0;
     font-size: 14px;
 }
@@ -4259,7 +4259,7 @@ a.thm-btn.refer-btn {
     height: 90px;
 }
 .cart-item .product-img {
-    width: 100%;
+    width: fit-content;
 }
 .cart-list {
     display: block;
@@ -4893,6 +4893,9 @@ img.payment-image {
     display: flex;
     align-items: center;
     gap: 10px;
+    display: none;
+}
+.responsive-name-user {
     display: none;
 }
 

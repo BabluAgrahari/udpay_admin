@@ -1,5 +1,10 @@
 @extends('Website.Layout.app')
 @section('content')
+<style>
+    .timeline-marker {
+    left: -13px !important;
+}
+</style>
 <section class="section-padding">
     <div class="container">
         <div class="row">
@@ -25,7 +30,7 @@
                                     </div>
                                     <div class="col-md-4 mb-3">
                                         <label class="form-label">&nbsp;</label>
-                                        <button type="submit" class="btn btn-primary w-100">Track Order</button>
+                                        <button type="submit" class="thm-btn btn-primary w-100">Track Order</button>
                                     </div>
                                 </div>
                             </form>
@@ -118,7 +123,7 @@
 
                         <!-- Demo Button for Testing -->
                         <div class="text-center mt-4">
-                            <button type="button" class="btn btn-outline-primary" onclick="showTrackingResult()">View Sample Tracking</button>
+                            <button type="button" class="thm-btn btn-outline-primary" onclick="showTrackingResult()">View Sample Tracking</button>
                         </div>
                     </div>
                 </div>
@@ -203,4 +208,4 @@ function showTrackingResult() {
     document.getElementById('trackingResult').style.display = 'block';
 }
 </script>
-@endsection 
+@endsection

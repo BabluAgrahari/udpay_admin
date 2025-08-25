@@ -91,29 +91,23 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-6">
+                    <div class="row g-0">
+                        <div class="col-4">
                             <strong>Name:</strong>
                         </div>
-                        <div class="col-6" id="preview-name"></div>
-                    </div>
-                    <div class="row">
-                        <div class="col-6">
+                        <div class="col-8" id="preview-name"></div>
+                        <div class="col-4">
                             <strong>Email:</strong>
                         </div>
-                        <div class="col-6" id="preview-email"></div>
-                    </div>
-                    <div class="row">
-                        <div class="col-6">
+                        <div class="col-8" ><span id="preview-email"></span></div>
+                        <div class="col-4">
                             <strong>Mobile:</strong>
                         </div>
-                        <div class="col-6" id="preview-mobile"></div>
-                    </div>
-                    <div class="row">
-                        <div class="col-6">
+                        <div class="col-8" id="preview-mobile"></div>
+                        <div class="col-5">
                             <strong>Amount to Add:</strong>
                         </div>
-                        <div class="col-6" id="preview-amount"></div>
+                        <div class="col-7" id="preview-amount"></div>
                     </div>
 
                 </div>

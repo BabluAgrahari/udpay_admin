@@ -1,4 +1,4 @@
-<section class="section-padding">
+<section class="section-padding py-4">
     <div class="container">
         <div class="row">
 
@@ -87,12 +87,13 @@
                         Star</strong></p>
                     <!-- Referral link -->
                     <input type="hidden" id="myInput" value="{{ url('distributor/signup') }}/{{ Auth::user()->user_num ?? '' }}">
-                    
-                    <!-- Buttons -->
-                    <button class="thm-btn btn-referral" id="copyLinkBtn" onclick="copyLink()">Copy Referral Link</button>
-                    {{-- only show in mobile -- add function to share link --}}
-                    <button class="thm-btn btn-referral mt-2 mobile-share-btn" onclick="shareLink()">Share Referral Link</button>
-                    <p class=" mt-3 thm-btn">Wallat Balance: {{ walletBalance(Auth::user()->user_id) }}</p>
+                    <div class="dashboard-veiw-btn">
+                        <!-- Buttons -->
+                        <button class="thm-btn btn-referral" id="copyLinkBtn" onclick="copyLink()">Copy Referral Link</button>
+                        {{-- only show in mobile -- add function to share link --}}
+                        <button class="thm-btn btn-referral mt-2 mobile-share-btn" onclick="shareLink()">Share Referral Link</button>
+                        <p class=" mt-3 thm-btn">Wallat Balance: {{ walletBalance(Auth::user()->user_id) }}</p>
+                    </div>
                 </div>
             </div>
 
@@ -104,7 +105,7 @@
     .mobile-share-btn {
       display: none;
     }
-    
+
     /* Show only on small screens (mobile) */
     @media (max-width: 768px) {
       .mobile-share-btn {
@@ -123,7 +124,7 @@
             });
         } else {
             // Fallback for older browsers
-            copyText.type = 'text'; 
+            copyText.type = 'text';
             copyText.select();
             document.execCommand("copy");
             copyText.type = 'hidden';

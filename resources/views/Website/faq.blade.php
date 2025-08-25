@@ -177,7 +177,7 @@
                         <div class="card-body">
                             <h5 class="card-title">Still have questions?</h5>
                             <p class="card-text">If you couldn't find the answer you're looking for, please don't hesitate to contact our support team.</p>
-                            <a href="{{ route('contact') }}" class="btn btn-primary">Contact Us</a>
+                            <a href="{{ route('contact') }}" class="thm-btn">Contact Us</a>
                         </div>
                     </div>
                 </div>
@@ -185,4 +185,4 @@
         </div>
     </div>
 </section>
-@endsection 
+@endsection

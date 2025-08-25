@@ -8,7 +8,9 @@
         border-radius: 8px;
         background: #f8f9fa;
     }
-    
+    .bg-primary  {
+        background: #0d6efd !important;
+    }
     .product-details-image img {
         width: 100%;
         height: 400px;
@@ -16,7 +18,7 @@
         transition: opacity 0.3s ease;
         cursor: zoom-in;
     }
-    
+
     .product-details-image img.error {
         opacity: 0.7;
         filter: grayscale(20%);
@@ -143,7 +145,7 @@
             font-size: 25px;
         }
     }
-    
+
     .thumb-slider .swiper-slide img {
         width: 100%;
         height: 80px;
@@ -152,27 +154,27 @@
         cursor: pointer;
         transition: opacity 0.3s ease;
     }
-    
+
     .thumb-slider .swiper-slide img:hover {
         opacity: 0.8;
     }
-    
+
     .thumb-slider .swiper-slide img.error {
         opacity: 0.7;
         filter: grayscale(20%);
     }
-    
+
     .swiper-slide-thumb-active img {
         border: 2px solid #007bff;
     }
-    
+
     /* Loading state */
     .image-loading {
         background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
         background-size: 200% 100%;
         animation: loading 1.5s infinite;
     }
-    
+
     @keyframes loading {
         0% {
             background-position: 200% 0;
@@ -393,7 +395,7 @@
                             <div class="zoom-indicator">Click to zoom</div>
                         </div>
                     </div>
-                    
+
                     <!-- Thumbnail Gallery -->
                     <div class="thumbnail-gallery">
                         <div class="thumb-container">
@@ -434,7 +436,7 @@
                 <div class="product-details-right">
                     <div class="product-details">
                         <span class="color-one border-bottom">{{ $product->category->name ?? 'Category' }}</span>
-                        <h1 class="title">{{ $product->product_name }}</h1>                        
+                        <h1 class="title">{{ $product->product_name }}</h1>
                         <div class="rating ">
                             @if(!empty($product->reviews) && $product->reviews->count() > 0)
                             <div>
@@ -453,7 +455,7 @@
                             <p class="color-one mb-0">{{ $product->product_short_description ?? 'Product description not available.' }}</p>
                         </div>
                         <div class="price-box">
-                            <span class="current-price">Price: 
+                            <span class="current-price">Price:
                                 @canany(['isDistributor', 'isCustomer'])
                                     ₹{{ number_format($product->guest_price, 2) }}
                                 @else
@@ -527,7 +529,7 @@
                             <ul class="delivery-service-list">
                                 @if($product_details)
                                     {!! nl2br(e($product_details->details)) !!}
-                              
+
                                 @endif
                             </ul>
                         </div>
@@ -578,7 +580,7 @@
                     </div>
                 </div>
             </div>
-        </div>  
+        </div>
         <?php $totalPrice += $product->product_sale_price; ?>
         @endforeach
         <div class="col-lg-3 col-md-6 d-flex align-items-center justify-content-center text-center">
@@ -658,7 +660,7 @@
              <h2>People also bought</h2>
             <p class="mb-0">Explore our best rated products</p>
         </div>
-       <a href="#" class="veiw-btn">View More >></a>    
+       <a href="#" class="veiw-btn">View More >></a>
     </div>
     <div class="row product-slider">
         @foreach($similarProducts as $product)
@@ -709,7 +711,7 @@
             <p>Just have a look at how happy our customers are</p>
         </div>
     </div>
-    
+
     <div class="client-slider">
         @foreach($product->reviews as $review)
         <div class="testimonial-card">
@@ -717,7 +719,7 @@
              <img src="https://randomuser.me/api/portraits/men/1.jpg" alt="Leo" class="testimonial-avatar">
              <div class="testi-content">
                 <h5>{{ !empty($review->user->name) ? $review->user->name : 'Anonymous' }}</h5>
-                <div class="position-main"> 
+                <div class="position-main">
                     <h4 class="position">{{ !empty($review->user->role) ? $review->user->role : 'Customer' }}</h4>
                     <div class="rating">
                         @for($i = 1; $i <= 5; $i++)
@@ -742,7 +744,7 @@
 <div class="py-5" style="background: #C9FFE9;">
 <div class="container">
     <div>
-        <h1 class="mb-0 color-one">Suitable for people with T2DM looking for a natural solution to manage blood sugar levels </h1>
+        <h1 class="mb-0 color-one blood-bg-text">Suitable for people with T2DM looking for a natural solution to manage blood sugar levels </h1>
     </div>
 </div>
 </div>
@@ -939,7 +941,7 @@
         updateCartQuantity(productId, quantity);
     });
 
-    
+
 
     });
   </script>
